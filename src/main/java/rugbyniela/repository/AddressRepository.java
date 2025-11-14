@@ -7,5 +7,5 @@ import rugbyniela.entity.pojo.Address;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
-	public Address getByStreet();
+	//public Address getByStreet();
 }

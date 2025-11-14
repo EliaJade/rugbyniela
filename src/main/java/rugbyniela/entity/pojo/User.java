@@ -31,6 +31,10 @@ public class User {
 	private String email;
 	private String password;
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name="user_id")
 	private List<Address> addresses;
+	@OneToMany()
+	@JoinColumn(name="user_id")
+	private List<UserSeasonScore> UserSeasonScore;
 
 }
