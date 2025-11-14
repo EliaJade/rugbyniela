@@ -20,6 +20,7 @@ public class AddressServiceImp implements IAddressService {
 		if(addressDTO != null) {
 			Address address = new Address(null,addressDTO.getStreet(), addressDTO.getCity(), addressDTO.getPostalCode(),addressDTO.getDescripcion());
 			addressRepository.save(address);
+			
 			//insert into address(...) values(...)
 			return true;
 		}else {

@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name="Usuario")
+@Entity(name = "Usuario")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -31,7 +31,6 @@ public class User {
 	private String email;
 	private String password;
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="User_Id")
 	private List<Address> addresses;
 
 }
