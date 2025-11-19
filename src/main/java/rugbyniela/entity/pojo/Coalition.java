@@ -15,8 +15,9 @@ public class Coalition {
 
 	@Id
 	private Long id;
-	@OneToMany(mappedBy = "coalition") //bidirectional
-	private Set<CoalitionSeasonScore> coalitionSeasons;
-	
+	@OneToMany(mappedBy = "coalition")
+	private Set<CoalitionSeasonScore> coalitionSeasons; //bidirectional relationship
+	@OneToMany(mappedBy = "coalition") 
+	private Set<UserSeasonScore> userSeason; //bidirectional relationship
 	
 }

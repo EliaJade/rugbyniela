@@ -32,6 +32,8 @@ public class UserSeasonScore {
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
 	@ManyToOne
 	private Season season;
+	@ManyToOne
+	private Coalition coalition;
 	/**
 	 * Method to add or subtract points
 	 * @param points
