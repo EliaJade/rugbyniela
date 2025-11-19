@@ -1,5 +1,7 @@
 package rugbyniela.entity.pojo;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -35,6 +37,20 @@ public class User {
 	private List<Address> addresses;
 	@OneToMany()
 	@JoinColumn(name="user_id")
-	private List<UserSeasonScore> UserSeasonScore;
+	private List<UserSeasonScore> seasonScores;
+	
+	/**
+	 * Method to add a new userSeasonScore to the user
+	 * @param userSeasonScore
+	 */
+	public void addUserSeasonScore(UserSeasonScore userSeasonScore) {
+		if(this.seasonScores != null ){
+			this.seasonScores = new ArrayList<>();
+		}
+		seasonScores.add(userSeasonScore);
+		//in this case as the relationship is not bidirectional only to save in here the relationship will be updated/saved successfully 
+	}
+	
+	//TODO: ask if we need a method to delete a item from the lists, of course if the logic allows it
 
 }

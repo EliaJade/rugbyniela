@@ -18,6 +18,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserSeasonScore {
+	
+	/**
+	 * UserSeasonScore a ;
+	 */
 
 	@Id
 	private Long id; //why Long?
@@ -43,11 +47,13 @@ public class UserSeasonScore {
 	 * @param ticket
 	 */
 	public void addTicket(WeeklyBetTicket ticket) {
-		if(this.tickets != null ){
+		if(this.tickets == null ){
 			this.tickets = new HashSet<WeeklyBetTicket>();
 		}
 		tickets.add(ticket);
 		//in this case, when the next line is use, the relationship will be updated, because the UserSeasonScore is the owner of the relationship
 		ticket.setUserSeason(this);
 	}
+
+	//TODO: ask if we need a method to delete a item from the lists, of course if the logic allows it
 }

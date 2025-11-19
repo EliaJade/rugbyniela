@@ -37,4 +37,6 @@ public class Division {
 		//in this case, when the next line is use, the relationship will be updated, because the MatchDay is the owner of the relationship
 		matchDay.setDivision(this);
 	}
+	
+	//TODO: ask if we need a method to delete a item from the lists, of course if the logic allows it
 }

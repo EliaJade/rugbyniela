@@ -70,5 +70,6 @@ public class Season {
 		//in this case, when the next line is use, the relationship will be updated, because the Division is the owner of the relationship
 		division.setSeason(this);
 	}
-	
+
+	//TODO: ask if we need a method to delete a item from the lists, of course if the logic allows it
 }
