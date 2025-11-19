@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -24,6 +26,7 @@ public class UserSeasonScore {
 	 */
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id; //why Long?
 	private int totalPoints;
 	@OneToMany(mappedBy = "userSeason")
@@ -32,6 +35,8 @@ public class UserSeasonScore {
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
 	@ManyToOne
 	private Season season;
+	@ManyToOne
+	private Coalition coalition;
 	/**
 	 * Method to add or subtract points
 	 * @param points
