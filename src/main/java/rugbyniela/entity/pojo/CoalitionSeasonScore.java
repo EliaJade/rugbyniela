@@ -15,4 +15,6 @@ public class CoalitionSeasonScore {
 	private Long id;
 	@ManyToOne
 	private Season season;
+	@ManyToOne
+	private Coalition coalition;
 }
