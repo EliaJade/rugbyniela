@@ -37,6 +37,7 @@ public class AddressServiceImp implements IAddressService {
 
 	@Override
 	public List<Address> findAll() {
+		//return null;
 		return addressRepository.findAll();
 	}
 

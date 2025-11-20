@@ -1,5 +1,6 @@
 package rugbyniela.entity.pojo;
 
+import com.cmeza.sdgenerator.annotation.SDGenerate;
 import com.cmeza.sdgenerator.annotation.SDGenerator;
 
 import jakarta.persistence.Column;
@@ -14,7 +15,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@SDGenerator
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
