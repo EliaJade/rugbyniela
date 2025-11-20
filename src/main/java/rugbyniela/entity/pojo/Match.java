@@ -26,7 +26,7 @@ public class Match {
 	private int localResult;
 	private int awayResult;
 	private String bonus; //check type is correct
-	//missing possible variable
+	
 	@ManyToOne
 	private MatchDay matchDay; //bidirectional relationship
 	@OneToMany
