@@ -1,5 +1,7 @@
 package rugbyniela.entity.pojo;
 
+import com.cmeza.sdgenerator.annotation.SDGenerator;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@SDGenerator
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
