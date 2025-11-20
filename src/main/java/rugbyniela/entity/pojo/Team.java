@@ -17,8 +17,6 @@ public class Team {
 	private Long id;
 	private String name;
 	private String url;
-//	@ManyToOne
-//	private Match match; //unidirectional
 	@OneToMany(mappedBy = "team") //unidirectional relationship
 	private Set<Bet> bets;
 }

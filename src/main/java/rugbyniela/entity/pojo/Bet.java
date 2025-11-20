@@ -18,8 +18,8 @@ public class Bet {
 	@ManyToOne
 	private WeeklyBetTicket weeklyBetTicket; //bidirectional relationship
 	
-//	@ManyToOne
-//	private Team team; //possible changes unidirectional relationship
+	@ManyToOne
+	private Team team; //possible changes unidirectional relationship
 //	@ManyToOne
 //	private Match match; //possible changes unidirectional relationship
 }
