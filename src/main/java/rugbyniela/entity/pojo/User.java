@@ -34,10 +34,10 @@ public class User {
 	private String password;
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
-	private List<Address> addresses;
+	private List<Address> addresses;//unidirectional relationship
 	@OneToMany()
 	@JoinColumn(name="user_id")
-	private List<UserSeasonScore> seasonScores;
+	private List<UserSeasonScore> seasonScores;//unidirectional relationship
 	
 	/**
 	 * Method to add a new userSeasonScore to the user

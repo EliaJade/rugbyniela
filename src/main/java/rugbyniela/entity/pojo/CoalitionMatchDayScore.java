@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 /**
  * This class will represent a 'CoalitionJornadaScore'
@@ -15,4 +16,7 @@ public class CoalitionMatchDayScore {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private int points;
+	@ManyToOne
+	private CoalitionSeasonScore coalitionSeason;//bidirectional relationship
 }
