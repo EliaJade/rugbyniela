@@ -22,6 +22,7 @@ public class MatchDay {
 	private Long id;
 	private LocalDate dateBegin;
 	private LocalDate dateEnd;
+	private String name;
 
 	@ManyToOne
 	private Division division;//bidirectional relationship

@@ -1,5 +1,6 @@
 package rugbyniela.entity.pojo;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -19,9 +20,10 @@ public class WeeklyBetTicket {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private LocalDate creationDate; //used to be called creation_at:
 	@ManyToOne()
-	private UserSeasonScore userSeason;
+	private UserSeasonScore userSeason;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "weeklyBetTicket")
+	@OneToMany(mappedBy = "weeklyBetTicket")//bidirectional relationship
 	private List<Bet> bets;
 }

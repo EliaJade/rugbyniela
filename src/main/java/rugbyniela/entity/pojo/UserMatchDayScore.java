@@ -16,6 +16,7 @@ public class UserMatchDayScore {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private int points;
 	@ManyToOne()
-	private UserSeasonScore userSeason;
+	private UserSeasonScore userSeason; //bidirectional relationship
 }
