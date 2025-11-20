@@ -18,9 +18,10 @@ public class Coalition {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private String name;
 	@OneToMany(mappedBy = "coalition")
 	private Set<CoalitionSeasonScore> coalitionSeasons; //bidirectional relationship
 	@OneToMany(mappedBy = "coalition") 
-	private Set<UserSeasonScore> userSeason; //bidirectional relationship
+	private Set<UserSeasonScore> userSeasons; //bidirectional relationship
 	
 }

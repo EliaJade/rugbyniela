@@ -23,9 +23,9 @@ public class Division {
 	private String name;
 	private String category;
 	@ManyToOne
-	private Season season;
+	private Season season;//bidirectional relationship
 	@OneToMany(mappedBy = "division")
-	private Set<MatchDay> matchDays; 
+	private Set<MatchDay> matchDays; //bidirectional relationship
 	
 	/**
 	 * Method to add a matchDay in the list
