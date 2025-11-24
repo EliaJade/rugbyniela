@@ -27,7 +27,8 @@ public class UserSeasonScore {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id; //why Long?
+	private Long id; //why Long?//se usa long en vez de int, bbdd no sabe cuantos registros van a tener y cuanto va durar y pues el long tiene menos limite
+	
 	private int totalPoints;
 	@OneToMany(mappedBy = "userSeason")
 	private Set<WeeklyBetTicket> tickets;//this should be a bidirectional relationship

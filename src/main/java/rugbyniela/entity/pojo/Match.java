@@ -3,10 +3,12 @@ package rugbyniela.entity.pojo;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
@@ -23,14 +25,17 @@ public class Match {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Address address; //if not just string location
-	private LocalDateTime timeDate; //check it's localdatetime
+//	@Column(nullable = false)
+	@ManyToOne
+	@JoinColumn()
+	private Address address; //unidirectional relationship
+	private LocalDateTime timeDate; 
 	private int localResult;
 	private int awayResult;
 	private String bonus; //check type is correct
-	//missing possible variable
+	
 	@ManyToOne
-	private MatchDay matchday; //bidirectional relationship
+	private MatchDay matchDay; //bidirectional relationship
 	@OneToMany
 	private Set<Team> team; //unidirectional relationship
 	@OneToMany
