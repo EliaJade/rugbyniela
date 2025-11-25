@@ -3,16 +3,22 @@ package rugbyniela.entity.pojo;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class Division {
@@ -20,10 +26,17 @@ public class Division {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String name;
-	private String category;
+	
+	@NotNull
+	@Column(nullable = false, length = 50)
+	private String name = "Division de Honor"; //check this is okay
+	
+	@Column(length = 50)
+	private Category category; //enum category for A and B
+	
 	@ManyToOne
 	private Season season;//bidirectional relationship
+	
 	@OneToMany(mappedBy = "division")
 	private Set<MatchDay> matchDays; //bidirectional relationship
 	
