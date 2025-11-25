@@ -5,12 +5,14 @@ import java.util.HashSet;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,15 +28,35 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@NotNull
+	@Column(nullable = false, length = 50)
 	private String name;
+	
+
+	@Column(length = 50)
 	private String surname;
+	
+	@NotNull
+	@Column(nullable = false)
 	private int age;
+	
+	
+	@Column(length = 50)
 	private String phoneNumber;
+	
+	@NotNull
+	@Column(nullable = false, length = 200)
 	private String email;
+	
+	@NotNull
+	@Column(nullable = false, length = 200)
 	private String password;
+	
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
 	private List<Address> addresses;//unidirectional relationship
+	
 	@OneToMany()
 	@JoinColumn(name="user_id")
 	private List<UserSeasonScore> seasonScores;//unidirectional relationship

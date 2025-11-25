@@ -3,12 +3,14 @@ package rugbyniela.entity.pojo;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,13 +31,19 @@ public class UserSeasonScore {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id; //why Long?//se usa long en vez de int, bbdd no sabe cuantos registros van a tener y cuanto va durar y pues el long tiene menos limite
 	
+	@NotNull
+	@Column(nullable = false)
 	private int totalPoints;
+	
 	@OneToMany(mappedBy = "userSeason")
 	private Set<WeeklyBetTicket> tickets;//this should be a bidirectional relationship
+	
 	@OneToMany(mappedBy = "userSeason")
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
+	
 	@ManyToOne
 	private Season season;
+	
 	@ManyToOne
 	private Coalition coalition;
 	/**
