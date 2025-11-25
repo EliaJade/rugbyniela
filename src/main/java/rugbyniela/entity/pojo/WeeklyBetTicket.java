@@ -2,7 +2,7 @@ package rugbyniela.entity.pojo;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,4 +37,12 @@ public class WeeklyBetTicket {
 	
 	@OneToMany(mappedBy = "weeklyBetTicket")//bidirectional relationship
 	private List<Bet> bets;
+	
+	public void addBet(Bet bet) {
+		if(this.bets==null) {
+			this.bets = new CopyOnWriteArrayList<Bet>();
+		}
+		this.bets.add(bet);
+		bet.setWeeklyBetTicket(this);
+	}
 }

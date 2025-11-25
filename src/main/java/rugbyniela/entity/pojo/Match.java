@@ -1,6 +1,7 @@
 package rugbyniela.entity.pojo;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -31,7 +32,7 @@ public class Match {
 	
 	@ManyToOne
 	@JoinColumn(nullable = false)
-	private Address address; //unidirectional relationship
+	private Address address; //unidirectional relationship 
 	
 	@NotNull
 	@Column(nullable = false)
@@ -51,4 +52,18 @@ public class Match {
 	@OneToMany
 	private Set<Bet> bets; //unidirectional relationship
 	
+	
+	public void addTeam(Team team) {
+		if(this.teams==null) {
+			this.teams = new HashSet<Team>();
+		}
+		this.teams.add(team);
+	}
+	
+	public void addBet (Bet bet) {
+		if(this.bets == null) {
+			this.bets = new HashSet<Bet>();
+		}
+		this.bets.add(bet);//unidirectional so it ends here
+	}
 }

@@ -1,6 +1,7 @@
 package rugbyniela.entity.pojo;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -44,4 +45,13 @@ public class MatchDay {
 	
 	@OneToMany(mappedBy = "matchDay")
 	private Set<Match> matches; //bidirectional relationship
+	
+	
+	public void addMatch (Match match) {
+		if(this.matches==null) {
+			this.matches = new HashSet<Match>();
+		}
+		this.matches.add(match);
+		match.setMatchDay(this);
+	}
 }

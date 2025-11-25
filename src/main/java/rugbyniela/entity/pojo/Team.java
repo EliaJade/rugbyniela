@@ -1,5 +1,6 @@
 package rugbyniela.entity.pojo;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -7,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -34,4 +34,12 @@ public class Team {
 	
 	@OneToMany(mappedBy = "team") //unidirectional relationship
 	private Set<Bet> bets;
+	
+	
+	public void addBet(Bet bet) {
+		if(this.bets==null) {
+			this.bets = new HashSet<Bet>();
+		}
+		this.bets.add(bet);
+	}
 }

@@ -1,5 +1,6 @@
 package rugbyniela.entity.pojo;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -33,7 +34,16 @@ public class CoalitionSeasonScore {
 	private Season season;//bidirectional relationship
 	@ManyToOne
 	private Coalition coalition;//bidirectional relationship
+	
 	@OneToMany(mappedBy = "coalitionSeason")
 	private Set<CoalitionMatchDayScore> coalitionMatchDays; //bidirectional relationship
 	
+	
+	public void addCoalitionMatchDay(CoalitionMatchDayScore coalition) {
+		if(this.coalitionMatchDays==null) {
+			this.coalitionMatchDays = new HashSet<CoalitionMatchDayScore>();
+		}
+		this.coalitionMatchDays.add(coalition);
+		coalition.setCoalitionSeason(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
+	}
 }
