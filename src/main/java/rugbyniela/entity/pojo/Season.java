@@ -25,8 +25,8 @@ public class Season {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String name;
-	private LocalDate start_season;//here we use the LocalDate in order to get the just the date not time (recommended)
-	private LocalDate end_season;//here we use the LocalDate in order to get the just the date not time (recommended)
+	private LocalDate startSeason;//here we use the LocalDate in order to get the just the date not time (recommended)
+	private LocalDate endSeason;//here we use the LocalDate in order to get the just the date not time (recommended)
 	@OneToMany(mappedBy = "season")
 	private Set<UserSeasonScore> seasonParticipants;
 	@OneToMany(mappedBy = "season")

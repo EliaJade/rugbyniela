@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import rugbyniela.entity.dto.AddressDTO;
+import rugbyniela.entity.dto.AddressDTO;
 import rugbyniela.entity.pojo.Address;
 import rugbyniela.repository.AddressRepository;
 
@@ -18,7 +19,7 @@ public class AddressServiceImp implements IAddressService {
 	@Override
 	public boolean createAddress(AddressDTO addressDTO) {
 		if(addressDTO != null) {
-			Address address = new Address(null,addressDTO.getStreet(), addressDTO.getCity(), addressDTO.getPostalCode(),addressDTO.getDescripcion());
+			Address address = new Address(null,addressDTO.street(), addressDTO.city(), addressDTO.postalCode(),addressDTO.descripcion());
 			addressRepository.save(address);
 			
 			//insert into address(...) values(...)

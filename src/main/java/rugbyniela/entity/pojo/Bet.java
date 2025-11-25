@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -30,7 +31,9 @@ public class Bet {
 	private WeeklyBetTicket weeklyBetTicket; //bidirectional relationship
 	
 	@ManyToOne
-	private Team team; //possible changes unidirectional relationship
-//	@ManyToOne
-//	private Match match; //possible changes unidirectional relationship
+	@JoinColumn(name = "team_id")
+	private Team predictedWinner; //possible changes unidirectional relationship
+	@ManyToOne
+	@JoinColumn(name = "match_id")//unidirectional relationship
+	private Match match;
 }

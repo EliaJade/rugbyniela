@@ -19,19 +19,21 @@ public class Match {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 //	@Column(nullable = false)
-	@ManyToOne
-	@JoinColumn()
-	private Address address; //unidirectional relationship
 	private LocalDateTime timeDate; 
 	private int localResult;
 	private int awayResult;
 	private String bonus; //check type is correct
 	//missing possible variable
 	@ManyToOne
+	@JoinColumn(name = "address_id")
+	private Address address; //unidirectional relationship
+	@ManyToOne
 	private MatchDay matchDay; //bidirectional relationship
-	@OneToMany
-	private Set<Team> team; //unidirectional relationship
-	@OneToMany
-	private Set<Bet> bets; //unidirectional relationship
+	@ManyToOne
+	@JoinColumn(name = "local_team_id")
+	private Team localTeam;
+	@ManyToOne
+	@JoinColumn(name = "away_team_id")
+	private Team awayTeam;
 	
 }
