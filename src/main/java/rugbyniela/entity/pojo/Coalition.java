@@ -2,14 +2,22 @@ package rugbyniela.entity.pojo;
 
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -18,9 +26,16 @@ public class Coalition {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@NotEmpty
+	@NotBlank
+	@NotNull
+	@Column(nullable = false, length = 50)
 	private String name;
+	
 	@OneToMany(mappedBy = "coalition")
 	private Set<CoalitionSeasonScore> coalitionSeasons; //bidirectional relationship
+	
 	@OneToMany(mappedBy = "coalition") 
 	private Set<UserSeasonScore> userSeasons; //bidirectional relationship
 	

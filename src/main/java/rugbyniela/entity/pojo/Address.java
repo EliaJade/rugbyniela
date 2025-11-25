@@ -1,11 +1,13 @@
 package rugbyniela.entity.pojo;
 
+
+import jakarta.validation.constraints.NotNull;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,9 +23,23 @@ public class Address {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+//	@NotNull
+//	@Column(nullable = false, length = 100) //see if its a good idea or not
+	@Column(length = 100)
 	private String street;
+	
+//	@NotNull
+//	@Column(nullable = false, length = 50) //see if its a good idea or not
+	@Column(length = 50)
 	private String city;
+	
+//	@NotNull
+//	@Column(nullable = false, length = 30)
+	@Column(length = 30)
 	private String postalCode;
+	
+	@Column(length = 100)
 	private String descripcion;
 	
 }

@@ -4,11 +4,13 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,13 +26,25 @@ public class Season {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@NotNull
+	@Column(nullable = false, length = 100)
 	private String name;
+	
+	@NotNull
+	@Column(nullable = false)
 	private LocalDate start_season;//here we use the LocalDate in order to get the just the date not time (recommended)
+	
+	@NotNull
+	@Column(nullable = false)
 	private LocalDate end_season;//here we use the LocalDate in order to get the just the date not time (recommended)
+	
 	@OneToMany(mappedBy = "season")
 	private Set<UserSeasonScore> seasonParticipants;
+	
 	@OneToMany(mappedBy = "season")
 	private Set<CoalitionSeasonScore> coalitionScore;
+	
 	@OneToMany(mappedBy = "season")
 	private Set<Division> divisions;
 	
