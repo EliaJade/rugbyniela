@@ -31,8 +31,7 @@ public class Team {
 	
 	@Column(length = 300)
 	private String url;
-	
-	@OneToMany(mappedBy = "team") //unidirectional relationship
+	@OneToMany(mappedBy = "predictedWinner") //unidirectional relationship
 	private Set<Bet> bets;
 	
 	

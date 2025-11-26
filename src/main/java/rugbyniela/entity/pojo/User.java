@@ -56,7 +56,6 @@ public class User {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
 	private List<Address> addresses;//unidirectional relationship
-	
 	@OneToMany()
 	@JoinColumn(name="user_id")
 	private List<UserSeasonScore> seasonScores;//unidirectional relationship

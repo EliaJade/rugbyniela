@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
@@ -23,10 +24,6 @@ import lombok.Setter;
 @Setter
 public class UserSeasonScore {
 	
-	/**
-	 * UserSeasonScore a ;
-	 */
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id; //why Long?//se usa long en vez de int, bbdd no sabe cuantos registros van a tener y cuanto va durar y pues el long tiene menos limite
@@ -44,6 +41,9 @@ public class UserSeasonScore {
 	@ManyToOne
 	private Season season;
 	
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 	@ManyToOne
 	private Coalition coalition;
 	/**

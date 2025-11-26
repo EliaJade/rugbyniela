@@ -1,5 +1,8 @@
 package rugbyniela.entity.pojo;
 
+import com.cmeza.sdgenerator.annotation.SDGenerate;
+import com.cmeza.sdgenerator.annotation.SDGenerator;
+
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -7,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -15,11 +19,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity
 public class Bet {
 
 	@Id
@@ -34,11 +39,10 @@ public class Bet {
 	private WeeklyBetTicket weeklyBetTicket; //bidirectional relationship
 	
 	@ManyToOne
-	private Team team; //possible changes unidirectional relationship //check this again
+	@JoinColumn(name = "team_id")
+	private Team predictedWinner; //possible changes unidirectional relationship
+	@ManyToOne
+	@JoinColumn(name = "match_id")//unidirectional relationship
+	private Match match;
 
-	
-	
-	
-//	@ManyToOne
-//	private Match match; //possible changes unidirectional relationship
 }

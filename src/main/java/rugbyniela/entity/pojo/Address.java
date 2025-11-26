@@ -1,5 +1,7 @@
 package rugbyniela.entity.pojo;
 
+import com.cmeza.sdgenerator.annotation.SDGenerate;
+import com.cmeza.sdgenerator.annotation.SDGenerator;
 
 import jakarta.validation.constraints.NotNull;
 
