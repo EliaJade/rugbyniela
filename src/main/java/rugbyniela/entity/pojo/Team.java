@@ -31,14 +31,5 @@ public class Team {
 	
 	@Column(length = 300)
 	private String url;
-	@OneToMany(mappedBy = "predictedWinner") //unidirectional relationship
-	private Set<Bet> bets;
-	
-	
-	public void addBet(Bet bet) {
-		if(this.bets==null) {
-			this.bets = new HashSet<Bet>();
-		}
-		this.bets.add(bet);
-	}
+
 }

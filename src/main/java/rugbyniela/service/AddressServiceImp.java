@@ -20,8 +20,7 @@ public class AddressServiceImp implements IAddressService {
 	public boolean createAddress(AddressDTO addressDTO) {
 		if(addressDTO != null) {
 			Address address = new Address(null,addressDTO.street(), addressDTO.city(), addressDTO.postalCode(),addressDTO.descripcion());
-			addressRepository.save(address);
-			
+			addressRepository.save(address);			
 			//insert into address(...) values(...)
 			return true;
 		}else {
