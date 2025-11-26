@@ -31,7 +31,7 @@ public class Match {
 	private Long id;
 	
 	@ManyToOne
-	@JoinColumn(nullable = false)
+	@JoinColumn(name = "address_id",nullable = false)
 	private Address address; //unidirectional relationship 
 	
 	@NotNull
@@ -44,26 +44,15 @@ public class Match {
 	
 	@Enumerated(EnumType.STRING)
 	private Bonus bonus; //check type is correct
-	
+
 	@ManyToOne
 	private MatchDay matchDay; //bidirectional relationship
-	@OneToMany //see about jointable
-	private Set<Team> teams; //unidirectional relationship
-	@OneToMany
-	private Set<Bet> bets; //unidirectional relationship
-	
-	
-	public void addTeam(Team team) {
-		if(this.teams==null) {
-			this.teams = new HashSet<Team>();
-		}
-		this.teams.add(team);
-	}
-	
-	public void addBet (Bet bet) {
-		if(this.bets == null) {
-			this.bets = new HashSet<Bet>();
-		}
-		this.bets.add(bet);//unidirectional so it ends here
-	}
+
+	@ManyToOne
+	@JoinColumn(name = "local_team_id")
+	private Team localTeam;
+	@ManyToOne
+	@JoinColumn(name = "away_team_id")
+	private Team awayTeam;
+
 }
