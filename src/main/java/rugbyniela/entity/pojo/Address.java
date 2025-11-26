@@ -26,13 +26,12 @@ public class Address {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-//	@NotNull
-//	@Column(nullable = false, length = 100) //see if its a good idea or not
+	
 	@Column(length = 100)
 	private String street;
 	
 	@NotNull
-	@Column(nullable = false, length = 50) //see if its a good idea or not
+	@Column(nullable = false, length = 50) 
 	private String city;
 	
 	@NotNull
