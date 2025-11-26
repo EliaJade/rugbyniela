@@ -29,14 +29,12 @@ public class Address {
 	@Column(length = 100)
 	private String street;
 	
-//	@NotNull
-//	@Column(nullable = false, length = 50) //see if its a good idea or not
-	@Column(length = 50)
+	@NotNull
+	@Column(nullable = false, length = 50) //see if its a good idea or not
 	private String city;
 	
-//	@NotNull
-//	@Column(nullable = false, length = 30)
-	@Column(length = 30)
+	@NotNull
+	@Column(nullable = false, length = 30)
 	private String postalCode;
 	
 	@Column(length = 100)
