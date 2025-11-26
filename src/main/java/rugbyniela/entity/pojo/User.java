@@ -53,6 +53,8 @@ public class User {
 	@Column(nullable = false, length = 200)
 	private String password;
 	
+	private boolean isActive;
+	
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
 	private List<Address> addresses;//unidirectional relationship
