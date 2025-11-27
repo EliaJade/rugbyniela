@@ -30,11 +30,11 @@ public class UserMatchDayScore {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull
+	
 	@Column(nullable = false)
 	private int points;
 	
-	@ManyToOne()
-	@JoinColumn(name = "user_season_id")
+	@ManyToOne
+	@JoinColumn(name = "user_season_id", nullable = false)
 	private UserSeasonScore userSeason; //bidirectional relationship
 }

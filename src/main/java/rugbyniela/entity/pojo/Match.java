@@ -1,8 +1,6 @@
 package rugbyniela.entity.pojo;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,8 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,28 +27,33 @@ public class Match {
 	private Long id;
 	
 	@ManyToOne
-	@JoinColumn(name = "address_id",nullable = false)
+	@JoinColumn(name = "address_id", nullable = false)
 	private Address address; //unidirectional relationship 
 	
-	@NotNull
+	
 	@Column(nullable = false)
 	private LocalDateTime timeDate; 
 	
-	private int localResult;
+	@Column
+	private Integer localResult; //null is notPlayedYet
+
+	@Column
+	private Integer awayResult; //null is notPlayedYet
 	
-	private int awayResult;
 	
 	@Enumerated(EnumType.STRING)
-	private Bonus bonus; //check type is correct
+	@Column(length = 30)
+	private Bonus bonus; 
 
 	@ManyToOne
+	@JoinColumn(name="match_day_id", nullable = false)
 	private MatchDay matchDay; //bidirectional relationship
 
 	@ManyToOne
-	@JoinColumn(name = "local_team_id")
+	@JoinColumn(name = "local_team_id", nullable = false)
 	private Team localTeam;
 	@ManyToOne
-	@JoinColumn(name = "away_team_id")
+	@JoinColumn(name = "away_team_id", nullable = false)
 	private Team awayTeam;
 
 }

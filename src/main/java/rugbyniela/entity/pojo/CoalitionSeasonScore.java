@@ -3,11 +3,13 @@ package rugbyniela.entity.pojo;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
@@ -27,23 +29,29 @@ public class CoalitionSeasonScore {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull
+	
 	@Column(nullable = false)
 	private int totalPoints = 0; //default 0
+	
+	@NotNull
 	@ManyToOne
+	@JoinColumn(name="season_id", nullable = false)
 	private Season season;//bidirectional relationship
+	
+	@NotNull
 	@ManyToOne
+	@JoinColumn(name="coalition_id", nullable = false)
 	private Coalition coalition;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "coalitionSeason")
+	@OneToMany(mappedBy = "coalitionSeason", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<CoalitionMatchDayScore> coalitionMatchDays; //bidirectional relationship
 	
 	
-	public void addCoalitionMatchDay(CoalitionMatchDayScore coalition) {
+	public void addCoalitionMatchDay(CoalitionMatchDayScore coalMatchDay) {
 		if(this.coalitionMatchDays==null) {
 			this.coalitionMatchDays = new HashSet<CoalitionMatchDayScore>();
 		}
-		this.coalitionMatchDays.add(coalition);
-		coalition.setCoalitionSeason(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
+		this.coalitionMatchDays.add(coalMatchDay);
+		coalMatchDay.setCoalitionSeason(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
 	}
 }
