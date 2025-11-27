@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,9 +27,11 @@ public class Team {
 	private Long id;
 	
 	@NotNull
+	@Size(max=50)
 	@Column(nullable = false, length = 50)
 	private String name;
 	
+	@Size(max=300)
 	@Column(length = 300)
 	private String url;
 

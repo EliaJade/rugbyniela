@@ -1,10 +1,10 @@
 package rugbyniela.entity.pojo;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,17 +32,20 @@ public class WeeklyBetTicket {
 	
 	@NotNull
 	@Column(nullable = false)
-	private LocalDate creationDate = LocalDate.now(); //maybe it's worth putting it as LocalDateTime so we know time of bet made ? to make sure it in range
-	@ManyToOne()
-	@JoinColumn(name = "user_season_score_id")
+	private LocalDateTime creationDate; // default LocalDateTime.now()
+	
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "user_season_score_id", nullable = false)
 	private UserSeasonScore userSeason;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "weeklyBetTicket")//bidirectional relationship
-	private List<Bet> bets;
+	
+	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true)//bidirectional relationship
+	private Set<Bet> bets;
 	
 	public void addBet(Bet bet) {
 		if(this.bets==null) {
-			this.bets = new CopyOnWriteArrayList<Bet>();
+			this.bets = new HashSet<Bet>();
 		}
 		this.bets.add(bet);
 		bet.setWeeklyBetTicket(this);

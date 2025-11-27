@@ -3,14 +3,19 @@ package rugbyniela.entity.pojo;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,17 +32,20 @@ public class Division {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull
+	@NotBlank
+	@Size(max=50, min = 1)
 	@Column(nullable = false, length = 50)
-	private String name = "Division de Honor"; //check this is okay
+	private String name; //default "Division de Honor"
 	
-	@Column(length = 50)
+	@Enumerated(EnumType.STRING)
+	@Column(length = 30)
 	private Category category; //enum category for A and B
 	
 	@ManyToOne
+	@JoinColumn( name= "season_id", nullable = false)
 	private Season season;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "division")
+	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<MatchDay> matchDays; //bidirectional relationship
 	
 	/**

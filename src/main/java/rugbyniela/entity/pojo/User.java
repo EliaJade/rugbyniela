@@ -12,7 +12,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,36 +30,45 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull
+	@NotBlank
+	@Size(max=50)
 	@Column(nullable = false, length = 50)
 	private String name;
 	
-
+	@Size(max = 50)
 	@Column(length = 50)
 	private String surname;
 	
-	@NotNull
+	@Size(max=50)
+	@Column(length = 50)
+	private String nickname;
+	
+	
 	@Column(nullable = false)
 	private int age;
 	
-	
-	@Column(length = 50)
+	@Size(max=50)
+	@Column(length = 50, unique = true)
 	private String phoneNumber;
 	
-	@NotNull
-	@Column(nullable = false, length = 200)
+	@NotBlank
+	@Size(max=200)
+	@Column(nullable = false, length = 200, unique = true)
 	private String email;
 	
-	@NotNull
+	@NotBlank
+	@Size(max=200)
 	@Column(nullable = false, length = 200)
 	private String password;
 	
-	private boolean isActive;
+	@Column(nullable = false)
+	private boolean isActive; //default true
 	
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
 	private List<Address> addresses;//unidirectional relationship
-	@OneToMany()
+	
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
 	private List<UserSeasonScore> seasonScores;//unidirectional relationship
 	

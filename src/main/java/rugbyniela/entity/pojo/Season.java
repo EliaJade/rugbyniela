@@ -4,13 +4,15 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,25 +29,27 @@ public class Season {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotNull
+	@NotBlank
+	@Size(max=100)
 	@Column(nullable = false, length = 100)
 	private String name;
-	@NotNull
+	
+	
 	@Column(nullable = false)
 	private LocalDate startSeason;// here we use the LocalDate in order to get the just the date not time
 									// (recommended)
-	@NotNull
+	
 	@Column(nullable = false)
 	private LocalDate endSeason;// here we use the LocalDate in order to get the just the date not time
 								// (recommended)
 
-	@OneToMany(mappedBy = "season")
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<UserSeasonScore> seasonParticipants;
 
-	@OneToMany(mappedBy = "season")
-	private Set<CoalitionSeasonScore> coalitionScore;
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<CoalitionSeasonScore> coalSeasonScores;
 
-	@OneToMany(mappedBy = "season")
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Division> divisions;
 
 	/**
@@ -68,14 +72,14 @@ public class Season {
 	 * 
 	 * @param coaltion
 	 */
-	public void addCoalition(CoalitionSeasonScore coaltion) {
-		if (this.coalitionScore == null) {
-			this.coalitionScore = new HashSet<CoalitionSeasonScore>();
+	public void addCoalition(CoalitionSeasonScore coalSeasonScore) {
+		if (this.coalSeasonScores == null) {
+			this.coalSeasonScores = new HashSet<CoalitionSeasonScore>();
 		}
-		this.coalitionScore.add(coaltion);
+		this.coalSeasonScores.add(coalSeasonScore);
 		// in this case, when the next line is use, the relationship will be updated,
 		// because the coalitionScore is the owner of the relationship
-		coaltion.setSeason(this);
+		coalSeasonScore.setSeason(this);
 	}
 
 	/**
