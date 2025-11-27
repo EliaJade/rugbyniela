@@ -1,14 +1,14 @@
 package rugbyniela.entity.dto;
 
-public record UserRequestDTO(
+public record UserResponseDTO(
+		Long id,
 		String name,
 		String surname,
 		String nickname,
 		int age,
 		String phoneNumber,
 		String email,
-		String password,
-		AddressDTO address) //no id
+		Long addressId) //no password
 {
-
+	
 }

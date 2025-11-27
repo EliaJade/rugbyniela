@@ -66,7 +66,7 @@ public class User {
 	
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
-	private List<Address> addresses;//unidirectional relationship
+	Address address;//unidirectional relationship
 	
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="user_id")
@@ -84,12 +84,7 @@ public class User {
 		//in this case as the relationship is not bidirectional only to save in here the relationship will be updated/saved successfully 
 	}
 	
-	public void addAddress(Address address) {
-		if(this.addresses==null) {
-			this.addresses = new CopyOnWriteArrayList<Address>();
-		}
-		this.addresses.add(address);
-	}
+	
 	
 	//TODO: ask if we need a method to delete a item from the lists, of course if the logic allows it
 
