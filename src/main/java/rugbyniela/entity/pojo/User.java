@@ -2,7 +2,6 @@ package rugbyniela.entity.pojo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
