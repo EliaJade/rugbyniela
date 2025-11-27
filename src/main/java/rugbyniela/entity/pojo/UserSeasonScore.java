@@ -3,6 +3,7 @@ package rugbyniela.entity.pojo;
 import java.util.HashSet;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,23 +29,26 @@ public class UserSeasonScore {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id; //why Long?//se usa long en vez de int, bbdd no sabe cuantos registros van a tener y cuanto va durar y pues el long tiene menos limite
 	
-	@NotNull
+	
 	@Column(nullable = false)
 	private int totalPoints;
 	
-	@OneToMany(mappedBy = "userSeason")
+	@OneToMany(mappedBy = "userSeasonScore", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<WeeklyBetTicket> tickets;//this should be a bidirectional relationship
 	
-	@OneToMany(mappedBy = "userSeason")
+	@OneToMany(mappedBy = "userSeasonScore", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
 	
 	@ManyToOne
+	@JoinColumn(name="season_id", nullable = false)
 	private Season season;
 	
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
+	
 	@ManyToOne
+	@JoinColumn(name = "coalition_id")
 	private Coalition coalition;
 	/**
 	 * Method to add or subtract points
