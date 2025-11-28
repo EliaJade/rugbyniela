@@ -1,8 +1,9 @@
 package rugbyniela.entity.dto;
 
-public record UserMatchDayScoreDTO(
+public record TeamDTO(
 		Long id,
-		int points
+		String name,
+		String url
 		) {
 
 }

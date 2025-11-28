@@ -1,9 +1,11 @@
 package rugbyniela.entity.dto;
 
+import java.util.Set;
+
 public record FlatUserSeasonScoreDTO(
 		Long id, 
-		String nickname,
-		FlatUserDTO user
+		FlatUserDTO user,
+		Set<UserMatchDayScoreDTO> ScorePerMatches
 		) {
 
 }

@@ -6,6 +6,7 @@ public record CoalitionDTO(
 		Long id,
 		String name,
 		Set<FlatUserSeasonScoreDTO> users
+		
 		) {
 
 }

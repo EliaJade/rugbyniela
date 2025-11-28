@@ -28,11 +28,11 @@ public class Match {
 	
 	@ManyToOne
 	@JoinColumn(name = "address_id", nullable = false)
-	private Address address; //unidirectional relationship 
+	private Address location; //unidirectional relationship 
 	
 	
 	@Column(nullable = false)
-	private LocalDateTime timeDate; 
+	private LocalDateTime timeMatchStart; 
 	
 	@Column
 	private Integer localResult; //null is notPlayedYet

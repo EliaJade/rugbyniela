@@ -1,5 +1,7 @@
 package rugbyniela.entity.dto;
 
+import java.util.Set;
+
 public record UserResponseDTO(
 		Long id,
 		String name,
@@ -8,7 +10,8 @@ public record UserResponseDTO(
 		int age,
 		String phoneNumber,
 		String email,
-		Long addressId) //no password
+		AddressDTO address,
+		Set<UserMatchDayScoreDTO> userSeasonScore) //no password
 {
 	
 }
