@@ -30,6 +30,8 @@ public class Match {
 	@JoinColumn(name = "address_id", nullable = false)
 	private Address address; //unidirectional relationship 
 	
+	private String name; //team away vs team local
+	
 	
 	@Column(nullable = false)
 	private LocalDateTime timeDate; 

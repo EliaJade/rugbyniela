@@ -33,10 +33,10 @@ public class UserSeasonScore {
 	@Column(nullable = false)
 	private int totalPoints;
 	
-	@OneToMany(mappedBy = "userSeasonScore", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<WeeklyBetTicket> tickets;//this should be a bidirectional relationship
 	
-	@OneToMany(mappedBy = "userSeasonScore", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
 	
 	@ManyToOne
