@@ -114,3 +114,24 @@ Resumen de tu Arquitectura Sugerida
 
 	Consejo: Inyectar Repositorios (XRepository) dentro de Servicios es correcto. Inyectar Servicios (XService) dentro de otros Servicios es peligroso (riesgo de ciclo) y debe hacerse con moderación.
 
+=============================================================================================================================================================================================
+Use for each entity a DTO with all its data instead of have many DTOs for each entity.
+
+- how break the infinitive loop in DTOs (in cases of bidirectional relationships, for example User has a list of UserSeasonScore and UserSeasonScore has an user, so in the moment
+	of creation of the DTO, will be a infinitive loop of creation)
+ 
+ 	Basically we have to break the chain from the Owner side (child)
+ 	
+ 	in a relationship, we can have 2 roles, father and child
+ 		father -> who has the list, for example User has a list of UserSeasonScore
+ 		child -> who has a object or reference of its father, for example an UserSeasonScore has a object of User type (its father)
+ 	
+ 	So to avoid the infinitive loop, we'll hava a DTO of the child class but instead of have a whole DTO of its father, we`ll have just a reference to it
+ 	like its ID for example. And in that way we break the infinitive loop in DTO
+ 	
+ - views
+ 	This is useful in performance and complexity.
+ 	it is use to store in database complex forms (like complex queries with joins and more stuff) as a table, but that will be just to read (fetch/select)
+ 	another point of view could be like, make repetitive calls/queries in just one
+ 	
+ 	INVESTIGATE HOW DO THIS WITH SPRING OR IF WE NEED DO IT WITH SQL
