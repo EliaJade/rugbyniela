@@ -38,7 +38,7 @@ public class Division {
 	private String name; //default "Division de Honor"
 	
 	@Enumerated(EnumType.STRING)
-	@Column(length = 30)
+	@Column(length = 30, nullable = false)
 	private Category category; //enum category for A and B
 	
 	@ManyToOne

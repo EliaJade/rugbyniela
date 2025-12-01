@@ -36,5 +36,5 @@ public class CoalitionMatchDayScore {
 	@NotNull
 	@ManyToOne
 	@JoinColumn(name="coal_season_score_id", nullable = false)
-	private CoalitionSeasonScore coalitionSeason;//bidirectional relationship
+	private CoalitionSeasonScore coalitionSeasonScore;//bidirectional relationship
 }

@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,10 +33,11 @@ public class UserSeasonScore {
 	private int totalPoints;
 	
 	@OneToMany(mappedBy = "userSeasonScore", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<WeeklyBetTicket> tickets;//this should be a bidirectional relationship
+	private Set<WeeklyBetTicket> bettingTickets;//this should be a bidirectional relationship
 	
 	@OneToMany(mappedBy = "userSeasonScore", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
+	//maybe call it ScorePerMatches??
 	
 	@ManyToOne
 	@JoinColumn(name="season_id", nullable = false)
@@ -65,10 +65,10 @@ public class UserSeasonScore {
 	 * @param ticket
 	 */
 	public void addTicket(WeeklyBetTicket ticket) {
-		if(this.tickets == null ){
-			this.tickets = new HashSet<WeeklyBetTicket>();
+		if(this.bettingTickets == null ){
+			this.bettingTickets = new HashSet<WeeklyBetTicket>();
 		}
-		tickets.add(ticket);
+		bettingTickets.add(ticket);
 		//in this case, when the next line is use, the relationship will be updated, because the UserSeasonScore is the owner of the relationship
 		ticket.setUserSeason(this);
 	}
