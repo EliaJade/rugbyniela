@@ -6,6 +6,7 @@ import java.util.Set;
 public record WeeklyBetTicketResponseDTO(
 		Long id,
 		LocalDateTime creationDate,
+		Long userSeasonId,
 		Set<BetDTO> bets) {
 
 }

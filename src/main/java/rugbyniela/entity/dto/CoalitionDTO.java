@@ -5,7 +5,8 @@ import java.util.Set;
 public record CoalitionDTO(
 		Long id,
 		String name,
-		Set<FlatUserSeasonScoreDTO> users
+		Set<UserSeasonScoreResponseDTO> users,
+		Set<CoalitionSeasonScoreDTO> coalitionSeasonScores
 		
 		) {
 

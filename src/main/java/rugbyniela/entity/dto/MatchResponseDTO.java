@@ -11,9 +11,9 @@ public record MatchResponseDTO(
 		Integer localResult,
 		Integer awayResult,
 		Bonus bonus,
-		String awayTeamName,
-		String localTeamName,
-		String matchDayName
+		TeamDTO awayTeam,
+		TeamDTO localTeam,
+		Long matchDayId
 		) {
 
 }

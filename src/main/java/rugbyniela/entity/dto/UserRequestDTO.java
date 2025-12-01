@@ -8,7 +8,7 @@ public record UserRequestDTO(
 		String phoneNumber,
 		String email,
 		String password,
-		AddressDTO address) //no id
+		AddressDTO address) //no id, no is active
 {
 
 }

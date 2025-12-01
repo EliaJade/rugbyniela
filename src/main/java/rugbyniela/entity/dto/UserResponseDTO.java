@@ -10,8 +10,9 @@ public record UserResponseDTO(
 		int age,
 		String phoneNumber,
 		String email,
+		boolean isActive,
 		AddressDTO address,
-		Set<UserMatchDayScoreDTO> userSeasonScore) //no password
+		Set<UserSeasonScoreResponseDTO> userSeasonScore) //no password
 {
 	
 }

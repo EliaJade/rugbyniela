@@ -7,8 +7,9 @@ public record UserSeasonScoreResponseDTO (
 		int totalPoints,
 		Set<WeeklyBetTicketResponseDTO> bettingTickets,
 		Set<UserMatchDayScoreDTO> ScorePerMatches,
-		String season,
-		String coalitionName
+		Long seasonId,
+		Long userId,
+		Long coalitionId
 		)  
 {
 

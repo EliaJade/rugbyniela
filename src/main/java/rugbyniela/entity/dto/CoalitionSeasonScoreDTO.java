@@ -1,10 +1,13 @@
 package rugbyniela.entity.dto;
 
+import java.util.Set;
+
 public record CoalitionSeasonScoreDTO(
 		Long id,
 		int totalPoints,
-		FlatSeasonDTO season,
-		Long coalitionId
+		Long seasonId,
+		Long coalitionId,
+		Set<CoalitionMatchDayScoreDTO> coalitionMatchDays
 		
 		) {
 

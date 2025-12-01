@@ -8,6 +8,7 @@ public record MatchDayResponseDTO(
 		LocalDate dateBegin,
 		LocalDate dateEnd,
 		String name,
+		Long divisionId,
 		Set<MatchResponseDTO> matches
 		) {
 
