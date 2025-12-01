@@ -135,3 +135,5 @@ Use for each entity a DTO with all its data instead of have many DTOs for each e
  	another point of view could be like, make repetitive calls/queries in just one
  	
  	INVESTIGATE HOW DO THIS WITH SPRING OR IF WE NEED DO IT WITH SQL
+ 	
+ - Lazy Eager
