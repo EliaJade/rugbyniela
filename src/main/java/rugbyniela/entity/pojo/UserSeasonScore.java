@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +37,7 @@ public class UserSeasonScore {
 	
 	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
+	//maybe call it ScorePerMatches??
 	
 	@ManyToOne
 	@JoinColumn(name="season_id", nullable = false)
