@@ -46,6 +46,9 @@ public class Match {
 	@Enumerated(EnumType.STRING)
 	@Column(length = 30)
 	private Bonus bonus; 
+	
+	@Enumerated(EnumType.STRING)
+	private MatchStatus status;
 
 	@ManyToOne
 	@JoinColumn(name="match_day_id", nullable = false)

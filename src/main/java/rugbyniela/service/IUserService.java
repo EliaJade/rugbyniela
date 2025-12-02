@@ -1,8 +1,11 @@
 package rugbyniela.service;
 
-public interface UserService {
+import rugbyniela.entity.dto.UserRequestDTO;
+import rugbyniela.entity.dto.UserResponseDTO;
 
-	void register();
+public interface IUserService {
+
+	UserResponseDTO register(UserRequestDTO dto);
 	void update();
 	void addAddress();
 	void removeAddress();
