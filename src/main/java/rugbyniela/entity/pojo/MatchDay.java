@@ -51,6 +51,7 @@ public class MatchDay {
 	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<Match> matches; //bidirectional relationship
 	
+	private boolean arePointsCalculated;
 	
 	public void addMatch (Match match) {
 		if(this.matches==null) {

@@ -28,13 +28,13 @@ public class Match {
 	
 	@ManyToOne
 	@JoinColumn(name = "address_id", nullable = false)
-	private Address address; //unidirectional relationship 
+	private Address location; //unidirectional relationship 
 	
 	private String name; //team away vs team local
 	
 	
 	@Column(nullable = false)
-	private LocalDateTime timeDate; 
+	private LocalDateTime timeMatchStart; 
 	
 	@Column
 	private Integer localResult; //null is notPlayedYet
@@ -46,6 +46,9 @@ public class Match {
 	@Enumerated(EnumType.STRING)
 	@Column(length = 30)
 	private Bonus bonus; 
+	
+	@Enumerated(EnumType.STRING)
+	private MatchStatus status;
 
 	@ManyToOne
 	@JoinColumn(name="match_day_id", nullable = false)
