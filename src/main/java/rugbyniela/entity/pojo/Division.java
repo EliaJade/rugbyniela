@@ -8,6 +8,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,11 +42,11 @@ public class Division {
 	@Column(length = 30, nullable = false)
 	private Category category; //enum category for A and B
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn( name= "season_id", nullable = false)
 	private Season season;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<MatchDay> matchDays; //bidirectional relationship
 	
 	/**

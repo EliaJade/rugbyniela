@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,16 +35,16 @@ public class CoalitionSeasonScore {
 	private int totalPoints = 0; //default 0
 	
 	@NotNull
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="season_id", nullable = false)
 	private Season season;//bidirectional relationship
 	
 	@NotNull
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="coalition_id", nullable = false)
 	private Coalition coalition;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "coalitionSeason", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "coalitionSeason", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<CoalitionMatchDayScore> coalitionMatchDays; //bidirectional relationship
 	
 	
@@ -52,6 +53,6 @@ public class CoalitionSeasonScore {
 			this.coalitionMatchDays = new HashSet<CoalitionMatchDayScore>();
 		}
 		this.coalitionMatchDays.add(coalMatchDay);
-		coalMatchDay.setCoalitionSeasonScore(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
+		coalMatchDay.setCoalitionSeason(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
 	}
 }

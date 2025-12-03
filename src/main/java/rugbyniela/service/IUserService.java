@@ -10,7 +10,7 @@ public interface IUserService {
 	void addAddress();
 	void removeAddress();
 	void updateAddress();
-	void fetchUserById();
+	UserResponseDTO fetchUserById(Long id);
 	void changePassword();
 	void recoveryAccount();
 	void login();//TODO: this method possibly belong to security service

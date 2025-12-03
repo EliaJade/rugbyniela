@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,22 +33,22 @@ public class UserSeasonScore {
 	@Column(nullable = false)
 	private int totalPoints;
 	
-	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<WeeklyBetTicket> tickets;//this should be a bidirectional relationship
 	
-	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "userSeason", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
 	//maybe call it ScorePerMatches??
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="season_id", nullable = false)
 	private Season season;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "coalition_id")
 	private Coalition coalition;
 	/**

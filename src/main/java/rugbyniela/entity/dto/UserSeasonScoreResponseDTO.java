@@ -6,7 +6,7 @@ public record UserSeasonScoreResponseDTO (
 		Long id, 
 		int totalPoints,
 		Set<WeeklyBetTicketResponseDTO> bettingTickets,
-		Set<UserMatchDayScoreDTO> ScorePerMatches,
+		Set<UserMatchDayScoreDTO> scorePerMatches,
 		Long seasonId,
 		Long userId,
 		Long coalitionId

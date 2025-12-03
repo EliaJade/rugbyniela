@@ -1,17 +1,24 @@
 package rugbyniela.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import rugbyniela.entity.dto.UserRequestDTO;
 import rugbyniela.entity.dto.UserResponseDTO;
+import rugbyniela.entity.pojo.User;
+import rugbyniela.mapper.UserMapper;
 import rugbyniela.repository.UserRepository;
 
-@AllArgsConstructor
 @Service
 public class UserServiceImp implements IUserService {
 
-	private final UserRepository userRepository;
+	@Autowired
+	private  UserRepository userRepository;
+	@Autowired
+	private  UserMapper userMapper;
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		return null;
@@ -42,9 +49,14 @@ public class UserServiceImp implements IUserService {
 	}
 
 	@Override
-	public void fetchUserById() {
-		// TODO Auto-generated method stub
-
+	@Transactional(readOnly = true)
+	public UserResponseDTO fetchUserById(Long id) {
+		User user = userRepository.findById(id).orElse(null);
+		if(user == null) {			
+			return null;
+		}else {
+			return userMapper.toUserDto(user);
+		}
 	}
 
 	@Override
