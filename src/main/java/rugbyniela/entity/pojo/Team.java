@@ -31,5 +31,6 @@ public class Team {
 	@Size(max=300)
 	@Column(length = 300)
 	private String url;
+	//TODO: add picture
 
 }

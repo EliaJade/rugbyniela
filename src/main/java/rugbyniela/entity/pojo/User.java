@@ -8,6 +8,8 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -43,7 +45,7 @@ public class User {
 	private String surname;
 	
 	@Size(max=50)
-	@Column(length = 50)
+	@Column(length = 50, unique = true)
 	private String nickname;
 	
 	
@@ -66,6 +68,19 @@ public class User {
 	
 	@Column(nullable = false)
 	private boolean isActive; //default true
+	
+	@Size(max=80)
+	@Column(length = 80,unique = true)
+	private String instagram;
+	
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
+	
+	//TODO: add picture
+	
+	@Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 	
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	@JoinColumn(name="address_id")

@@ -6,8 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import rugbyniela.entity.dto.UserRequestDTO;
-import rugbyniela.entity.dto.UserResponseDTO;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.mapper.UserMapper;
 import rugbyniela.repository.UserRepository;
@@ -20,8 +18,7 @@ public class UserServiceImp implements IUserService {
 	@Autowired
 	private  UserMapper userMapper;
 	@Override
-	public UserResponseDTO register(UserRequestDTO dto) {
-		return null;
+	public  void register() {
 	}
 
 	@Override
@@ -48,16 +45,7 @@ public class UserServiceImp implements IUserService {
 
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public UserResponseDTO fetchUserById(Long id) {
-		User user = userRepository.findById(id).orElse(null);
-		if(user == null) {			
-			return null;
-		}else {
-			return userMapper.toUserDto(user);
-		}
-	}
+
 
 	@Override
 	public void changePassword() {
@@ -129,6 +117,12 @@ public class UserServiceImp implements IUserService {
 	public void sendNotificationToUsers() {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public void fetchUserById(Long id) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

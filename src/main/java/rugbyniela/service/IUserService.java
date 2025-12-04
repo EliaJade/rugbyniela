@@ -1,16 +1,14 @@
 package rugbyniela.service;
 
-import rugbyniela.entity.dto.UserRequestDTO;
-import rugbyniela.entity.dto.UserResponseDTO;
 
 public interface IUserService {
 
-	UserResponseDTO register(UserRequestDTO dto);
+	void register();
 	void update();
 	void addAddress();
 	void removeAddress();
 	void updateAddress();
-	UserResponseDTO fetchUserById(Long id);
+	void fetchUserById(Long id);
 	void changePassword();
 	void recoveryAccount();
 	void login();//TODO: this method possibly belong to security service

@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import rugbyniela.entity.dto.UserResponseDTO;
 import rugbyniela.service.IUserService;
 
 @RestController
@@ -18,16 +17,16 @@ public class UserController {
 	@Autowired
 	private IUserService iUserService;
 	
-	@GetMapping("/find/{id}")
-	public ResponseEntity<?> fetchUserById(@PathVariable("id") Long id){
-		UserResponseDTO response = iUserService.fetchUserById(id);
-		
-		if(response==null) {
-			System.out.println("is null");
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}else {
-			System.out.println("was found");
-			return new ResponseEntity<>(response,HttpStatus.FOUND);
-		}
-	}
+//	@GetMapping("/find/{id}")
+//	public ResponseEntity<?> fetchUserById(@PathVariable("id") Long id){
+//		UserResponseDTO response = iUserService.fetchUserById(id);
+//		
+//		if(response==null) {
+//			System.out.println("is null");
+//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//		}else {
+//			System.out.println("was found");
+//			return new ResponseEntity<>(response,HttpStatus.FOUND);
+//		}
+//	}
 }
