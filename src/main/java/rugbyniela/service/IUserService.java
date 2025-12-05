@@ -1,13 +1,14 @@
 package rugbyniela.service;
 
-public interface UserService {
+
+public interface IUserService {
 
 	void register();
 	void update();
 	void addAddress();
 	void removeAddress();
 	void updateAddress();
-	void fetchUserById();
+	void fetchUserById(Long id);
 	void changePassword();
 	void recoveryAccount();
 	void login();//TODO: this method possibly belong to security service

@@ -7,6 +7,7 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,13 +44,13 @@ public class Season {
 	private LocalDate endSeason;// here we use the LocalDate in order to get the just the date not time
 								// (recommended)
 
-	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<UserSeasonScore> seasonParticipants;
 
-	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<CoalitionSeasonScore> coalSeasonScores;
 
-	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<Division> divisions;
 
 	/**

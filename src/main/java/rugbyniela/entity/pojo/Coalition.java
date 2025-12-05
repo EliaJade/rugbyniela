@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,11 +36,11 @@ public class Coalition {
 	private String name;
 	
 	
-	@OneToMany(mappedBy = "coalition", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "coalition", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<CoalitionSeasonScore> coalitionSeasonScores; //bidirectional relationship
 	
 	
-	@OneToMany(mappedBy = "coalition")
+	@OneToMany(mappedBy = "coalition",fetch = FetchType.LAZY)
 	private Set<UserSeasonScore> userSeasonScores; //bidirectional relationship
 	
 	

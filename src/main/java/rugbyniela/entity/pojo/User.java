@@ -1,16 +1,22 @@
 package rugbyniela.entity.pojo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -39,7 +45,7 @@ public class User {
 	private String surname;
 	
 	@Size(max=50)
-	@Column(length = 50)
+	@Column(length = 50, unique = true)
 	private String nickname;
 	
 	
@@ -63,13 +69,27 @@ public class User {
 	@Column(nullable = false)
 	private boolean isActive; //default true
 	
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="user_id")
-	Address address;//unidirectional relationship
+	@Size(max=80)
+	@Column(length = 80,unique = true)
+	private String instagram;
 	
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
+	
+	@Column(length = 500)
+	private String profilePictureUrl;
+	
+	@Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+	
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+	@JoinColumn(name="address_id")
+	Address address;
+	
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	@JoinColumn(name="user_id")
-	private List<UserSeasonScore> seasonScores;//unidirectional relationship
+	private Set<UserSeasonScore> seasonScores;//unidirectional relationship
 	
 	/**
 	 * Method to add a new userSeasonScore to the user
@@ -77,7 +97,7 @@ public class User {
 	 */
 	public void addUserSeasonScore(UserSeasonScore userSeasonScore) {
 		if(this.seasonScores != null ){
-			this.seasonScores = new ArrayList<>();
+			this.seasonScores = new HashSet<>();
 		}
 		seasonScores.add(userSeasonScore);
 		//in this case as the relationship is not bidirectional only to save in here the relationship will be updated/saved successfully 
