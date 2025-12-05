@@ -12,6 +12,7 @@ public record UserResponseDTO(
 		String email,
 		String instagram,
 		String gender,
+		//TODO: add profile picture
 		AddressResponseDTO addres) {
 
 }

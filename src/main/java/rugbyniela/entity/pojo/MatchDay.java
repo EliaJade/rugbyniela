@@ -32,7 +32,7 @@ public class MatchDay {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	
+	//TODO: maybe remove both dates
 	@Column(nullable = false)
 	private LocalDate dateBegin;
 	

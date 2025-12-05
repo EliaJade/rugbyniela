@@ -76,7 +76,8 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private Gender gender;
 	
-	//TODO: add picture
+	@Column(length = 500)
+	private String profilePictureUrl;
 	
 	@Enumerated(EnumType.STRING)
     @Column(nullable = false)
