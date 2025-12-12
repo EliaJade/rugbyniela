@@ -137,3 +137,27 @@ Use for each entity a DTO with all its data instead of have many DTOs for each e
  	INVESTIGATE HOW DO THIS WITH SPRING OR IF WE NEED DO IT WITH SQL
  	
  - Lazy Eager
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ - Quedamos definiendo el como actualizar un weeklybetticket, ya que necesitamos la lista
+    de equipos de esa divison para actualizar el equip que quedara de primero!:
+ 
+ 
+ 
+ 
+ 

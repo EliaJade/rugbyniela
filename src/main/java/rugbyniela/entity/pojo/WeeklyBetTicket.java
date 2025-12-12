@@ -44,6 +44,9 @@ public class WeeklyBetTicket {
 	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)//bidirectional relationship
 	private Set<Bet> bets;
 	
+	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<DivisionBet> divisionBets;
+	
 	public void addBet(Bet bet) {
 		if(this.bets==null) {
 			this.bets = new HashSet<Bet>();
@@ -51,4 +54,9 @@ public class WeeklyBetTicket {
 		this.bets.add(bet);
 		bet.setWeeklyBetTicket(this);
 	}
+	public void addDivisionBet(DivisionBet divBet) {
+        if (this.divisionBets == null) this.divisionBets = new HashSet<>();
+        this.divisionBets.add(divBet);
+        divBet.setWeeklyBetTicket(this);
+    }
 }
