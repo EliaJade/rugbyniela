@@ -15,4 +15,5 @@ DOCUMENT TO WRITE IDEAS!.
  
  
  
- 
+  - Why and how we should handle the valdiations in the dtos in order to use the personalized exceptions
+  - 12345678 -> $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy

@@ -25,11 +25,11 @@ public class JwtService {
 		this.SECRET_KEY=SECRET_KEY;
 	}
 	
-	private String generateToken(UserDetails userDetails) {
+	public String generateToken(UserDetails userDetails) {
 		return generateToken(new HashMap<>(),userDetails);
 	}
 	
-	public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+	private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername()) // El email es el subject
@@ -41,6 +41,10 @@ public class JwtService {
 	
 	public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+	public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

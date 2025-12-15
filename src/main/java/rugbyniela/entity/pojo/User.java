@@ -24,6 +24,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rugbyniela.enums.Gender;
+import rugbyniela.enums.Role;
 
 @Entity
 @Table(name = "Usuario")
