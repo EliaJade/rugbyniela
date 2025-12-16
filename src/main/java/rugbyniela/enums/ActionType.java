@@ -1,5 +1,6 @@
 package rugbyniela.enums;
 
+//TODO: add more cases
 public enum ActionType {
 	AUTHENTICATION, // Login, Tokens
     REGISTRATION,   // User registraton

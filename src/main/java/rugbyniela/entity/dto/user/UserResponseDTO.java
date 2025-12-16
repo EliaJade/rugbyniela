@@ -10,9 +10,10 @@ public record UserResponseDTO(
 		int age, 
 		String phoneNumber,
 		String email,
+		boolean isActive,
 		String instagram,
 		String gender,
-		//TODO: add profile picture
-		AddressResponseDTO addres) {
+		//TODO: add profile picture, maybe add role?
+		AddressResponseDTO address) {
 
 }

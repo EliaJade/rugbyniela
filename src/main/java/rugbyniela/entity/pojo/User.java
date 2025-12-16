@@ -19,6 +19,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -66,8 +68,12 @@ public class User {
 	private String email;
 	
 	@NotBlank
-	@Size(max=200)
+	@Size(min = 8, max=200)
 	@Column(nullable = false, length = 200)
+	@Pattern(
+	        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
+	        message = "Password must have at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character"
+	    )
 	private String password;
 	
 	@Column(nullable = false)
@@ -77,12 +83,15 @@ public class User {
 	@Column(length = 80,unique = true)
 	private String instagram;
 	
+	@NotNull
 	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private Gender gender;
 	
 	@Column(length = 500)
 	private String profilePictureUrl;
 	
+	@NotNull
 	@Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -100,7 +109,7 @@ public class User {
 	 * @param userSeasonScore
 	 */
 	public void addUserSeasonScore(UserSeasonScore userSeasonScore) {
-		if(this.seasonScores != null ){
+		if(this.seasonScores == null ){
 			this.seasonScores = new HashSet<>();
 		}
 		seasonScores.add(userSeasonScore);

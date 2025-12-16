@@ -25,10 +25,6 @@ public class UserDetailsServiceImp implements UserDetailsService{
 				.orElseThrow(()-> new RugbyException("El usuario con el email "+email+" no se encuenta en la base de datos",
 						HttpStatus.NOT_FOUND,
 						ActionType.AUTHENTICATION));
-		System.out.println("DEBUG LOGIN:");
-	    System.out.println("Email buscado: " + email);
-	    System.out.println("Email encontrado: " + user.getEmail());
-	    System.out.println("Password en BD: |" + user.getPassword() + "|");
 		return new SecurityUser(user);
 	}
 
