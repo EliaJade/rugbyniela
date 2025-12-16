@@ -25,7 +25,7 @@ public class SecurityConfig {
 		.csrf(csrf -> csrf.disable())
 		.authorizeHttpRequests(
 				auth->auth
-					.requestMatchers("/").permitAll()//allow public paths
+					.requestMatchers("/**").permitAll()//allow public paths
 					.anyRequest().authenticated()//everything else required authentication
 					)
 		.sessionManagement(sess->sess

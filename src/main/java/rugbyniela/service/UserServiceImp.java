@@ -76,7 +76,6 @@ public class UserServiceImp implements IUserService {
 	    
 	    String email = loginRequestDTO.email();
 	    String password = loginRequestDTO.password();
-	    
 	    try {
 	        // 2. Autenticación (Aquí Spring hace la Consulta a BD #1 y verifica password)
 	        Authentication authentication = authenticationManager.authenticate(
@@ -87,7 +86,6 @@ public class UserServiceImp implements IUserService {
 	        // En lugar de ir a la BD otra vez, sacamos el usuario del objeto 'authentication'
 	        // Spring ya lo cargó en memoria, así que lo recuperamos con un casting.
 	        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
-	        
 	        // 4. Generamos el token usando ese usuario
 	        return new LoginResponseDTO(jwtService.generateToken(securityUser));
 
