@@ -13,6 +13,7 @@ public record UserRequestDTO(
 		String password,
 		String instagram,
 		String gender,
+		String role,
 		AddressRequestDTO address) {
 
 }

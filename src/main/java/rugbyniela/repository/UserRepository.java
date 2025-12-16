@@ -11,4 +11,9 @@ import rugbyniela.entity.pojo.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
+	public boolean existsByEmail(String email);
+
+	public boolean existsByPhoneNumber(String phoneNumber);
+
+	public boolean existsByInstagram(String instagram);
 }

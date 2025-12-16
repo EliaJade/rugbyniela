@@ -4,6 +4,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+import rugbyniela.entity.dto.user.UserRequestDTO;
+import rugbyniela.entity.dto.user.UserResponseDTO;
+import rugbyniela.entity.pojo.User;
+
 
 @Mapper(
 	    componentModel = "spring", // Para poder usar @Autowired UserMapper
@@ -14,6 +18,10 @@ public interface UserMapper {
 //	// ==========================================
 //    // 1. User -> UserResponseDTO
 //    // ==========================================
+	
+		User toEntity(UserRequestDTO dto);
+		UserResponseDTO toDTO(User entity);
+	
 //    @Mapping(source = "seasonScores", target = "userSeasonScore")
 //    UserResponseDTO toUserDto(User entity);
 //
