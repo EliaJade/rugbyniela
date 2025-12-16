@@ -9,7 +9,7 @@ public interface IUserService {
 
 	UserResponseDTO register(UserRequestDTO dto) throws BusinessException;
 	UserResponseDTO update(UserUpdatedRequestDTO dto, Long id);
-	UserResponseDTO fetchUserById(Long id);
+	UserResponseDTO fetchUserById(Long id) throws BusinessException;
 	void changePassword();
 	void recoveryAccount();
 	void login();//TODO: this method possibly belong to security service

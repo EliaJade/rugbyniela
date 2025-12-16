@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +37,19 @@ public class UserController {
 			Map<String, String> errorBody = Map.of("error", e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 		}
+		
+	}
+	@GetMapping("/{id}")
+	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+		
+			try {
+				return ResponseEntity.ok(userService.fetchUserById(id));
+			} catch (BusinessException e) {
+				e.getMessage();
+			}
+			return null;
+			
+		
 		
 	}
 	

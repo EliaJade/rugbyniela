@@ -105,7 +105,7 @@ public class User {
 	 * @param userSeasonScore
 	 */
 	public void addUserSeasonScore(UserSeasonScore userSeasonScore) {
-		if(this.seasonScores != null ){
+		if(this.seasonScores == null ){
 			this.seasonScores = new HashSet<>();
 		}
 		seasonScores.add(userSeasonScore);

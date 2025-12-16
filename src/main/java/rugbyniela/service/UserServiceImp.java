@@ -1,16 +1,15 @@
 package rugbyniela.service;
 
-import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.util.Arrays;
+import java.util.Optional;
 
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.entity.dto.user.UserUpdatedRequestDTO;
+import rugbyniela.entity.pojo.Gender;
 import rugbyniela.entity.pojo.Role;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.exceptions.BusinessException;
@@ -29,15 +28,36 @@ public class UserServiceImp implements IUserService {
 	
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) throws BusinessException {
+		
+		//Normalize input
+		String email = dto.email().trim().toLowerCase();
+		String phone = dto.phoneNumber().trim();
+		String instagram = dto.instagram() != null? dto.instagram().trim().toLowerCase() : null;
+		
+		//Convert GENDER safely
+		Gender gender;
+		try {
+			gender = Gender.valueOf(dto.gender().trim().toUpperCase());
+			
+		}catch (IllegalArgumentException | NullPointerException ex) {
+			throw new BusinessException("The gender options must be " + Arrays.toString(Gender.values()));
+		}
+		//Convert ROLE safely
+		Role role;
+	    try {
+	        role = Role.valueOf(dto.role().trim().toUpperCase());
+	    } catch (IllegalArgumentException | NullPointerException ex) {
+	        throw new BusinessException("Invalid role");
+	    }
 		//validations
 		//unique
-		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
+		if (userRepository.existsByEmail(email)) { //without using JpaSpecificationExecutor<User>
 	        throw new BusinessException("This email already belongs to a user");
 	    }
-		if(userRepository.existsByPhoneNumber(dto.phoneNumber())) {
+		if(userRepository.existsByPhoneNumber(phone)) {
 			throw new BusinessException("This phone number already belongs to a user");
 		}
-		if(userRepository.existsByInstagram(dto.instagram())) {
+		if(instagram!= null && userRepository.existsByInstagram(instagram)) {
 			throw new BusinessException("This instagram handle already belongs to a user");
 		}
 		if(dto.role()==null) {
@@ -60,9 +80,9 @@ public class UserServiceImp implements IUserService {
 	}
 
 	@Override
-	public UserResponseDTO fetchUserById(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+	public UserResponseDTO fetchUserById(Long id) throws BusinessException {
+		User user = userRepository.findById(id).orElseThrow(()->new BusinessException("User not found with id: " + id));
+		return userMapper.toDTO(user);
 	}
 
 	@Override
