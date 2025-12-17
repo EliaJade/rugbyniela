@@ -41,16 +41,15 @@ public class User {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank
-	@Size(max=50)
+
 	@Column(nullable = false, length = 50)
 	private String name;
 	
-	@Size(max = 50)
+
 	@Column(length = 50)
 	private String surname;
 	
-	@Size(max=50)
+
 	@Column(length = 50, unique = true)
 	private String nickname;
 	
@@ -58,28 +57,22 @@ public class User {
 	@Column(nullable = false)
 	private int age;
 	
-	@Size(max=50)
+
 	@Column(length = 50, unique = true)
 	private String phoneNumber;
 	
-	@NotBlank
-	@Size(max=200)
+
 	@Column(nullable = false, length = 200, unique = true)
 	private String email;
 	
-	@NotBlank
-	@Size(min = 8, max=200)
+
 	@Column(nullable = false, length = 200)
-	@Pattern(
-	        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
-	        message = "Password must have at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character"
-	    )
 	private String password;
 	
 	@Column(nullable = false)
 	private boolean isActive; //default true
 	
-	@Size(max=80)
+
 	@Column(length = 80,unique = true)
 	private String instagram;
 	

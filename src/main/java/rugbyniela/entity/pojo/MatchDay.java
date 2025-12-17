@@ -40,8 +40,7 @@ public class MatchDay {
 	@Column(nullable = false)
 	private LocalDate dateEnd;
 	
-	@NotBlank
-	@Size(max=100)
+
 	@Column(nullable = false, length = 100)
 	private String name; //jornada 1, jornada 2....
 

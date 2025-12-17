@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -38,57 +39,32 @@ public class UserServiceImp implements IUserService {
 	private JwtService jwtService;
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	//@Autowired
+	@Autowired
 	private  UserMapper userMapper;
-
+	@Autowired
+	private PasswordEncoder encoder;
 	
 	
 	//TODO: define the error structure, where should be the annotation in entity or dto
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		
-		//Normalize input
-		String email = dto.email().trim().toLowerCase();
-		String phone = dto.phoneNumber().trim();
-		String instagram = dto.instagram() != null? dto.instagram().trim().toLowerCase() : null;
-		
-		//Convert GENDER safely
-		Gender gender;
-		try {
-			gender = Gender.valueOf(dto.gender().trim().toUpperCase());
-			
-		}catch (IllegalArgumentException | NullPointerException ex) {
-			 throw new RugbyException("El genero debe estar dentro de estas opciones" + Arrays.toString(Gender.values()), HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
-		}
-		//Convert ROLE safely
-		if(dto.role()==null) {
-			throw new RugbyException("Debe estar el rol", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
-		}
-		Role role;
-	    try {
-	        role = Role.valueOf(dto.role().trim().toUpperCase());
-	    } catch (IllegalArgumentException | NullPointerException ex) {
-	    	throw new RugbyException("Rol invalido", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
-	    }
-		//validations
-		//unique
-		if (userRepository.existsByEmail(email)) { //without using JpaSpecificationExecutor<User>
+		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
 			throw new RugbyException("Este email ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 	    }
-		if(userRepository.existsByPhoneNumber(phone)) {
+		if(userRepository.existsByPhoneNumber(dto.phoneNumber())) {
 			throw new RugbyException("Este numero de telefono ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 		}
-		if(instagram!= null && userRepository.existsByInstagram(instagram)) {
+		if(dto.instagram()!= null && userRepository.existsByInstagram(dto.instagram())) {
 			throw new RugbyException("Este instagram ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 		}
-		
-		
 		//mapping
 		User user = userMapper.toEntity(dto);
 		//encrypt password
+		user.setPassword(encoder.encode(dto.password()));
 		user.setActive(true);
 		//save
-		userRepository.save(user); //works because userRepo implements JpaRepo 
+		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		return userMapper.toDTO(user);
 	}
 
