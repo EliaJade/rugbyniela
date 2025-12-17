@@ -1,6 +1,7 @@
 package rugbyniela.service;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +21,16 @@ import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.entity.dto.user.UserUpdatedRequestDTO;
 import rugbyniela.entity.pojo.SecurityUser;
+import rugbyniela.entity.pojo.Token;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Gender;
 import rugbyniela.enums.Role;
+import rugbyniela.enums.TokenType;
 import rugbyniela.exception.RugbyException;
 
 import rugbyniela.mapper.UserMapper;
+import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
 import rugbyniela.security.JwtService;
 
@@ -43,6 +47,8 @@ public class UserServiceImp implements IUserService {
 	private  UserMapper userMapper;
 	@Autowired
 	private PasswordEncoder encoder;
+	@Autowired
+	private TokenRepository tokenRepository;
 	
 	
 	//TODO: define the error structure, where should be the annotation in entity or dto
@@ -113,13 +119,40 @@ public class UserServiceImp implements IUserService {
 	        // Spring ya lo cargó en memoria, así que lo recuperamos con un casting.
 	        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
 	        // 4. Generamos el token usando ese usuario
-	        return new LoginResponseDTO(jwtService.generateToken(securityUser));
+	        String token = jwtService.generateToken(securityUser);
+	        //we get the user in order to revoke its previous tokens
+	        User user = securityUser.getUser();
+	        revokeAllUserTokens(user);
+	        saveUserToken(user, token);
+	        return new LoginResponseDTO(token);
 
 	    } catch (BadCredentialsException e) {
 	        throw new RugbyException("Credenciales incorrectas", HttpStatus.UNAUTHORIZED, ActionType.AUTHENTICATION);
 	    } catch (DisabledException e) {
 	        throw new RugbyException("Cuenta desactivada", HttpStatus.FORBIDDEN, ActionType.AUTHENTICATION);
 	    }
+	}
+	
+	private void revokeAllUserTokens(User user) {
+		List<Token> tokens = tokenRepository.findAllValidTokenByUser(user.getId());
+		if(tokens.isEmpty()) {
+			return;
+		}
+		tokens.forEach(token->{
+			token.setExpired(true);
+			token.setRevoked(true);
+		});
+		tokenRepository.saveAll(tokens);
+	}
+	private void saveUserToken(User user, String jwtToken) {
+		Token token = Token.builder()
+				.user(user)
+                .token(jwtToken)
+                .tokenType(TokenType.BEARER)
+                .expired(false)
+                .revoked(false)
+                .build();
+		tokenRepository.save(token);
 	}
 
 	@Override
