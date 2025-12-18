@@ -1,0 +1,16 @@
+package rugbyniela.entity.dto.matchDay;
+
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+//TODO: for both add and update
+public record MatchDayRequestDTO(
+		LocalDate dateBegin,
+		LocalDate dateEnd,
+		@NotBlank
+		@Size(max=100)
+		String name) {
+
+}

@@ -1,139 +1,19 @@
 DOCUMENT TO WRITE IDEAS!.
 
-Posible functions to set in the interfaces of the service package
-
- - we'll create the service by domain (DDD - Domain Driven Design) and not by entities,
- 	 that means that we won't create a 
- 	service by entity, instead we'll create a services by domain, for example all about user will be
- 	a domain, all about bet, ranking and so on will be another service, etc.
- 	
-  - we need to make the DTOs, we have to different DTO, one to save (request) that we'll receive from Front
-  	and another to fetch (response) that we'll send from our database and app.
- 	
-  Some services that we can do (this is an example by IA, we have to think what to do ).
-  - CompetitionService 
-    
-    	// --- Gestión Administrativa ---
-    	SeasonResponseDTO createSeason(SeasonRequestDTO dto);
-    	DivisionResponseDTO addDivision(Long seasonId, DivisionRequestDTO dto);
-    
-    	// Crear la jornada y definir sus fechas límite
-    	MatchDayResponseDTO createMatchDay(Long divisionId, MatchDayRequestDTO dto);
-    
-    	// Agendar partidos (Admin)
-    	MatchResponseDTO scheduleMatch(Long matchDayId, MatchRequestDTO dto);
-
-    	// --- Gestión de Resultados (CRÍTICO) ---
-    	/**
-    	 * El admin carga el resultado. 
-    	 * IMPORTANTE: Al guardar el resultado, se debería disparar un evento 
-    	 * o llamar al RankingService para recalcular puntos si la jornada terminó.
-    	 */
-    	MatchResponseDTO registerMatchResult(Long matchId, int localScore, int visitorScore);
-
-    	// --- Consultas Públicas ---
-    	List<SeasonResponseDTO> getAllActiveSeasons();
-    
-    	// Para que el usuario vea la "cartilla" vacía que debe llenar
-    	List<MatchResponseDTO> getMatchesForJornada(Long seasonId, int jornadaNumber);
-
-
-  - public interface UserService 
-
-    	// Registro y Login
-    	UserResponseDTO register(UserRequestDTO dto);
-    	UserResponseDTO login(String email, String password); // O devolver un JWT Token
-    	
-   	 	/**
-    	 * Lógica de Negocio: Inscribirse a una temporada.
-    	 * 1. Verifica si ya existe UserSeasonScore.
-    	 * 2. Si viene coalitionId, valida que exista.
-    	 * 3. Crea el UserSeasonScore inicializando puntos en 0.
-    	 */
-    	UserSeasonScoreResponseDTO enrollInSeason(Long userId, Long seasonId, Long coalitionId);
-    
-    	// Ver mi perfil y mis estadísticas históricas
-    	UserProfileDTO getUserProfile(Long userId);
-    	
-
-  - public interface BettingService
-
-    	/**
-    	 * MÉTODO PRINCIPAL DE LA APP.
-    	 * Validaciones requeridas:
-    	 * 1. ¿Está abierta la jornada? (Fecha actual < MatchDay deadline).
-    	 * 2. ¿El usuario está inscrito en la temporada?
-    	 * 3. VALIDACIÓN DE ORO: ¿Vienen apuestas para TODOS los partidos de esa jornada?
-    	 * (Comparar count(matches) vs count(bets)).
-    	 * 4. Si ya existe un Ticket para esa jornada/usuario -> Sobreescribir (Update).
-    	 * 5. Si no existe -> Crear nuevo (Insert).
-    	 */
-   		 WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO ticketRequest);
-
-    	// Ver mi apuesta ya enviada (para comprobar qué aposté)
-    	WeeklyBetTicketResponseDTO getMyTicket(Long userSeasonScoreId, int jornadaNumber);
-    	
-  - public interface CoalitionService 
-  
-    	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
-    	List<CoalitionResponseDTO> getAllCoalitions();
-    	
-    	// Obtener detalles y quiénes son sus miembros actuales
-    	CoalitionDetailDTO getCoalitionById(Long coalitionId);
-    	
-Resumen de tu Arquitectura Sugerida
-	Para tu proyecto de Rugby, en lugar de 15 servicios pequeños, deberías tener estos 5 servicios robustos (inyectando múltiples repositorios en cada uno):
-
-	UserService
-
-		Repositories: UserRepository, AddressRepository, UserSeasonScoreRepository.
-
-		Acciones: Crear usuario, añadir dirección, inscribirse en temporada.
-
-	CompetitionService
-
-		Repositories: SeasonRepository, DivisionRepository, MatchDayRepository, MatchRepository, TeamRepository.
-
-		Acciones: Crear toda la estructura de la liga y partidos.
-
-	BettingService
-
-		Repositories: WeeklyBetTicketRepository, BetRepository, MatchRepository (solo lectura para validar).
-
-		Acciones: Crear boleto completo (guarda Ticket y Bets en una sola transacción).
-
-	RankingService
-
-		Repositories: UserMatchDayScoreRepository, UserSeasonScoreRepository, etc.
-
-		Acciones: Calcular puntos.
-
-	CoalitionService
-
-		Repositories: CoalitionRepository.
-
-	Consejo: Inyectar Repositorios (XRepository) dentro de Servicios es correcto. Inyectar Servicios (XService) dentro de otros Servicios es peligroso (riesgo de ciclo) y debe hacerse con moderación.
-
-=============================================================================================================================================================================================
-Use for each entity a DTO with all its data instead of have many DTOs for each entity.
-
-- how break the infinitive loop in DTOs (in cases of bidirectional relationships, for example User has a list of UserSeasonScore and UserSeasonScore has an user, so in the moment
-	of creation of the DTO, will be a infinitive loop of creation)
+ - Quedamos definiendo el como actualizar un weeklybetticket, ya que necesitamos la lista
+    de equipos de esa divison para actualizar el equip que quedara de primero!:
  
- 	Basically we have to break the chain from the Owner side (child)
- 	
- 	in a relationship, we can have 2 roles, father and child
- 		father -> who has the list, for example User has a list of UserSeasonScore
- 		child -> who has a object or reference of its father, for example an UserSeasonScore has a object of User type (its father)
- 	
- 	So to avoid the infinitive loop, we'll hava a DTO of the child class but instead of have a whole DTO of its father, we`ll have just a reference to it
- 	like its ID for example. And in that way we break the infinitive loop in DTO
- 	
- - views
- 	This is useful in performance and complexity.
- 	it is use to store in database complex forms (like complex queries with joins and more stuff) as a table, but that will be just to read (fetch/select)
- 	another point of view could be like, make repetitive calls/queries in just one
- 	
- 	INVESTIGATE HOW DO THIS WITH SPRING OR IF WE NEED DO IT WITH SQL
- 	
- - Lazy Eager
+ - SECRET_KEY:
+ 	it is a private key which we sing tokens (jwt) when we use algorithims HMAC(HS256,HS384, HS512)
+ 	Based on the JJWT and OWAPS specifications the key should  has at least 256 bits, that mean
+ 		32 bytes = 32 ascii characters or even better use a key BASE64 of 256 bits or more
+ 		
+ 	To create a key we should (recommended way), do this:
+ 		var key = Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256);
+ 	but we can too do this 
+ 	openssl rand -base64 32 (do this in linux and it will print the key generated)
+ 
+ 
+ 
+  - Why and how we should handle the valdiations in the dtos in order to use the personalized exceptions
+  - 12345678 -> $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy

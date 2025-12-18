@@ -24,12 +24,14 @@ public class Team {
 	private Long id;
 	
 	@NotNull
-	@Size(max=50)
 	@Column(nullable = false, length = 50)
 	private String name;
 	
-	@Size(max=300)
+	
 	@Column(length = 300)
 	private String url;
+	
+	@Column(length = 500)
+	private String teamPictureUrl;
 
 }

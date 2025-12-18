@@ -13,6 +13,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
@@ -21,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rugbyniela.enums.Category;
 
 @Entity
 @AllArgsConstructor
@@ -33,8 +36,7 @@ public class Division {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank
-	@Size(max=50, min = 1)
+
 	@Column(nullable = false, length = 50)
 	private String name; //default "Division de Honor"
 	
@@ -48,6 +50,15 @@ public class Division {
 	
 	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<MatchDay> matchDays; //bidirectional relationship
+	
+	//to know which teams we could pair with each other
+	@ManyToMany(fetch = FetchType.LAZY) 
+    @JoinTable(
+        name = "division_teams", // Nombre de la tabla intermedia en BD
+        joinColumns = @JoinColumn(name = "division_id"),
+        inverseJoinColumns = @JoinColumn(name = "team_id")
+    )
+    private Set<Team> teams = new HashSet<>();
 	
 	/**
 	 * Method to add a matchDay in the list

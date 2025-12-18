@@ -53,6 +53,6 @@ public class CoalitionSeasonScore {
 			this.coalitionMatchDays = new HashSet<CoalitionMatchDayScore>();
 		}
 		this.coalitionMatchDays.add(coalMatchDay);
-		coalMatchDay.setCoalitionSeasonScore(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
+		coalMatchDay.setCoalitionSeason(this); //maintains bidirectional relationship connecting parent to child this being matchdays --> coaltionSeason
 	}
 }

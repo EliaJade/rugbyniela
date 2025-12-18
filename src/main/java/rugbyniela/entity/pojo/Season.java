@@ -30,8 +30,7 @@ public class Season {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
-	@Size(max=100)
+
 	@Column(nullable = false, length = 100)
 	private String name;
 	

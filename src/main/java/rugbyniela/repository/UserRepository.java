@@ -1,5 +1,7 @@
 package rugbyniela.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -11,4 +13,10 @@ import rugbyniela.entity.pojo.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
+	Optional<User> findByEmail(String email);
+	public boolean existsByEmail(String email);
+
+	public boolean existsByPhoneNumber(String phoneNumber);
+
+	public boolean existsByInstagram(String instagram);
 }
