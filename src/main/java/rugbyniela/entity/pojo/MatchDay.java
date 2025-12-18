@@ -7,6 +7,7 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,11 +45,11 @@ public class MatchDay {
 	@Column(nullable = false, length = 100)
 	private String name; //jornada 1, jornada 2....
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "division_id", nullable = false)
 	private Division division;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<Match> matches; //bidirectional relationship
 	
 	private boolean arePointsCalculated;

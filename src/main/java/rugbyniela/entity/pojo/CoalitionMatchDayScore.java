@@ -3,6 +3,7 @@ package rugbyniela.entity.pojo;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,7 +35,7 @@ public class CoalitionMatchDayScore {
 	private int points = 0; //default 0
 	
 	@NotNull
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="coal_season_score_id", nullable = false)
 	private CoalitionSeasonScore coalitionSeasonScore;//bidirectional relationship
 }

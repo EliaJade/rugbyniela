@@ -1,5 +1,6 @@
 package rugbyniela.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
@@ -7,11 +8,11 @@ import rugbyniela.entity.dto.UserRequestDTO;
 import rugbyniela.entity.dto.UserResponseDTO;
 import rugbyniela.repository.UserRepository;
 
-@AllArgsConstructor
 @Service
 public class UserServiceImp implements IUserService {
 
-	private final UserRepository userRepository;
+	@Autowired
+	private  UserRepository userRepository;
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		return null;

@@ -29,7 +29,6 @@ public class Address {
 	
 	@NotBlank
 	@Size( max = 50)
-//	@Column(nullable = false, length = 50)
 	@Column(nullable = false, columnDefinition = "citext") //case sensitive MUST ADD IN SUPABASE: CREATE EXTENSIONS IF NOT EXISTS citext
 	private String city;
 	

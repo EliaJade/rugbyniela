@@ -7,6 +7,7 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,12 +36,12 @@ public class WeeklyBetTicket {
 	private LocalDateTime creationDate; // default LocalDateTime.now()
 	
 	@NotNull
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_season_score_id", nullable = false)
 	private UserSeasonScore userSeason;//bidirectional relationship
 	
 	
-	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true)//bidirectional relationship
+	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)//bidirectional relationship
 	private Set<Bet> bets;
 	
 	public void addBet(Bet bet) {
