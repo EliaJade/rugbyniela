@@ -23,22 +23,16 @@ public class Address {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Size( max = 100)
 	@Column(length = 100)
 	private String street;
 	
-	@NotBlank
-	@Size( max = 50)
-//	@Column(nullable = false, length = 50)
+
 	@Column(nullable = false, columnDefinition = "citext") //case sensitive MUST ADD IN SUPABASE: CREATE EXTENSIONS IF NOT EXISTS citext
 	private String city;
 	
-	@NotBlank
-	@Size( max = 30)
 	@Column(nullable = false, length = 30)
 	private String postalCode;
 	
-	@Size( max = 100)
 	@Column(length = 100)
 	private String description;
 	

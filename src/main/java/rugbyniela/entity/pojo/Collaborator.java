@@ -22,14 +22,13 @@ public class Collaborator {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Size(max = 80)
-	@NotBlank
+	
 	@Column(unique = true, length = 80, nullable = false)
 	private String name;
-	@Size(max = 300)
+	
 	@Column(length = 300)
 	private String url;
-	@Size(max = 500)
+
 	@Column(length = 500)
 	private String pictureUrl;
 }
