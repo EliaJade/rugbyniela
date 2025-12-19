@@ -76,8 +76,13 @@ public class UserServiceImp implements IUserService {
 
 	@Override
 	public UserResponseDTO update(UserUpdatedRequestDTO dto, Long id) {
-		// TODO Auto-generated method stub
-		return null;
+		//Find existing user
+		User user = userRepository.findById(id)
+				.orElseThrow(() -> new RugbyException ("Usuario no encontrado con id: " + id, HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION)); //might have to change actionType
+		//partial update
+		userMapper.updateUserFromDto(dto, user);
+		User updatedUser = userRepository.save(user);
+		return userMapper.toResponseDto(updatedUser);
 	}
 
 	@Override
