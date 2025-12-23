@@ -23,6 +23,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rugbyniela.enums.Category;
 
 @Entity
 @AllArgsConstructor
@@ -35,8 +36,7 @@ public class Division {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotBlank
-	@Size(max=50, min = 1)
+
 	@Column(nullable = false, length = 50)
 	private String name; //default "Division de Honor"
 	

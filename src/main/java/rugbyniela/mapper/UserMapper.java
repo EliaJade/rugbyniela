@@ -1,12 +1,20 @@
 package rugbyniela.mapper;
 
+import java.util.Arrays;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.http.HttpStatus;
 
 import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.entity.pojo.User;
+import rugbyniela.enums.ActionType;
+import rugbyniela.enums.Gender;
+import rugbyniela.enums.Role;
+import rugbyniela.exception.RugbyException;
 
 
 @Mapper(
@@ -14,60 +22,51 @@ import rugbyniela.entity.pojo.User;
 	    unmappedTargetPolicy = ReportingPolicy.IGNORE // Ignora campos que no coincidan (útil para password)
 	)
 public interface UserMapper {
-//
-//	// ==========================================
-//    // 1. User -> UserResponseDTO
-//    // ==========================================
 	
+		@Mapping(target = "gender",source="gender",qualifiedByName = "stringToGender")
+		@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
+		@Mapping(target = "password",ignore = true)//TODO: change this in order to allow mapstruct do this for us
+		@Mapping(target="email",source="email",qualifiedByName = "normalizeEmail")
 		User toEntity(UserRequestDTO dto);
+		@Mapping(target = "isActive",source = "active")
 		UserResponseDTO toDTO(User entity);
-	
-//    @Mapping(source = "seasonScores", target = "userSeasonScore")
-//    UserResponseDTO toUserDto(User entity);
-//
-//    AddressDTO toAddressDto(Address entity);
-//
-//    // ==========================================
-//    // 2. UserSeasonScore -> UserSeasonScoreResponseDTO
-//    // ==========================================
-//    @Mapping(source = "season.id", target = "seasonId")
-//    @Mapping(source = "user.id", target = "userId")
-//    @Mapping(source = "coalition.id", target = "coalitionId")
-//    @Mapping(source = "tickets", target = "bettingTickets") 
-//    @Mapping(source = "matchDayScores", target = "scorePerMatches") 
-//    UserSeasonScoreResponseDTO toScoreDto(UserSeasonScore entity);
-//
-//
-//    // ==========================================
-//    // 3. WeeklyBetTicket -> WeeklyBetTicketResponseDTO
-//    // ==========================================
-//    @Mapping(source = "userSeason.id", target = "userSeasonId")
-//    WeeklyBetTicketResponseDTO toTicketDto(WeeklyBetTicket entity);
-//
-//    // ==========================================
-//    // 4. UserMatchDayScore -> UserMatchDayScoreDTO
-//    // ==========================================
-//    @Mapping(source = "userSeason.id", target = "userSeasonId")
-//    UserMatchDayScoreDTO toMatchDayScoreDto(UserMatchDayScore entity);
-//
-//
-//    // ==========================================
-//    // 5. Bet -> BetDTO
-//    // ==========================================
-//    @Mapping(source = "weeklyBetTicket.id", target = "weeklyBetTicketId")
-//    @Mapping(source = "predictedWinner.id", target = "predictedWinnerTeamId")
-//    BetDTO toBetDto(Bet entity);
-//
-//
-//    // ==========================================
-//    // 6. Match -> MatchResponseDTO
-//    // ==========================================
-//    // CORREGIDO: Eliminamos los mappings de 'address' y 'timeDate' porque ya coinciden los nombres
-//    @Mapping(source = "matchDay.id", target = "matchDayId")
-//    MatchResponseDTO toMatchDto(Match entity);
-//
-//    // ==========================================
-//    // 7. Team -> TeamDTO
-//    // ==========================================
-//    TeamDTO toTeamDto(Team entity);
+		
+		@Named("normalizeEmail")
+		default String normalizeEmail(String email) {
+			if(email==null) return null;
+			return email.trim().toLowerCase();
+		}
+		@Named("stringToGender")
+	    default Gender mapGender(String genderStr) {
+	        if (genderStr == null || genderStr.isBlank()) {
+	            // Si en el DTO pusiste @NotNull, esto teóricamente no pasaría, 
+	            // pero es bueno protegerse o retornar null si es opcional.
+	            return null; 
+	        }
+	        try {
+	            return Gender.valueOf(genderStr.trim().toUpperCase());
+	        } catch (IllegalArgumentException e) {
+	            throw new RugbyException(
+	                "El género '" + genderStr + "' no es válido. Valores permitidos: " + Arrays.toString(Gender.values()),
+	                HttpStatus.BAD_REQUEST,
+	                ActionType.REGISTRATION // O ActionType.VALIDATION
+	            );
+	        }
+	    }
+		
+		@Named("stringToRole")
+	    default Role mapRole(String roleStr) {
+	        if (roleStr == null || roleStr.isBlank()) {
+	            return null; // O lanzar excepción si es obligatorio
+	        }
+	        try {
+	            return Role.valueOf(roleStr.trim().toUpperCase());
+	        } catch (IllegalArgumentException e) {
+	            throw new RugbyException(
+	                "El rol '" + roleStr + "' no es válido. Valores permitidos: " + Arrays.toString(Role.values()),
+	                HttpStatus.BAD_REQUEST,
+	                ActionType.REGISTRATION
+	            );
+	        }
+	    }
 }
