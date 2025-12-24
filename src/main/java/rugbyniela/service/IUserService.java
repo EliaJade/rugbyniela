@@ -14,7 +14,6 @@ public interface IUserService {
 	void changePassword();
 	void recoveryAccount();
 	LoginResponseDTO login(LoginRequestDTO loginRequestDTO);//TODO: this method possibly belong to security service
-	void logout();//TODO: this method possibly belong to security service
 	void registerInSeason();
 	void fetchSeasonPoints();
 	void fetchSeasonUserHaveBeenRegistered();

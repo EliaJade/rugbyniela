@@ -1,5 +1,6 @@
 package rugbyniela.service;
 
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
+import lombok.extern.slf4j.Slf4j;
 import rugbyniela.entity.dto.user.LoginRequestDTO;
 import rugbyniela.entity.dto.user.LoginResponseDTO;
 import rugbyniela.entity.dto.user.UserRequestDTO;
@@ -35,6 +36,7 @@ import rugbyniela.repository.UserRepository;
 import rugbyniela.security.JwtService;
 
 @Service
+@Slf4j
 public class UserServiceImp implements IUserService {
 
 	@Autowired
@@ -49,19 +51,19 @@ public class UserServiceImp implements IUserService {
 	private PasswordEncoder encoder;
 	@Autowired
 	private TokenRepository tokenRepository;
-	
-	
-	//TODO: define the error structure, where should be the annotation in entity or dto
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		
 		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
+			log.warn("Intento fallido de registro. Email ya existe {}",dto.email());
 			throw new RugbyException("Este email ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 	    }
 		if(userRepository.existsByPhoneNumber(dto.phoneNumber())) {
+			log.warn("Intento fallido de registro. Numero de telefono ya existe {}",dto.phoneNumber());
 			throw new RugbyException("Este numero de telefono ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 		}
 		if(dto.instagram()!= null && userRepository.existsByInstagram(dto.instagram())) {
+			log.warn("Intento fallido de registro. Instagram ya existe {}",dto.instagram());
 			throw new RugbyException("Este instagram ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 		}
 		//mapping
@@ -71,6 +73,7 @@ public class UserServiceImp implements IUserService {
 		user.setActive(true);
 		//save
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
+		log.info("Usuario creado!");
 		return userMapper.toDTO(user);
 	}
 
@@ -127,6 +130,7 @@ public class UserServiceImp implements IUserService {
 	        return new LoginResponseDTO(token);
 
 	    } catch (BadCredentialsException e) {
+	    	
 	        throw new RugbyException("Credenciales incorrectas", HttpStatus.UNAUTHORIZED, ActionType.AUTHENTICATION);
 	    } catch (DisabledException e) {
 	        throw new RugbyException("Cuenta desactivada", HttpStatus.FORBIDDEN, ActionType.AUTHENTICATION);
@@ -153,12 +157,6 @@ public class UserServiceImp implements IUserService {
                 .revoked(false)
                 .build();
 		tokenRepository.save(token);
-	}
-
-	@Override
-	public void logout() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

@@ -35,8 +35,8 @@ public class Coalition {
 	@Column(nullable = false, length = 50)
 	private String name;
 	
-	
-	@OneToMany(mappedBy = "coalition", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+
+	@OneToMany(mappedBy = "coalition", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<CoalitionSeasonScore> coalitionSeasonScores; //bidirectional relationship
 	
 	

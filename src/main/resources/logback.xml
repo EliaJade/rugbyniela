@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- Here we declare a variable named LOG_PATTERN, to print date and hour,
+	the thread that execute the task, the level (info, warn, error), 
+	the class where ithappened, the message and newline
+	-->
+	<property name="LOG_PATTERN"
+		value="%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n" />
+
+	<!-- 
+		First destination
+		an Appender is a destiny, this block configure the screen output (what we
+		see in Eclipse or Docker logs)
+		- ConsoleAppender: this means "write in in standar output (System.out)"
+		- %highlight(%-5level): this prin the errors in red, the  warning in yellow
+			and the info in blue. This is a visual help
+		- %cyan(%logger{15}): this print the class name of cian and cut it to 15 characters
+			the name so that it does not take up the entire screen
+	-->
+	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>
+				%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level)
+				%cyan(%logger{15}) - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<!-- 
+		Second destination
+		This is the professional destination, it writes to a physical file on the hard
+		disk, but with intelligence not to fill the disk.
+		How work this rotation?.
+			1. Today: everything will be written in logs/rugbyniela.log
+			2. Tomorrow (to 00:00): Logback detect the changes of the day
+				- rename the file of the previous day to logs/archived/rugbyniela-2025-12-19.log
+					(the year, month and day obvoiously will change)
+				- create a new empty rugbyniela.log file for today
+			3. cleaning (maxHistory): if there are more than 30 files, delete the oldest one
+				automatically
+			4. top (totalSizeCap): if the folder archived weighs more than 1GB in total, start deleting old
+				logs even though it hasn't passed 30 days.
+	-->
+	<appender name="RollingFile"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>logs/rugbyniela.log</file>
+		<encoder>
+			<pattern>${LOG_PATTERN}</pattern>
+		</encoder>
+
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>logs/archived/rugbyniela-%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+			<totalSizeCap>1GB</totalSizeCap>
+		</rollingPolicy>
+	</appender>
+
+	<!-- 
+		The profiles.
+		Here we connect the destination based the enviroment that spring boot is executing
+	-->
+	<!-- When we're in dev mod, we'll just print in console-->
+	<springProfile name="dev">
+		<root level="INFO">
+			<appender-ref ref="Console" />
+		</root>
+	</springProfile>
+	<!-- When we're in dev mod, we'll both print in console and write in the file-->
+	<springProfile name="prod">
+		<root level="INFO">
+			<appender-ref ref="Console" />
+			<appender-ref ref="RollingFile" />
+		</root>
+	</springProfile>
+	<!-- If we forget set a profile, by the fault we'll just print in console-->
+	<root level="INFO">
+		<appender-ref ref="Console" />
+	</root>
+</configuration>
