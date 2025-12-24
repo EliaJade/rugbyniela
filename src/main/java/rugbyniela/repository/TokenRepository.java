@@ -5,9 +5,12 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import jakarta.transaction.Transactional;
 import rugbyniela.entity.pojo.Token;
 
 /**
@@ -25,4 +28,8 @@ public interface TokenRepository extends JpaRepository<Token, Long>, JpaSpecific
 	List<Token> findAllValidTokenByUser(@Param("userId")Long userId);
 	//to logout
 	Optional<Token> findByToken(String token);
+	@Modifying //Indicates this query will change data (delete/update)
+	@Transactional //needed to ensure that if it fails, the DB does not break
+	@Query(value = "delete from Token t where t.expired = true or t.revoked = true")
+	void deleteAllExpiredOrRevokedTokens();
 }
