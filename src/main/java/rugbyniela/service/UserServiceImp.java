@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import rugbyniela.entity.dto.user.LoginRequestDTO;
 import rugbyniela.entity.dto.user.LoginResponseDTO;
@@ -34,6 +36,7 @@ import rugbyniela.mapper.UserMapper;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
 import rugbyniela.security.JwtService;
+import rugbyniela.security.TokenValidator;
 
 @Service
 @Slf4j
@@ -51,6 +54,10 @@ public class UserServiceImp implements IUserService {
 	private PasswordEncoder encoder;
 	@Autowired
 	private TokenRepository tokenRepository;
+	@Autowired
+	private TokenValidator tokenValidator;
+	
+	
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		
@@ -103,6 +110,54 @@ public class UserServiceImp implements IUserService {
 	}
 
 	@Override
+	public LoginResponseDTO refreshToken(HttpServletRequest request) {
+	    // 1. Extracción del Header (igual que antes)
+	    final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+	    final String refreshToken;
+	    final String userEmail;
+
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	        throw new RugbyException("No hay token", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
+	    }
+
+	    refreshToken = authHeader.substring(7);
+	    userEmail = jwtService.extractUsername(refreshToken);
+
+	    if (userEmail != null) {
+	        // 2. Buscar usuario
+	        User user = this.userRepository.findByEmail(userEmail)
+	                .orElseThrow(() -> new RugbyException("Usuario no encontrado", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION));
+	        
+	        SecurityUser securityUser = new SecurityUser(user);
+
+	        // 3. USO DEL VALIDATOR
+	        // Aquí pasamos TokenType.REFRESH_TOKEN.
+	        // Esto verifica: Firma OK + Expiración OK + No Revocado + ES REFRESH TOKEN
+	        if (tokenValidator.isValid(refreshToken, securityUser, TokenType.REFRESH_TOKEN)) {
+	            
+	            // 4. Lógica de Rotación (Quemar el viejo, crear nuevos)
+	            
+	            // A) Revocamos el token que se acaba de usar
+	            Token storedToken = tokenRepository.findByToken(refreshToken).orElseThrow();
+	            storedToken.setRevoked(true);
+	            storedToken.setExpired(true);
+	            tokenRepository.save(storedToken);
+
+	            // B) Generamos los nuevos
+	            String newAccessToken = jwtService.generateToken(securityUser);
+	            String newRefreshToken = jwtService.generateRefreshToken(securityUser);
+
+	            // C) Guardamos los nuevos
+	            saveUserToken(user, newAccessToken, TokenType.BEARER);
+	            saveUserToken(user, newRefreshToken, TokenType.REFRESH_TOKEN);
+
+	            return new LoginResponseDTO(newAccessToken, newRefreshToken);
+	        }
+	    }
+	    
+	    throw new RugbyException("Refresh token inválido o expirado", HttpStatus.FORBIDDEN, ActionType.AUTHENTICATION);
+	}
+	@Override
 	public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
 		// 1. Validaciones básicas
 	    if (loginRequestDTO == null) {
@@ -121,13 +176,15 @@ public class UserServiceImp implements IUserService {
 	        // En lugar de ir a la BD otra vez, sacamos el usuario del objeto 'authentication'
 	        // Spring ya lo cargó en memoria, así que lo recuperamos con un casting.
 	        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
-	        // 4. Generamos el token usando ese usuario
-	        String token = jwtService.generateToken(securityUser);
+	        // 4. Generamos el access token y el refresh token usando ese usuario
+	        String accessToken = jwtService.generateToken(securityUser);
+	        String refreshToken = jwtService.generateRefreshToken(securityUser);
 	        //we get the user in order to revoke its previous tokens
 	        User user = securityUser.getUser();
 	        revokeAllUserTokens(user);
-	        saveUserToken(user, token);
-	        return new LoginResponseDTO(token);
+	        saveUserToken(user, accessToken,TokenType.BEARER);
+	        saveUserToken(user, refreshToken,TokenType.REFRESH_TOKEN);
+	        return new LoginResponseDTO(accessToken,refreshToken);
 
 	    } catch (BadCredentialsException e) {
 	    	
@@ -148,11 +205,11 @@ public class UserServiceImp implements IUserService {
 		});
 		tokenRepository.saveAll(tokens);
 	}
-	private void saveUserToken(User user, String jwtToken) {
+	private void saveUserToken(User user, String jwtToken,TokenType type) {
 		Token token = Token.builder()
 				.user(user)
                 .token(jwtToken)
-                .tokenType(TokenType.BEARER)
+                .tokenType(type)
                 .expired(false)
                 .revoked(false)
                 .build();
