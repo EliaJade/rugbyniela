@@ -11,4 +11,5 @@ import rugbyniela.entity.pojo.MatchDay;
 @Repository
 public interface MatchDayRepository extends JpaRepository<MatchDay, Long>, JpaSpecificationExecutor<MatchDay> {
 
+	
 }

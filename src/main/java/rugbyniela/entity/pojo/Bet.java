@@ -1,5 +1,7 @@
 package rugbyniela.entity.pojo;
 
+import java.util.Optional;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -51,5 +53,7 @@ public class Bet {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "match_id", nullable = false)//unidirectional relationship
 	private Match match;
+
+	
 
 }
