@@ -14,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import rugbyniela.repository.TokenRepository;
 import rugbyniela.service.UserDetailsServiceImp;
 
 @Component
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 	
 	private final JwtService jwtService;
 	private final UserDetailsServiceImp userDetailsServiceImp;
+	private final TokenRepository tokenRepository;
 
 	@Override
 	protected void doFilterInternal(
@@ -48,8 +50,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter{
 		if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			//fetch user by its email from the data base
 			UserDetails userDetails = this.userDetailsServiceImp.loadUserByUsername(userEmail);
+			boolean isTokenValid = tokenRepository.findByToken(jwt)
+					.map(t -> !t.isExpired() && !t.isRevoked())
+					.orElse(false);
 			//validate that the token is valid and belong to the user
-			if(jwtService.isTokenValid(jwt, userDetails)) {
+			if(jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {
 				//create a spring's authentication object
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
 						userDetails,
