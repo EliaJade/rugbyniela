@@ -14,5 +14,4 @@ public record SeasonRequestDTO(
 		LocalDate startSeason,
 		LocalDate endSeason,
 		Set<DivisionRequestDTO> divisions) {
-
 }
