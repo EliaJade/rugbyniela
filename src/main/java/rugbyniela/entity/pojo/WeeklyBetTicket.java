@@ -47,6 +47,16 @@ public class WeeklyBetTicket {
 	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DivisionBet> divisionBets;
 	
+	
+	/**
+	 * This is to have a reference of the coalition that the user belongs
+	 * in order to avoid lose points when the user changes of coalition
+	 * after make a bet (in a match day, basically avoid cheating)
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ticket_coalition_id")
+	private Coalition coalitionAtBetTime;
+	
 	public void addBet(Bet bet) {
 		if(this.bets==null) {
 			this.bets = new HashSet<Bet>();
