@@ -1,5 +1,7 @@
 package rugbyniela.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,13 +19,13 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 public interface WeeklyBetTicketRepository extends JpaRepository<WeeklyBetTicket, Long>, JpaSpecificationExecutor<WeeklyBetTicket> {
 
 	@Query("""
-			SELECT COUNT(wbt) > 0
+			SELECT DISTINCT wbt
 			FROM WeeklyBetTicket wbt
 			JOIN wbt.bets b
 			JOIN b.match m
 			WHERE wbt.userSeason = :userSeason
 				AND m.matchDay = :matchDay
 			""")
-	boolean existsByUserSeasonAndMatchDay(@Param ("userSeason") UserSeasonScore userSeason, @Param ("matchDay") MatchDay matchDay);
+	Optional<WeeklyBetTicket> findByUserSeasonAndMatchDay(@Param ("userSeason") UserSeasonScore userSeason, @Param ("matchDay") MatchDay matchDay);
 
 }

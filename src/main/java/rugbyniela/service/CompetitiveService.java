@@ -10,6 +10,8 @@ public interface CompetitiveService {
 	void fetchTeamById();
 	void createSeason();
 	void createDivision();
+	void createMatch();
+	void createTeam();
 	void addDivisionToSeason();
 	void fetchMatchesOfSeason();
 	void fetchMatchesOfSeasonByMatchDay();

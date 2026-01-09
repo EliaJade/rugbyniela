@@ -63,4 +63,8 @@ public class Match {
 	@JoinColumn(name = "away_team_id", nullable = false)
 	private Team awayTeam;
 
+	
+	public boolean isOpenForBetting(LocalDateTime now) {
+		return now.isBefore(this.timeMatchStart); //used in betting service
+	}
 }

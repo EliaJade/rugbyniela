@@ -10,7 +10,9 @@ public record WeeklyBetTicketRequestDTO(
 		Long userSeasonId,
 		Long matchDayId,
 		Set<BetRequestDTO> bets,
-		Set<DivisionBetDTO> divisionBets){
+		Set<DivisionBetDTO> divisionBets,
+		Long predictedLeaderboardWinner
+		){
 
 	
 
