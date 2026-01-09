@@ -10,7 +10,9 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -35,6 +37,10 @@ public class Coalition {
 	@Column(nullable = false, length = 50)
 	private String name;
 	
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "capitan_id",unique = true,nullable = false)
+	private User capitan;
+	
 
 	@OneToMany(mappedBy = "coalition", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<CoalitionSeasonScore> coalitionSeasonScores; //bidirectional relationship
@@ -43,6 +49,19 @@ public class Coalition {
 	@OneToMany(mappedBy = "coalition",fetch = FetchType.LAZY)
 	private Set<UserSeasonScore> userSeasonScores; //bidirectional relationship
 	
+	@OneToMany(
+	        mappedBy = "coalition", // Apunta al nombre del campo en la otra clase
+	        fetch = FetchType.LAZY, // IMPORTANTE: No cargues las peticiones si no es necesario
+	        cascade = CascadeType.ALL, // Si borras la coalición, se borran las peticiones
+	        orphanRemoval = true // Si quitas una petición de la lista, se borra de la BD
+	    )
+	    private Set<CoalitionRequest> requests = new HashSet<>();
+
+	    // Helper method para mantener la coherencia
+	    public void addRequest(CoalitionRequest request) {
+	        requests.add(request);
+	        request.setCoalition(this);
+	    }
 	
 	public void addCoalitionSeasonScore(CoalitionSeasonScore coalSeasonScore) {
 		if(this.coalitionSeasonScores==null) {
