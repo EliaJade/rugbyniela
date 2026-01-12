@@ -14,8 +14,22 @@ public interface ICoalitionService {
 	List<CoalitionResponseDTO> fetchAllCoalitions();
 	//update coalition ??
 	
-	//--- management of members (from leader's point of view)
-	List<CoalitionJoinRequestDTO> fetchPendingRequests(Long coalitionId);
-	void responseJoinRequest(Long requestId);
-	
+	// --- Gestión de Miembros (Desde el punto de vista del Usuario) ---
+    void requestJoinCoalition(Long coalitionId); // Crea el CoalitionRequest
+    void leaveCoalition(); // El usuario se sale voluntariamente (currentCoalition = null)
+    
+    // --- Gestión Administrativa (Desde el punto de vista del Capitán) ---
+    List<CoalitionRequestDTO> getPendingRequests(Long coalitionId);
+    void respondToRequest(Long requestId, boolean accepted); // Acepta (borra request, asigna user) o Rechaza (borra request)
+    void kickMember(Long userId, Long coalitionId); // Expulsar usuario
+    void transferCaptaincy(Long currentCaptainId, Long newCaptainId); // Ceder liderazgo
+    void deleteCoalition(Long coalitionId); // Disolver coalición
+    
+    // --- Participación en Temporada ---
+    // Inscribe a la coalición en la temporada actual (crea CoalitionSeasonScore)
+    void registerCoalitionInSeason(Long coalitionId, Long seasonId); 
+    
+    // --- Historial ---
+    // Obtener historial de temporadas de una coalición
+    //List<CoalitionSeasonScoreDTO> getCoalitionHistory(Long coalitionId);
 }
