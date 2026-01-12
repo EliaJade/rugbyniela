@@ -1,6 +1,6 @@
 package rugbyniela.service;
 
-public interface CompetitiveService {
+public interface ICompetitiveService {
 
 	void fetchAllSeasons();
 	void fetchSeasonById();

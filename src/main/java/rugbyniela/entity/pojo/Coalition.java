@@ -55,7 +55,7 @@ public class Coalition {
 	        cascade = CascadeType.ALL, // Si borras la coalición, se borran las peticiones
 	        orphanRemoval = true // Si quitas una petición de la lista, se borra de la BD
 	    )
-	    private Set<CoalitionRequest> requests = new HashSet<>();
+	    private Set<CoalitionRequest> requests;
 
 	    // Helper method para mantener la coherencia
 	    public void addRequest(CoalitionRequest request) {

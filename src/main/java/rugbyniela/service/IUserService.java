@@ -14,8 +14,6 @@ public interface IUserService {
 	UserResponseDTO fetchUserById(Long id);
 	void changePassword();
 	void recoveryAccount();
-	LoginResponseDTO login(LoginRequestDTO loginRequestDTO);//TODO: this method possibly belong to security service
-	LoginResponseDTO refreshToken(HttpServletRequest request);
 	void registerInSeason();
 	void fetchSeasonPoints();
 	void fetchSeasonUserHaveBeenRegistered();
