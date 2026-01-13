@@ -32,7 +32,7 @@ import rugbyniela.enums.Role;
 import rugbyniela.enums.TokenType;
 import rugbyniela.exception.RugbyException;
 
-import rugbyniela.mapper.UserMapper;
+import rugbyniela.mapper.IUserMapper;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
 import rugbyniela.security.JwtService;
@@ -45,7 +45,7 @@ public class UserServiceImp implements IUserService {
 	@Autowired
 	private  UserRepository userRepository;
 	@Autowired
-	private  UserMapper userMapper;
+	private  IUserMapper userMapper;
 	@Autowired
 	private PasswordEncoder encoder;
 

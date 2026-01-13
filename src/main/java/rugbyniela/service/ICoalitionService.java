@@ -2,8 +2,8 @@ package rugbyniela.service;
 
 import java.util.List;
 
-import rugbyniela.entity.dto.coalition.CoalitionRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionJoinRequestDTO;
+import rugbyniela.entity.dto.coalition.CoalitionRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionResponseDTO;
 
 public interface ICoalitionService {
@@ -14,19 +14,18 @@ public interface ICoalitionService {
 	List<CoalitionResponseDTO> fetchAllCoalitions();
 	//update coalition ??
 	
-	// --- Gestión de Miembros (Desde el punto de vista del Usuario) ---
-    void requestJoinCoalition(Long coalitionId); // Crea el CoalitionRequest
-    void leaveCoalition(); // El usuario se sale voluntariamente (currentCoalition = null)
+	// --- management of members (from user's point of view) ---
+    void requestJoinCoalition(CoalitionJoinRequestDTO joinRequestDTO);
+    void leaveCoalition();
     
-    // --- Gestión Administrativa (Desde el punto de vista del Capitán) ---
+    // --- administrative management(from leader's point of view) ---
     List<CoalitionRequestDTO> getPendingRequests(Long coalitionId);
-    void respondToRequest(Long requestId, boolean accepted); // Acepta (borra request, asigna user) o Rechaza (borra request)
-    void kickMember(Long userId, Long coalitionId); // Expulsar usuario
-    void transferCaptaincy(Long currentCaptainId, Long newCaptainId); // Ceder liderazgo
-    void deleteCoalition(Long coalitionId); // Disolver coalición
+    void respondToRequest(Long requestId, boolean accepted);
+    void kickMember(Long userId, Long coalitionId);
+    void transferCaptaincy(Long currentCaptainId, Long newCaptainId);
+    void deleteCoalition(Long coalitionId);
     
-    // --- Participación en Temporada ---
-    // Inscribe a la coalición en la temporada actual (crea CoalitionSeasonScore)
+    // --- Participate in a season---
     void registerCoalitionInSeason(Long coalitionId, Long seasonId); 
     
     // --- Historial ---
