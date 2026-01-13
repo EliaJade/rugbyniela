@@ -4,6 +4,12 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.print.attribute.standard.PageRanges;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,21 +151,40 @@ public class BettingServiceImp implements BettingService{
 		// 8. Return some response DTO (you can create a mapper for this)
 	}
 
+
+	// TODO: Si no se usa hay que borrarlo
 	@Override
 	public void cancelTicket() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void fetchUserSeasonTickets() {
-		// TODO Auto-generated method stub
+	@Transactional()
+	public Page<WeeklyBetTicket> fetchUserSeasonTickets(Long userSeasonId, int page) {
+		//Validate userSeasonScore exists
+		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
+				.orElseThrow(()-> 
+					new RugbyException("Usuario no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
 		
+		
+		//Create pageable: 10 tickets, newest first
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
+		
+		return weeklyBetTicketRepository.findByUserSeason(userSeasonScore, pageable);
+	//TODO: controller	
 	}
 
+	
+	@Transactional(readOnly = true)
 	@Override
-	public void fetchUserSeasonTicketsByMatchDay() {
-		// TODO Auto-generated method stub
+	public Page<WeeklyBetTicket> fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId) {
+		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
+				.orElseThrow(()-> new RugbyException("Usuario no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
+		//Validate match day exists
+		//crear pageable
+		//buscar tickets en el return
+		return null;
+		
 		
 	}
 

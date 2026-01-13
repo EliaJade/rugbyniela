@@ -2,6 +2,8 @@ package rugbyniela.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -18,6 +20,9 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 @Repository
 public interface WeeklyBetTicketRepository extends JpaRepository<WeeklyBetTicket, Long>, JpaSpecificationExecutor<WeeklyBetTicket> {
 
+	Page<WeeklyBetTicket> findByUserSeason(
+			UserSeasonScore userSeasonScore, Pageable pageable);
+	
 	@Query("""
 			SELECT DISTINCT wbt
 			FROM WeeklyBetTicket wbt

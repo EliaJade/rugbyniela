@@ -1,6 +1,9 @@
 package rugbyniela.service;
 
+import org.springframework.data.domain.Page;
+
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
+import rugbyniela.entity.pojo.WeeklyBetTicket;
 
 public interface BettingService {
 
@@ -8,7 +11,7 @@ public interface BettingService {
 
 	void cancelTicket();
 
-	void fetchUserSeasonTickets();
+	Page<WeeklyBetTicket> fetchUserSeasonTickets(Long userSeasonId, int page);
 
-	void fetchUserSeasonTicketsByMatchDay();
+	Page<WeeklyBetTicket> fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId);
 }
