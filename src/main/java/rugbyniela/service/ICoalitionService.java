@@ -2,16 +2,19 @@ package rugbyniela.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import rugbyniela.entity.dto.coalition.CoalitionJoinRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionResponseDTO;
+import rugbyniela.entity.dto.coalition.CoalitionSimpleResponseDTO;
 
 public interface ICoalitionService {
 
 	//--- generic basic CRUD
 	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
 	CoalitionResponseDTO fetchCoalitionById(Long id);
-	List<CoalitionResponseDTO> fetchAllCoalitions();
+	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(int page, int size);
 	//update coalition ??
 	
 	// --- management of members (from user's point of view) ---

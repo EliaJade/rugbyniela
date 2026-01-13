@@ -10,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import rugbyniela.entity.dto.user.LoginRequestDTO;
@@ -25,6 +26,7 @@ import rugbyniela.repository.UserRepository;
 import rugbyniela.security.JwtService;
 import rugbyniela.security.TokenValidator;
 
+@Service
 public class AuthServiceImp implements IAuthService{
 
 	@Autowired
