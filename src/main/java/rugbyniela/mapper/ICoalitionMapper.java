@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
 
+import rugbyniela.entity.dto.coalition.CoalitionJoinResponseDTO;
 import rugbyniela.entity.dto.coalition.CoalitionRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionResponseDTO;
 import rugbyniela.entity.dto.coalition.CoalitionSimpleResponseDTO;
@@ -13,6 +14,7 @@ import rugbyniela.entity.dto.user.UserSimpleResponseDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 import rugbyniela.entity.pojo.Coalition;
 import rugbyniela.entity.pojo.CoalitionMatchDayScore;
+import rugbyniela.entity.pojo.CoalitionRequest;
 import rugbyniela.entity.pojo.CoalitionSeasonScore;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
@@ -42,6 +44,10 @@ public interface ICoalitionMapper {
 	@Mapping(target = "captainName", source = "capitan.name")
     @Mapping(target = "membersCount", expression = "java(coalition.getUserSeasonScores() != null ? coalition.getUserSeasonScores().size() : 0)")
 	CoalitionSimpleResponseDTO toSimpleDTO(Coalition coalition);
+	
+	@Mapping(target="name",source="user.name")
+	@Mapping(target="coalitionId",source="coalition.id")
+	CoalitionJoinResponseDTO toCoalitionJoinResponseDTO(CoalitionRequest coalitionRequest);
 	
 	@Mapping(target = "id",ignore = true)
 	@Mapping(target = "capitan",ignore = true)

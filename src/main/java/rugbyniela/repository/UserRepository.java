@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.pojo.Coalition;
 import rugbyniela.entity.pojo.User;
 
 /**
@@ -22,4 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	public boolean existsByInstagram(String instagram);
 	
 	public boolean existsByIdAndCurrentCoalitionIsNotNull(Long id);
+	
+	public long countByCurrentCoalition(Coalition coalition);
 }

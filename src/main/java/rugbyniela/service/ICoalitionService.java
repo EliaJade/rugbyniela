@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 import rugbyniela.entity.dto.coalition.CoalitionJoinRequestDTO;
+import rugbyniela.entity.dto.coalition.CoalitionJoinResponseDTO;
 import rugbyniela.entity.dto.coalition.CoalitionRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionResponseDTO;
 import rugbyniela.entity.dto.coalition.CoalitionSimpleResponseDTO;
@@ -14,7 +15,7 @@ public interface ICoalitionService {
 	//--- generic basic CRUD
 	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
 	CoalitionResponseDTO fetchCoalitionById(Long id);
-	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(int page, int size);
+	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(int page, int size, Boolean active);
 	//update coalition ??
 	
 	// --- management of members (from user's point of view) ---
@@ -22,7 +23,7 @@ public interface ICoalitionService {
     void leaveCoalition();
     
     // --- administrative management(from leader's point of view) ---
-    List<CoalitionRequestDTO> getPendingRequests(Long coalitionId);
+    Page<CoalitionJoinResponseDTO> getPendingRequests(Long coalitionId,int page, int size);
     void respondToRequest(Long requestId, boolean accepted);
     void kickMember(Long userId, Long coalitionId);
     void transferCaptaincy(Long currentCaptainId, Long newCaptainId);

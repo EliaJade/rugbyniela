@@ -34,8 +34,11 @@ public class Coalition {
 
 	@NotBlank
 	@Size(max=50)
-	@Column(nullable = false, length = 50)
+	@Column(nullable = false, length = 50,unique = true)
 	private String name;
+	
+	@Column(nullable = false)
+	private boolean active = true;
 	
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "capitan_id",unique = true,nullable = false)
