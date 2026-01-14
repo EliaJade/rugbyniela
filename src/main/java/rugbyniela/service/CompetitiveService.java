@@ -1,8 +1,12 @@
 package rugbyniela.service;
 
+import org.springframework.data.domain.Page;
+
+import rugbyniela.entity.pojo.Season;
+
 public interface CompetitiveService {
 
-	void fetchAllSeasons();
+	Page<Season> fetchAllSeasons(Long seasonId, int page);
 	void fetchSeasonById();
 	void fetchDivisionsBySeason();
 	void fetchDivisionBySeasonAndId();

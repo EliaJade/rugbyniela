@@ -13,5 +13,5 @@ public interface BettingService {
 
 	Page<WeeklyBetTicket> fetchUserSeasonTickets(Long userSeasonId, int page);
 
-	Page<WeeklyBetTicket> fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId);
+	WeeklyBetTicket fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId);
 }

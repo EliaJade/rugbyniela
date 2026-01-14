@@ -165,7 +165,9 @@ public class BettingServiceImp implements BettingService{
 		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
 				.orElseThrow(()-> 
 					new RugbyException("Usuario no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-		
+		if (page < 0) {
+	        throw new RugbyException("El usuario no tiene tickets", HttpStatus.BAD_REQUEST, ActionType.BETTING);
+	    }
 		
 		//Create pageable: 10 tickets, newest first
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
@@ -177,13 +179,17 @@ public class BettingServiceImp implements BettingService{
 	
 	@Transactional(readOnly = true)
 	@Override
-	public Page<WeeklyBetTicket> fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId) {
+	public WeeklyBetTicket fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId) {
 		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
 				.orElseThrow(()-> new RugbyException("Usuario no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
 		//Validate match day exists
+		MatchDay matchDay = matchDayRepository.findById(matchDayId)
+				.orElseThrow(()-> new RugbyException("Jornada no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
 		//crear pageable
 		//buscar tickets en el return
-		return null;
+		Optional<WeeklyBetTicket> ticket = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userSeasonScore, matchDay);
+		WeeklyBetTicket existingTicket = ticket.get();
+		return existingTicket;
 		
 		
 	}
