@@ -41,7 +41,7 @@ public class Coalition {
 	private boolean active = true;
 	
 	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "capitan_id",unique = true,nullable = false)
+	@JoinColumn(name = "capitan_id",unique = true,nullable = true)
 	private User capitan;
 	
 

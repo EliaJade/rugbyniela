@@ -24,13 +24,13 @@ public interface ICoalitionService {
     
     // --- administrative management(from leader's point of view) ---
     Page<CoalitionJoinResponseDTO> getPendingRequests(Long coalitionId,int page, int size);
-    void respondToRequest(Long requestId, boolean accepted);
+    void respondToRequest(Long requestId, Boolean accepted);
     void kickMember(Long userId, Long coalitionId);
-    void transferCaptaincy(Long currentCaptainId, Long newCaptainId);
-    void deleteCoalition(Long coalitionId);
+    void transferCaptaincy(Long newCaptainId);
+    void deleteCoalition();
     
     // --- Participate in a season---
-    void registerCoalitionInSeason(Long coalitionId, Long seasonId); 
+    void registerCoalitionInSeason(Long seasonId); 
     
     // --- Historial ---
     // Obtener historial de temporadas de una coalición
