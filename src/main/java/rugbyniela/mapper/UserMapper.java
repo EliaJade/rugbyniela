@@ -37,8 +37,6 @@ public interface UserMapper {
 		
 		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	    void updateUserFromDto(UserUpdatedRequestDTO dto, @MappingTarget User user); // im not sure what this does need to check
-
-	    UserResponseDTO toResponseDto(User user);
 	    
 		User toEntity(UserRequestDTO dto);
 		@Mapping(target = "isActive",source = "active")

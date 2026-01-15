@@ -3,11 +3,12 @@ package rugbyniela.service;
 import org.springframework.data.domain.Page;
 
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
+import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 
 public interface BettingService {
 
-	void submitTicket(WeeklyBetTicketRequestDTO dto);
+	WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto);
 
 	void cancelTicket();
 

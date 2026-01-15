@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.print.attribute.standard.PageRanges;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import rugbyniela.entity.dto.bet.BetRequestDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
+import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
 import rugbyniela.entity.pojo.Bet;
 import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
@@ -26,6 +28,8 @@ import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
 import rugbyniela.exception.RugbyException;
+import rugbyniela.mapper.BettingMapper;
+import rugbyniela.mapper.UserMapper;
 import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.TeamRepository;
@@ -46,9 +50,11 @@ public class BettingServiceImp implements BettingService{
 	private final MatchRepository matchRepository;
 	
 	private final TeamRepository teamRepository;
+	
+	private  final BettingMapper bettingMapper;
 	@Override
 	@Transactional
-	public void submitTicket(WeeklyBetTicketRequestDTO dto) {
+	public WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto) {
 		
 		LocalDateTime now = LocalDateTime.now();
 		
@@ -112,6 +118,7 @@ public class BettingServiceImp implements BettingService{
 					}
 					// 7. Save the ticket (cascade saves bets)
 					weeklyBetTicketRepository.save(newTicket);
+					return bettingMapper.toDTO(newTicket);
 				
 		} else {
 			
@@ -146,7 +153,9 @@ public class BettingServiceImp implements BettingService{
 			}
 			//Save new updated ticket
 			weeklyBetTicketRepository.save(existingTicket);
+			return bettingMapper.toDTO(existingTicket);
 		}
+		
 		
 		// 8. Return some response DTO (you can create a mapper for this)
 	}

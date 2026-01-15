@@ -85,7 +85,7 @@ public class UserServiceImp implements IUserService {
 		//partial update
 		userMapper.updateUserFromDto(dto, user);
 		User updatedUser = userRepository.save(user);
-		return userMapper.toResponseDto(updatedUser);
+		return userMapper.toDTO(updatedUser);
 	}
 
 	@Override

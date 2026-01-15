@@ -1,14 +1,29 @@
 package rugbyniela.service;
 
+import java.awt.print.Pageable;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 
 import rugbyniela.entity.pojo.Season;
+import rugbyniela.enums.ActionType;
+import rugbyniela.exception.RugbyException;
+import rugbyniela.repository.SeasonRepository;
 
 public class CompetitiveServiceImpl implements CompetitiveService{
 
+//	private final SeasonRepository seasonRepository;
 	@Override
 	public Page<Season> fetchAllSeasons(Long seasonId, int page) {
-		
+//		//Validate there are seasons
+//		Season season = seasonRepository.findById(seasonId);
+//		if(page<0) {
+//			throw new RugbyException("No hay temporadas", HttpStatus.BAD_REQUEST, ActionType.BETTING);
+//		}
+//		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
+//		
 		return null;
 		
 		
