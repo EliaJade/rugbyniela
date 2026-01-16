@@ -23,9 +23,9 @@ public interface ICoalitionService {
     void leaveCoalition();
     
     // --- administrative management(from leader's point of view) ---
-    Page<CoalitionJoinResponseDTO> getPendingRequests(Long coalitionId,int page, int size);
+    Page<CoalitionJoinResponseDTO> getPendingRequests(int page, int size);
     void respondToRequest(Long requestId, Boolean accepted);
-    void kickMember(Long userId, Long coalitionId);
+    void kickMember(Long userId);
     void transferCaptaincy(Long newCaptainId);
     void deleteCoalition();
     

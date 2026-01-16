@@ -60,11 +60,12 @@ public class ColaitionServiceImp implements ICoalitionService {
 			log.warn("Intento fallido de creacion de coalicion");
 			throw new RugbyException("El dto para crear la coalicion es null", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
 		}
-		User user = userRepository.findById(dto.idCapitan()).orElseThrow(()->{
-			throw new RugbyException("El usuario con id "+dto.idCapitan()+" no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
-		});
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
+	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
+	    });
 		if(userRepository.existsByIdAndCurrentCoalitionIsNotNull(user.getId())) {
-			throw new RugbyException("El usuario con id "+dto.idCapitan()+" ya pertenece a una coalicion o es lider de alguna!", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.TEAM_MANAGEMENT);
+			throw new RugbyException("El usuario con id "+user.getId()+" ya pertenece a una coalicion o es lider de alguna!", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.TEAM_MANAGEMENT);
 		}
 		Coalition coalition = coalitionMapper.toEntity(dto);
 		coalition.setCapitan(user);
@@ -115,8 +116,12 @@ public class ColaitionServiceImp implements ICoalitionService {
 		Coalition coalition = coalitionRepository.findById(joinRequestDTO.coalitionId()).orElseThrow(()->{
 			throw new RugbyException("La coalicion con id "+joinRequestDTO.coalitionId()+" no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
 		});
-		User user = userRepository.findById(joinRequestDTO.userId()).orElseThrow(()->{
-			throw new RugbyException("El usuario con id "+joinRequestDTO.userId()+" no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
+		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		
+		User user = userRepository.findByEmail(email).orElseThrow(()->{
+			throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 		});
 		if(user.getCurrentCoalition()!=null) {
 			throw new RugbyException("El usuario ya pertenece a una coalicion, debe dejarla antes de pedir unirse a otra", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
@@ -162,15 +167,26 @@ public class ColaitionServiceImp implements ICoalitionService {
 	}
 
 	@Override
-	public Page<CoalitionJoinResponseDTO> getPendingRequests(Long coalitionId,int page, int size) {
+	public Page<CoalitionJoinResponseDTO> getPendingRequests(int page, int size) {
 		if(page < 0) {
 			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
 		}
-		if (!coalitionRepository.existsById(coalitionId)) {
-	        throw new RugbyException("Coalición no encontrada", HttpStatus.NOT_FOUND,  ActionType.TEAM_MANAGEMENT);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		
+		User user = userRepository.findByEmail(email).orElseThrow(()->{
+			throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
+		});
+		
+		Coalition coalition = user.getCurrentCoalition();
+	    if (coalition == null) {
+	        throw new RugbyException("No perteneces a ninguna coalición.", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
+	    }
+	    if (!coalition.getCapitan().getId().equals(user.getId())) {
+	        throw new RugbyException("Solo el capitán puede ver las solicitudes de ingreso.", HttpStatus.FORBIDDEN, ActionType.TEAM_MANAGEMENT);
 	    }
 
-	    Page<CoalitionRequest> requestPage = coalitionRequestRepository.findByCoalitionId(coalitionId, PageRequest.of(page, size));
+	    Page<CoalitionRequest> requestPage = coalitionRequestRepository.findByCoalitionId(coalition.getId(), PageRequest.of(page, size));
 
 	    if (page >= requestPage.getTotalPages() && requestPage.getTotalElements() > 0) {
 	    	throw new RugbyException("No existen suficientes solicitudes para mostrar la página", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
@@ -218,7 +234,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	@Transactional
 	//TODO: admins no could do this, because if we want to allow them to do this, we must change the logic and add the id of the capitan
 	//		as we're doing a MVP, we don't need the admin do that (for the moment)
-	public void kickMember(Long userId, Long coalitionId) {
+	public void kickMember(Long userId) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
 		
@@ -226,23 +242,20 @@ public class ColaitionServiceImp implements ICoalitionService {
 			throw new RugbyException("El usuario quien quiere hacer la accion no existe", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
 		});
 		User userToKick = userRepository.findById(userId).orElseThrow(()->{
-			throw new RugbyException("El usuario quien quiere hacer la accion no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
+			throw new RugbyException("El usuario a expulsar no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
 		});
 		if(userToKick.getId().equals(capitan.getId())) {
 			throw new RugbyException("El capitan no puede eliminarse a si mismo", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
 		}
 		Coalition coalition = capitan.getCurrentCoalition();
-		if(coalition==null) {
-			throw new RugbyException("El usuario autenticado no pertenece a ninguan coalicion", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
-		}
-		if(!coalition.getId().equals(coalitionId)) {
+	    if (coalition == null) {
+	        throw new RugbyException("No perteneces a ninguna coalición.", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
+	    }
+		if(!coalition.getCapitan().getId().equals(capitan.getId())) {
 			throw new RugbyException("No tienes permisos sobre esta coalición.", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
 		}
 		if(!coalition.getCapitan().getId().equals(capitan.getId())) {
 			throw new RugbyException("El usuario que quiere hacer la accion, no es capitan, por lo tanto no puede eliminar miembros", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);	
-		}
-		if(userToKick.getCurrentCoalition()==null) {
-			throw new RugbyException("El usuario a eliminar, no existe", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);
 		}
 		if(!userToKick.getCurrentCoalition().getId().equals(coalition.getId())) {
 			throw new RugbyException("El usuario a eliminar, no hace parte de la coalicion del capitan", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);

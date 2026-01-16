@@ -150,6 +150,12 @@ public class UserServiceImp implements IUserService {
 		
 	}
 
+	@Override
+	public UserResponseDTO fetchCurrentUser() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 
 

@@ -39,7 +39,7 @@ public class CoalitionController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<CoalitionResponseDTO> getCoalitionById(@PathVariable Long id) {
         return ResponseEntity.ok(coalitionService.fetchCoalitionById(id));
     }
@@ -65,7 +65,7 @@ public class CoalitionController {
     }
 
     @DeleteMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> deleteCoalition() {
         coalitionService.deleteCoalition();
         return ResponseEntity.noContent().build();
@@ -73,31 +73,30 @@ public class CoalitionController {
 
 
     @PostMapping("/join")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> requestJoin(@Valid @RequestBody CoalitionJoinRequestDTO dto) {
         coalitionService.requestJoinCoalition(dto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PostMapping("/leave")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> leaveCoalition() {
         coalitionService.leaveCoalition();
         return ResponseEntity.ok().build(); // 200 OK
     }
 
-    @GetMapping("/{id}/requests")
-    @PreAuthorize("hasAnyRole('ADMIN', 'CUSTOMER')")
+    @GetMapping("/requests")
+    @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<Page<CoalitionJoinResponseDTO>> getPendingRequests(
-            @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(coalitionService.getPendingRequests(id, page, size));
+        return ResponseEntity.ok(coalitionService.getPendingRequests(page, size));
     }
 
-    @PutMapping("/requests/{requestId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PutMapping("/request/{requestId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> respondToRequest(
             @PathVariable Long requestId,
             @RequestParam Boolean accepted
@@ -106,25 +105,24 @@ public class CoalitionController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{coalitionId}/members/{userId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @DeleteMapping("/members/{userId}")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> kickMember(
-            @PathVariable Long coalitionId,
             @PathVariable Long userId
     ) {
-        coalitionService.kickMember(userId, coalitionId);
+        coalitionService.kickMember(userId);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/captaincy")
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<Void> transferCaptaincy(@RequestParam Long newCaptainId) {
-        coalitionService.transferCaptaincy(newCaptainId);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Void> transferCaptaincy(@RequestParam Long newCapitanId) {
+        coalitionService.transferCaptaincy(newCapitanId);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/seasons/{seasonId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> registerInSeason(@PathVariable Long seasonId) {
         coalitionService.registerCoalitionInSeason(seasonId);
         return ResponseEntity.ok().build();

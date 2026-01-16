@@ -20,7 +20,7 @@ public record UserRequestDTO(
 		@Size(max=150,message = "El tamaño del email debe estar entre 0-150 caracteres")
 		String email,
 		@NotBlank(message = "La contraseña no debe estar vacia")
-		@Size(min = 8, max=200)
+		@Size(min = 8, max=200, message = "La contraseña debe tener entre 8 y 200 caracteres")
 		@Pattern(
 		        regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
 		        message = "La contraseña debe tener al menos 1 mayuscula, 1 minuscula, 1 numero y 1 caracter especial (@$!%*?&)"
