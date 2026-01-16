@@ -1,6 +1,6 @@
 package rugbyniela.service;
 
-public interface BettingService {
+public interface IBettingService {
 
 	void submitTicket();
 	void cancelTicket();

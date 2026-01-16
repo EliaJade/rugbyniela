@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import rugbyniela.entity.dto.user.LoginRequestDTO;
 import rugbyniela.entity.dto.user.LoginResponseDTO;
+import rugbyniela.service.IAuthService;
 import rugbyniela.service.IUserService;
 
 @RestController
@@ -16,11 +17,11 @@ import rugbyniela.service.IUserService;
 public class LoginController {
 
 	@Autowired
-	private IUserService userService;
+	private IAuthService authService;
 	
 	@PostMapping("/authenticate")
 	public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO){
-		LoginResponseDTO dto = userService.login(loginRequestDTO);
+		LoginResponseDTO dto = authService.login(loginRequestDTO);
 		return ResponseEntity.ok(dto);
 	}
 }

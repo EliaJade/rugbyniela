@@ -20,21 +20,32 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
 
 	private final String SECRET_KEY;
+	private final long TOKEN_EXPIRATION;
+	private final long REFRESH_EXPIRATION;
 	
-	public JwtService(@Value("${jwt.secret-key}") String SECRET_KEY) {
+	public JwtService(
+			@Value("${application.security.jwt.secret-key}") String SECRET_KEY,
+			@Value("${application.security.jwt.expiration.token}") long TOKEN_EXPIRATION,
+			@Value("${application.security.jwt.refresh.token}") long REFRESH_EXPIRATION) {
 		this.SECRET_KEY=SECRET_KEY;
+		this.TOKEN_EXPIRATION = TOKEN_EXPIRATION;
+		this.REFRESH_EXPIRATION = REFRESH_EXPIRATION;
 	}
 	
 	public String generateToken(UserDetails userDetails) {
-		return generateToken(new HashMap<>(),userDetails);
+		return generateToken(new HashMap<>(),userDetails,TOKEN_EXPIRATION);
 	}
 	
-	private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+	public String generateRefreshToken(UserDetails userDetails){
+		return generateToken(new HashMap<>(), userDetails,REFRESH_EXPIRATION);
+	}
+	
+	private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername()) // El email es el subject
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // Expira en 24 horas
+                .setExpiration(new Date(System.currentTimeMillis() + expiration)) // Expira en 24 horas
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

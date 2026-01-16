@@ -1,6 +1,6 @@
 package rugbyniela.service;
 
-public interface RankingService {
+public interface IRankingService {
 
 	void fetchGeneralRankingSeason();
 	void fetchMatchDayRankingSeason();
