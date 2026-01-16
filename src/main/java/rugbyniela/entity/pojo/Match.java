@@ -32,6 +32,7 @@ public class Match {
 	@JoinColumn(name = "address_id", nullable = false)
 	private Address location; //unidirectional relationship 
 	
+	@Column(nullable = false, length = 100)
 	private String name; //team away vs team local
 	
 	

@@ -16,7 +16,7 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 		componentModel = "spring",
 		unmappedTargetPolicy = ReportingPolicy.IGNORE 
 		)
-public interface BettingMapper {
+public interface WeeklyBetTicketMapper {
 		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 		void updateTicketFromDTO(WeeklyBetTicketUpdateRequestDTO dto, @MappingTarget WeeklyBetTicket ticket);
 		

@@ -4,9 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.print.attribute.standard.PageRanges;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +25,7 @@ import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
 import rugbyniela.exception.RugbyException;
-import rugbyniela.mapper.BettingMapper;
-import rugbyniela.mapper.UserMapper;
+import rugbyniela.mapper.WeeklyBetTicketMapper;
 import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.TeamRepository;
@@ -51,7 +47,7 @@ public class BettingServiceImp implements BettingService{
 	
 	private final TeamRepository teamRepository;
 	
-	private  final BettingMapper bettingMapper;
+	private  final WeeklyBetTicketMapper bettingMapper;
 	@Override
 	@Transactional
 	public WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto) {
@@ -59,9 +55,7 @@ public class BettingServiceImp implements BettingService{
 		LocalDateTime now = LocalDateTime.now();
 		
 		// 1. Validate UserSeasonScore exists
-		UserSeasonScore userSeason = userSeasonScoreRepository.findById(dto.userSeasonId())
-				.orElseThrow(() -> new RugbyException("No se ha encontrado este usuario", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-//		
+		UserSeasonScore userSeason = checkUserSeason(dto.userSeasonId());
 				
 		// 2. Validate MatchDay exists and fetch matches
 		MatchDay matchDay = matchDayRepository.findById(dto.matchDayId())
@@ -171,35 +165,39 @@ public class BettingServiceImp implements BettingService{
 	@Transactional()
 	public Page<WeeklyBetTicket> fetchUserSeasonTickets(Long userSeasonId, int page) {
 		//Validate userSeasonScore exists
-		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
-				.orElseThrow(()-> 
-					new RugbyException("Usuario no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
+		UserSeasonScore userSeasonScore = checkUserSeason(userSeasonId);
 		if (page < 0) {
-	        throw new RugbyException("El usuario no tiene tickets", HttpStatus.BAD_REQUEST, ActionType.BETTING);
+	        throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.BETTING);
 	    }
 		
 		//Create pageable: 10 tickets, newest first
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
 		
 		return weeklyBetTicketRepository.findByUserSeason(userSeasonScore, pageable);
-	//TODO: controller	
+	
 	}
 
 	
 	@Transactional(readOnly = true)
 	@Override
-	public WeeklyBetTicket fetchUserSeasonTicketsByMatchDay(Long userSeasonId, Long matchDayId) {
-		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
-				.orElseThrow(()-> new RugbyException("Usuario no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-		//Validate match day exists
+	public WeeklyBetTicket fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId) {
+		UserSeasonScore userSeasonScore = checkUserSeason(userSeasonId);//Validate match day exists
 		MatchDay matchDay = matchDayRepository.findById(matchDayId)
-				.orElseThrow(()-> new RugbyException("Jornada no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
+				.orElseThrow(()-> new RugbyException("Jornada no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		//crear pageable
 		//buscar tickets en el return
-		Optional<WeeklyBetTicket> ticket = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userSeasonScore, matchDay);
-		WeeklyBetTicket existingTicket = ticket.get();
-		return existingTicket;
+		WeeklyBetTicket ticket = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userSeasonScore, matchDay)
+				.orElseThrow(()-> new RugbyException("No existe ticket para esta jornada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		
+		return ticket;
+		
+		
+	}
+	
+	public UserSeasonScore checkUserSeason (Long userSeasonId) {
+		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
+				.orElseThrow(()-> new RugbyException("Usuario no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
+		return userSeasonScore;
 		
 	}
 
