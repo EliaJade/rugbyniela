@@ -52,13 +52,10 @@ public class CoalitionController {
             @RequestParam(required = false) Boolean active,
             Authentication authentication // Inyectamos la auth para verificar el rol manualmente
     ) {
-        // Verificamos si tiene el rol ADMIN
         boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        // LÓGICA DE NEGOCIO EN CAPA CONTROLADOR (Filtrado de Seguridad)
         if (!isAdmin) {
-            active = true; // Forzamos a que solo vea las activas
+            active = true;
         }
 
         return ResponseEntity.ok(coalitionService.fetchAllCoalitions(page, size, active));
@@ -121,6 +118,7 @@ public class CoalitionController {
         return ResponseEntity.ok().build();
     }
 
+    //TODO: teste this endpoint
     @PostMapping("/seasons/{seasonId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> registerInSeason(@PathVariable Long seasonId) {
