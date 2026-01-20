@@ -1,5 +1,6 @@
 package rugbyniela.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,10 +24,9 @@ public interface IUserService {
 	void recoveryAccount();
 	void registerInSeason();
 	void fetchSeasonPoints();
-	Set<UserCoalitionHistoryResponseDTO> fetchSeasonUserHaveBeenRegistered();
 	void registerInCoalition();
 	void dismissOfCoalition();
-	void fetchCoalitionUserHaveBeenRegistered();
+	List<UserCoalitionHistoryResponseDTO> fetchCoalitionUserHaveBeenRegistered();
 	void sendNotificationToUser();
 	void sendNotificationToUsers();
 }

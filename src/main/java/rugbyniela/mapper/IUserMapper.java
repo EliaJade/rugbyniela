@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 
 import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
+import rugbyniela.entity.dto.userSeasonScore.UserCoalitionHistoryResponseDTO;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Gender;
@@ -30,6 +31,7 @@ public interface IUserMapper {
 		User toEntity(UserRequestDTO dto);
 		@Mapping(target = "isActive",source = "active")
 		UserResponseDTO toDTO(User entity);
+		
 		
 		@Named("normalizeEmail")
 		default String normalizeEmail(String email) {

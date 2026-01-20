@@ -38,6 +38,7 @@ import rugbyniela.repository.CoalitionRequestRepository;
 import rugbyniela.repository.CoalitionSeasonScoreRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.UserRepository;
+import rugbyniela.repository.UserSeasonScoreRepository;
 
 @RequiredArgsConstructor
 @Service
@@ -50,6 +51,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	private final CoalitionRequestRepository coalitionRequestRepository;
 	private final SeasonRepository seasonRepository;
 	private final CoalitionSeasonScoreRepository coalitionSeasonScoreRepository;
+	private final UserSeasonScoreRepository userSeasonScoreRepository;
 	//TODO: we use the @Transactional because we need it to the mapper cause' within that it make some joins
 	
 	@Override
@@ -163,6 +165,16 @@ public class ColaitionServiceImp implements ICoalitionService {
 			user.setCurrentCoalition(null);
 			user.setCoalitionJoinedAt(null);
 		}
+		Season season = seasonRepository.findByIsActiveTrue().orElse(null);
+		if(season!=null) {
+			//there is a season so we need to change the userSeasonScore of coalition
+			UserSeasonScore userSeasonScore = userSeasonScoreRepository.findByUserAndSeason(user, season).orElse(null);
+			if(userSeasonScore!=null) {
+				//the user is registered in the season
+				userSeasonScore.setCoalition(null);
+				userSeasonScoreRepository.save(userSeasonScore);
+			}
+		}
 		userRepository.save(user);
 	}
 
@@ -215,6 +227,16 @@ public class ColaitionServiceImp implements ICoalitionService {
 			}
 			user.setCurrentCoalition(coalition);
 			user.setCoalitionJoinedAt(LocalDateTime.now());
+			Season season = seasonRepository.findByIsActiveTrue().orElse(null);
+			if(season!=null) {
+				//there is a season so we need to change the userSeasonScore of coalition
+				UserSeasonScore userSeasonScore = userSeasonScoreRepository.findByUserAndSeason(user, season).orElse(null);
+				if(userSeasonScore!=null) {
+					//the user is registered in the season
+					userSeasonScore.setCoalition(coalition);
+					userSeasonScoreRepository.save(userSeasonScore);
+				}
+			}
 			userRepository.save(user);
 			log.info("El usuario {} ha aceptado una solicitud de ingreso a {} en la coalicion {}",
 					SecurityContextHolder.getContext().getAuthentication().getName(),

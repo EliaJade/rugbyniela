@@ -2,6 +2,8 @@ package rugbyniela.service;
 
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import rugbyniela.entity.dto.user.ChangePassworRequestDTO;
 import rugbyniela.entity.dto.user.LoginRequestDTO;
@@ -37,7 +40,7 @@ import rugbyniela.enums.Gender;
 import rugbyniela.enums.Role;
 import rugbyniela.enums.TokenType;
 import rugbyniela.exception.RugbyException;
-
+import rugbyniela.mapper.IUserCoalitionHistoryMapper;
 import rugbyniela.mapper.IUserMapper;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
@@ -46,14 +49,14 @@ import rugbyniela.security.TokenValidator;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class UserServiceImp implements IUserService {
 
-	@Autowired
-	private  UserRepository userRepository;
-	@Autowired
-	private  IUserMapper userMapper;
-	@Autowired
-	private PasswordEncoder encoder;
+	
+	private final UserRepository userRepository;
+	private final IUserMapper userMapper;
+	private final PasswordEncoder encoder;
+	private final IUserCoalitionHistoryMapper historyMapper;
 
 	
 	
@@ -134,17 +137,6 @@ public class UserServiceImp implements IUserService {
 	}
 
 	@Override
-	public Set<UserCoalitionHistoryResponseDTO> fetchSeasonUserHaveBeenRegistered() {
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
-	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
-	    });
-		Set<UserSeasonScore> history = user.getSeasonScores();
-		return null;
-		//TODO: finish
-	}
-
-	@Override
 	public void registerInCoalition() {
 		// TODO Auto-generated method stub
 		
@@ -157,9 +149,22 @@ public class UserServiceImp implements IUserService {
 	}
 
 	@Override
-	public void fetchCoalitionUserHaveBeenRegistered() {
-		// TODO Auto-generated method stub
-		
+	@Transactional
+	public List<UserCoalitionHistoryResponseDTO> fetchCoalitionUserHaveBeenRegistered() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
+	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
+	    });
+		Set<UserSeasonScore> seasonScores = user.getSeasonScores();
+
+		if (seasonScores == null || seasonScores.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return seasonScores.stream()
+				.filter(score -> score.getCoalition()!=null)
+				.map(historyMapper::toHistoryDTO)
+				.sorted(Comparator.comparing(UserCoalitionHistoryResponseDTO::seasonId).reversed())
+				.toList();
 	}
 
 	@Override
