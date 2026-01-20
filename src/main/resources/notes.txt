@@ -1,3 +1,4 @@
+==========================================================================================================================
 DOCUMENT TO WRITE IDEAS!.
 
  - Quedamos definiendo el como actualizar un weeklybetticket, ya que necesitamos la lista
@@ -21,3 +22,18 @@ DOCUMENT TO WRITE IDEAS!.
   laura.martinez@example.com ->  Laura@2024
   andres.lopez@example.com -> Andres*99
   sofia.ramirez@example.com -> Sofi!22abc
+==========================================================================================================================
+
+
+================================================CHANGES===================================================================
+
+	* added in season a boolean value to know if it is active
+	* added in season a boolean value to know if it is active
+  
+==========================================================================================================================  
+  COALITION - USER
+  	
+  	* for the moment, as we need a MVP, we'll have as "history of coalitions" of the user, that basically it is 
+  		a list of coalition where the user has participated but the condition is that just the coalition where the user
+  		finish the season will be count, that means, if a user participate in two coalition in a season, in its 
+  		coalition history will be the coalition where the user end the season the previous one no.
