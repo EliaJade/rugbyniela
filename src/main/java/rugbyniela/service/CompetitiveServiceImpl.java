@@ -1,12 +1,7 @@
 package rugbyniela.service;
 
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.hibernate.annotations.NotFoundAction;
 import org.springframework.data.domain.Page;
@@ -26,6 +21,7 @@ import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
+import rugbyniela.entity.pojo.Address;
 import rugbyniela.entity.pojo.Division;
 import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.Season;
@@ -33,9 +29,11 @@ import rugbyniela.entity.pojo.Team;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Category;
 import rugbyniela.exception.RugbyException;
+import rugbyniela.mapper.AddressMapper;
 import rugbyniela.mapper.MatchMapper;
 import rugbyniela.mapper.SeasonMapper;
 import rugbyniela.mapper.TeamMapper;
+import rugbyniela.repository.AddressRepository;
 import rugbyniela.repository.DivisionRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.SeasonRepository;
@@ -50,10 +48,12 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 	private final DivisionRepository divisionRepository;
 	private final TeamRepository teamRepository;
 	private final MatchRepository matchRepository;
+	private final AddressRepository addressRepository;
 	
 	private final SeasonMapper seasonMapper;
 	private final TeamMapper teamMapper;
 	private final MatchMapper matchMapper;
+	private final AddressMapper addressMapper;
 	
 	@Override
 	public Page<Season> fetchAllSeasons(int page) {
@@ -155,14 +155,16 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 		if(dto.localTeam()==dto.awayTeam()) {
 			throw new RugbyException("No puede jugar un equipo contra si mismo", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		if(dto.timeMatchStart().isAfter(now)) {
+		if(dto.timeMatchStart().isBefore(now)) {
 			throw new RugbyException("El partido no puede empezar en el pasado",  HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		
 		Team localTeam = teamRepository.findById(dto.localTeam()).orElseThrow(()-> new RugbyException("Equipo local no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
 		Team awayTeam = teamRepository.findById(dto.awayTeam()).orElseThrow(()-> new RugbyException("Equipo visitante no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
-		
+		Address location = addressMapper.toEntity(dto.location());
+		location = addressRepository.save(location);
 		Match match = matchMapper.toEntity(dto);
+		match.setLocation(location);
 		match.setLocalTeam(localTeam);
 		match.setAwayTeam(awayTeam);
 		matchRepository.save(match);

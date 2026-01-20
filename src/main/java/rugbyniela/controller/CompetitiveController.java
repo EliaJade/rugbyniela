@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import rugbyniela.entity.dto.match.MatchRequestDTO;
+import rugbyniela.entity.dto.match.MatchResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.service.CompetitiveService;
@@ -25,6 +27,13 @@ public class CompetitiveController {
 	@PostMapping("/createTeam")
 	public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto){
 		TeamResponseDTO response = competitiveService.createTeam(dto);
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	@PostMapping("/createMatch")
+	public ResponseEntity<MatchResponseDTO> createMatch(@Valid @RequestBody MatchRequestDTO dto){
+		MatchResponseDTO response = competitiveService.createMatch(dto);
 		return ResponseEntity.ok(response);
 		
 	}

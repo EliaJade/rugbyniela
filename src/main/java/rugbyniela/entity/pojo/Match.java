@@ -54,7 +54,7 @@ public class Match {
 	private MatchStatus status;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="match_day_id", nullable = false)
+	@JoinColumn(name="match_day_id", nullable = true)
 	private MatchDay matchDay; //bidirectional relationship
 
 	@ManyToOne(fetch = FetchType.LAZY)
