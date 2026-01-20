@@ -3,7 +3,6 @@ package rugbyniela.service;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.NotFoundAction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,8 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
+import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
@@ -24,17 +26,20 @@ import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.entity.pojo.Address;
 import rugbyniela.entity.pojo.Division;
 import rugbyniela.entity.pojo.Match;
+import rugbyniela.entity.pojo.MatchDay;
+import rugbyniela.entity.pojo.MatchStatus;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 import rugbyniela.enums.ActionType;
-import rugbyniela.enums.Category;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.mapper.AddressMapper;
+import rugbyniela.mapper.MatchDayMapper;
 import rugbyniela.mapper.MatchMapper;
 import rugbyniela.mapper.SeasonMapper;
 import rugbyniela.mapper.TeamMapper;
 import rugbyniela.repository.AddressRepository;
 import rugbyniela.repository.DivisionRepository;
+import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TeamRepository;
@@ -49,11 +54,13 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 	private final TeamRepository teamRepository;
 	private final MatchRepository matchRepository;
 	private final AddressRepository addressRepository;
+	private final MatchDayRepository matchDayRepository;
 	
 	private final SeasonMapper seasonMapper;
 	private final TeamMapper teamMapper;
 	private final MatchMapper matchMapper;
 	private final AddressMapper addressMapper;
+	private final MatchDayMapper matchDayMapper;
 	
 	@Override
 	public Page<Season> fetchAllSeasons(int page) {
@@ -142,6 +149,35 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 	}
 
 	@Override
+	public MatchDayResponseDTO createMatchDay(MatchDayRequestDTO dto) {
+		if(dto.dateEnd()!= null) {
+			if(dto.dateBegin().isAfter(dto.dateEnd())) {
+				throw new RugbyException("No puede acabar la jornada antes de que haya empezado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			}
+		}
+		
+		MatchDay matchDay = matchDayMapper.toEntity(dto);
+		matchDayRepository.save(matchDay);
+		
+		return matchDayMapper.toDTO(matchDay);
+		
+	}
+	
+	@Override
+	public MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto) {
+		MatchDay matchDay = matchDayRepository.findById(dto.matchDay()).orElseThrow(()-> new RugbyException("Jornada no encontrada", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
+		Match match = matchRepository.findById(dto.match()).orElseThrow(()-> new RugbyException("Partido no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)); 
+		if(match.getTimeMatchStart().isBefore(matchDay.getDateBegin().atStartOfDay())) {
+			throw new RugbyException("No puede empezar el partido antes de la jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		matchDay.addMatch(match);
+		match.setMatchDay(matchDay);
+		matchDayRepository.save(matchDay);
+		matchRepository.save(match);
+		return matchDayMapper.toDTO(matchDay);
+	}
+	
+	@Override
 	public DivisionResponseDTO createDivision(DivisionRequestDTO dto) {
 		
 		return null;
@@ -164,12 +200,13 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 		Address location = addressMapper.toEntity(dto.location());
 		location = addressRepository.save(location);
 		Match match = matchMapper.toEntity(dto);
+		if(match.getStatus()==null) {
+			match.setStatus(MatchStatus.SCHEDULED);
+		}
 		match.setLocation(location);
 		match.setLocalTeam(localTeam);
 		match.setAwayTeam(awayTeam);
-		matchRepository.save(match);
-		
-		
+		matchRepository.save(match); ;
 		return matchMapper.toDTO(match);
 		
 	}
@@ -225,6 +262,9 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 	}
+
+	
+
 	
 
 }

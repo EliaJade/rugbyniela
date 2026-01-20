@@ -7,8 +7,11 @@ import org.springframework.data.domain.Page;
 
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
+import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
@@ -29,6 +32,8 @@ public interface CompetitiveService {
 	DivisionResponseDTO createDivision(DivisionRequestDTO dto);
 	MatchResponseDTO createMatch(MatchRequestDTO dto);
 	TeamResponseDTO createTeam(TeamRequestDTO dto);
+	MatchDayResponseDTO createMatchDay(MatchDayRequestDTO dto);
+	MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto);
 	void addDivisionToSeason();
 	void fetchMatchesOfSeason();
 	void fetchMatchesOfSeasonByMatchDay();

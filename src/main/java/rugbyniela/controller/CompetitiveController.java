@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.service.CompetitiveService;
@@ -36,6 +38,12 @@ public class CompetitiveController {
 		MatchResponseDTO response = competitiveService.createMatch(dto);
 		return ResponseEntity.ok(response);
 		
+	}
+	
+	@PostMapping("/createMatchDay")
+	public ResponseEntity<MatchDayResponseDTO> createMatchDay(@Valid@RequestBody MatchDayRequestDTO dto){
+		MatchDayResponseDTO response = competitiveService.createMatchDay(dto);
+		return ResponseEntity.ok(response);
 	}
 	
 	

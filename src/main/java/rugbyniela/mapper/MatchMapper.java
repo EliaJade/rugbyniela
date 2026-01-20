@@ -25,6 +25,10 @@ public interface MatchMapper {
 	@Mapping(target = "location", ignore = true)
 	Match toEntity(MatchRequestDTO dto);
 	
+
+	@Mapping(target = "matchStatus", source = "status")
+	@Mapping(target = "localTeamName", source = "localTeam.name")
+	@Mapping(target = "awayTeamName", source = "awayTeam.name")
 	MatchResponseDTO toDTO(Match match);
 	
 	

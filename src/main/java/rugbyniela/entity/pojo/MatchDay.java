@@ -45,7 +45,7 @@ public class MatchDay {
 	private String name; //jornada 1, jornada 2....
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "division_id", nullable = false)
+	@JoinColumn(name = "division_id", nullable = true)
 	private Division division;//bidirectional relationship
 	
 	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
@@ -55,7 +55,7 @@ public class MatchDay {
 	
 	public void addMatch (Match match) {
 		if(this.matches==null) {
-			this.matches = new HashSet<Match>();
+			this.matches = new HashSet<Match>(); //TODO: delete this because mapping does it already
 		}
 		this.matches.add(match);
 		match.setMatchDay(this);
