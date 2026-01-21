@@ -3,6 +3,7 @@ package rugbyniela.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import rugbyniela.entity.dto.coalition.CoalitionJoinRequestDTO;
 import rugbyniela.entity.dto.coalition.CoalitionJoinResponseDTO;
@@ -15,7 +16,7 @@ public interface ICoalitionService {
 	//--- generic basic CRUD
 	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
 	CoalitionResponseDTO fetchCoalitionById(Long id);
-	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(int page, int size, Boolean active);
+	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active);
 	//update coalition ??
 	
 	// --- management of members (from user's point of view) ---
@@ -23,7 +24,7 @@ public interface ICoalitionService {
     void leaveCoalition();
     
     // --- administrative management(from leader's point of view) ---
-    Page<CoalitionJoinResponseDTO> getPendingRequests(int page, int size);
+    Page<CoalitionJoinResponseDTO> getPendingRequests(Pageable pageable);
     void respondToRequest(Long requestId, Boolean accepted);
     void kickMember(Long userId);
     void transferCaptaincy(Long newCaptainId);

@@ -16,4 +16,5 @@ public interface SeasonRepository extends JpaRepository<Season, Long>, JpaSpecif
 
 	
 	public Optional<Season> findByIsActiveTrue();
+	public Optional<Season> findByIdAndIsActiveTrue(Long id);
 }

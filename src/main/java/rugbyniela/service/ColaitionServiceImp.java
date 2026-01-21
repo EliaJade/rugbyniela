@@ -92,19 +92,13 @@ public class ColaitionServiceImp implements ICoalitionService {
 	}
 
 	@Override
-	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(int page, int size, Boolean active) {
-		
-		if(page < 0) {
-			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
-		}
+	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active) {
+
 		Page<Coalition> coalitionPage;
 		if(active == null) {
-			coalitionPage= coalitionRepository.findAll(PageRequest.of(page, size));
+			coalitionPage= coalitionRepository.findAll(pageable);
 		}else {
-			coalitionPage= coalitionRepository.findByActive(active,PageRequest.of(page, size));
-		}
-		if(page >= coalitionPage.getTotalPages() && coalitionPage.getTotalElements() > 0) {
-			throw new RugbyException("No existen suficientes coaliciones para mostrar la página ", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
+			coalitionPage= coalitionRepository.findByActive(active,pageable);
 		}
 		return coalitionPage.map(coalitionMapper::toSimpleDTO);
 	}
@@ -179,10 +173,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	}
 
 	@Override
-	public Page<CoalitionJoinResponseDTO> getPendingRequests(int page, int size) {
-		if(page < 0) {
-			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
-		}
+	public Page<CoalitionJoinResponseDTO> getPendingRequests( Pageable pageable) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
 		
@@ -197,13 +188,8 @@ public class ColaitionServiceImp implements ICoalitionService {
 	    if (!coalition.getCapitan().getId().equals(user.getId())) {
 	        throw new RugbyException("Solo el capitán puede ver las solicitudes de ingreso.", HttpStatus.FORBIDDEN, ActionType.TEAM_MANAGEMENT);
 	    }
-
-	    Page<CoalitionRequest> requestPage = coalitionRequestRepository.findByCoalitionId(coalition.getId(), PageRequest.of(page, size));
-
-	    if (page >= requestPage.getTotalPages() && requestPage.getTotalElements() > 0) {
-	    	throw new RugbyException("No existen suficientes solicitudes para mostrar la página", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
-	    }
-		return requestPage.map(coalitionMapper::toCoalitionJoinResponseDTO);
+		return coalitionRequestRepository.findByCoalitionId(coalition.getId(), pageable)
+				.map(coalitionMapper::toCoalitionJoinResponseDTO);
 	}
 
 	@Override
