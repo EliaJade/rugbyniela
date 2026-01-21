@@ -32,6 +32,7 @@ public class Match {
 	@JoinColumn(name = "address_id", nullable = false)
 	private Address location; //unidirectional relationship 
 	
+	@Column(nullable = false, length = 100)
 	private String name; //team away vs team local
 	
 	
@@ -53,7 +54,7 @@ public class Match {
 	private MatchStatus status;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="match_day_id", nullable = false)
+	@JoinColumn(name="match_day_id", nullable = true)
 	private MatchDay matchDay; //bidirectional relationship
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -63,4 +64,8 @@ public class Match {
 	@JoinColumn(name = "away_team_id", nullable = false)
 	private Team awayTeam;
 
+	
+	public boolean isOpenForBetting(LocalDateTime now) {
+		return now.isBefore(this.timeMatchStart); //used in betting service
+	}
 }

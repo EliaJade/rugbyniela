@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.validator.constraints.UniqueElements;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,7 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,16 +32,16 @@ public class Season {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-
-	@Column(nullable = false, length = 100)
+	@NotBlank
+	@Column(nullable = false, length = 100, unique=true)
 	private String name;
 	
-	
-	@Column(nullable = false)
+	@NotBlank
+	@Column(nullable = false, unique = true)
 	private LocalDate startSeason;// here we use the LocalDate in order to get the just the date not time
 									// (recommended)
 	
-	@Column(nullable = false)
+	@Column(unique = true)
 	private LocalDate endSeason;// here we use the LocalDate in order to get the just the date not time
 								// (recommended)
 
@@ -48,7 +50,7 @@ public class Season {
 
 	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<CoalitionSeasonScore> coalSeasonScores;
-
+	
 	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<Division> divisions;
 

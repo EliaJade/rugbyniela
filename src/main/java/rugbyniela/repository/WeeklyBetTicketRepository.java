@@ -1,8 +1,17 @@
 package rugbyniela.repository;
 
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.pojo.MatchDay;
+import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 
 /**
@@ -10,5 +19,18 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 */
 @Repository
 public interface WeeklyBetTicketRepository extends JpaRepository<WeeklyBetTicket, Long>, JpaSpecificationExecutor<WeeklyBetTicket> {
+
+	Page<WeeklyBetTicket> findByUserSeason(
+			UserSeasonScore userSeasonScore, Pageable pageable);
+	
+	@Query("""
+			SELECT DISTINCT wbt
+			FROM WeeklyBetTicket wbt
+			JOIN wbt.bets b
+			JOIN b.match m
+			WHERE wbt.userSeason = :userSeason
+				AND m.matchDay = :matchDay
+			""")
+	Optional<WeeklyBetTicket> findByUserSeasonAndMatchDay(@Param ("userSeason") UserSeasonScore userSeason, @Param ("matchDay") MatchDay matchDay);
 
 }

@@ -1,6 +1,4 @@
 package rugbyniela.service;
-
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +33,7 @@ import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.entity.dto.user.UserUpdatedRequestDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserCoalitionHistoryResponseDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
+import rugbyniela.entity.pojo.Address;
 import rugbyniela.entity.pojo.Coalition;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.SecurityUser;
@@ -42,26 +41,25 @@ import rugbyniela.entity.pojo.Token;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.enums.ActionType;
-import rugbyniela.enums.Gender;
-import rugbyniela.enums.Role;
-import rugbyniela.enums.TokenType;
 import rugbyniela.exception.RugbyException;
+import rugbyniela.mapper.IAddressMapper;
 import rugbyniela.mapper.IUserCoalitionHistoryMapper;
 import rugbyniela.mapper.IUserMapper;
 import rugbyniela.mapper.IUserSeasonScoreMaper;
+import rugbyniela.repository.AddressRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
 import rugbyniela.repository.UserSeasonScoreRepository;
 import rugbyniela.security.JwtService;
 import rugbyniela.security.TokenValidator;
+import rugbyniela.utils.StringUtils;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 public class UserServiceImp implements IUserService {
 
-	
 	private final UserRepository userRepository;
 	private final UserSeasonScoreRepository userSeasonScoreRepository;
 	private final SeasonRepository seasonRepository;
@@ -69,9 +67,9 @@ public class UserServiceImp implements IUserService {
 	private final PasswordEncoder encoder;
 	private final IUserCoalitionHistoryMapper historyMapper;
 	private final IUserSeasonScoreMaper userSeasonScoreMaper;
+	private final AddressRepository addressRepository;
+	private final IAddressMapper addressMapper;
 
-	
-	
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		
@@ -87,11 +85,21 @@ public class UserServiceImp implements IUserService {
 			log.warn("Intento fallido de registro. Instagram ya existe {}",dto.instagram());
 			throw new RugbyException("Este instagram ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 		}
+		String street = StringUtils.normalize(dto.address().street());
+		String city = StringUtils.normalize(dto.address().city());
+		String postalCode = StringUtils.normalize(dto.address().postalCode());
+		String description = StringUtils.normalize(dto.address().description());
+		Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
+				.orElseGet(()->{
+					Address newAddress = addressMapper.toEntity(dto.address());
+					return addressRepository.save(newAddress);
+				});
 		//mapping
 		User user = userMapper.toEntity(dto);
 		//encrypt password
 		user.setPassword(encoder.encode(dto.password()));
 		user.setActive(true);
+		user.setAddress(address);
 		//save
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		log.info("Usuario creado!");
@@ -100,8 +108,15 @@ public class UserServiceImp implements IUserService {
 
 	@Override
 	public UserResponseDTO update(UserUpdatedRequestDTO dto) {
-		//TODO: elia did this
-		return null;
+		//Find existing user
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
+	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
+	    });
+		//partial update
+		userMapper.updateUserFromDto(dto, user);
+		User updatedUser = userRepository.save(user);
+		return userMapper.toDTO(updatedUser);
 	}
 
 	@Override

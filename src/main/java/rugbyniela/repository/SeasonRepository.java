@@ -14,7 +14,7 @@ import rugbyniela.entity.pojo.Season;
 @Repository
 public interface SeasonRepository extends JpaRepository<Season, Long>, JpaSpecificationExecutor<Season> {
 
-	
 	public Optional<Season> findByIsActiveTrue();
 	public Optional<Season> findByIdAndIsActiveTrue(Long id);
+	boolean existsByName(String name);
 }

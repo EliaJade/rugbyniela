@@ -2,15 +2,18 @@ package rugbyniela.mapper;
 
 import java.util.Arrays;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.http.HttpStatus;
 
 import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
-import rugbyniela.entity.dto.userSeasonScore.UserCoalitionHistoryResponseDTO;
+import rugbyniela.entity.dto.user.UserUpdatedRequestDTO;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Gender;
@@ -25,9 +28,16 @@ import rugbyniela.exception.RugbyException;
 public interface IUserMapper {
 	
 		@Mapping(target = "gender",source="gender",qualifiedByName = "stringToGender")
-		@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
+//		@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
 		@Mapping(target = "password",ignore = true)//TODO: change this in order to allow mapstruct do this for us
-		@Mapping(target="email",source="email",qualifiedByName = "normalizeEmail")
+//		@Mapping(target="email",source="email",qualifiedByName = "normalizeEmail")
+		//[ERROR] /C:/Users/jadee/git/rugbyniela/src/main/java/rugbyniela/mapper/UserMapper.java:[37,18] No property named "role" exists in source parameter(s). Did you mean "name"?
+		//[ERROR] /C:/Users/jadee/git/rugbyniela/src/main/java/rugbyniela/mapper/UserMapper.java:[37,18] No property named "email" exists in source parameter(s). Did you mean "name"?
+		//[INFO] 2 errors  porque no esta el email ni el role en el dto de actualizar
+		
+		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+	    void updateUserFromDto(UserUpdatedRequestDTO dto, @MappingTarget User user); // im not sure what this does need to check
+	    
 		User toEntity(UserRequestDTO dto);
 		@Mapping(target = "isActive",source = "active")
 		UserResponseDTO toDTO(User entity);
