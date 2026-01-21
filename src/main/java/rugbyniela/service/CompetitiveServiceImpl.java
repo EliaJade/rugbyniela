@@ -262,6 +262,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(anyOutside) {
 			throw new RugbyException("Alguna jornada de la division esta fuera del rango de la temporada",HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
+		if(season.getIsActive()==null) {
+			season.setIsActive(false);
+		}
 		
 		season.addDivision(division);
 		division.setSeason(season);
@@ -282,8 +285,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(teamOutside) {
 			throw new RugbyException("Hay un equipo que juega en la jornada que no juega en esta division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		
-		return null;
+		division.addMatchDay(matchDay);
+		matchDay.setDivision(division);
+		matchDayRepository.save(matchDay);
+		divisionRepository.save(division);
+		return divisionMapper.toDTO(division);
 	}
 	
 	@Override
