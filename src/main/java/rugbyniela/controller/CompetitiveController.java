@@ -7,13 +7,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.matchDay.MatchDayAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
+import rugbyniela.entity.dto.season.SeasonRequestDTO;
+import rugbyniela.entity.dto.season.SeasonResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.service.CompetitiveService;
@@ -60,6 +64,24 @@ public class CompetitiveController {
 		DivisionResponseDTO response = competitiveService.createDivision(dto);
 		return ResponseEntity.ok(response);
 	}
+	@PostMapping("/addMatchDay")
+	public ResponseEntity<DivisionResponseDTO> addMatchDayToDivision(@Valid@RequestBody MatchDayAddToDivisionRequestDTO dto){
+		DivisionResponseDTO response = competitiveService.addMatchDayToDivision(dto);
+		return ResponseEntity.ok(response);
+	}	
+	@PostMapping("/createSeason")
+	public ResponseEntity<SeasonResponseDTO> createSeason(@Valid@RequestBody SeasonRequestDTO dto){
+		SeasonResponseDTO response = competitiveService.createSeason(dto);
+		return ResponseEntity.ok(response);
+		
+	}
+	@PostMapping("/addDivision")
+	public ResponseEntity<SeasonResponseDTO> addDivisionToSeason(@Valid@RequestBody DivisionAddToSeasonRequestDTO dto){
+		SeasonResponseDTO response = competitiveService.addDivisionToSeason(dto);
+		return ResponseEntity.ok(response);
+	}
+		 
+	
 }
 
 
