@@ -12,7 +12,9 @@ import rugbyniela.entity.pojo.Team;
 
 @Mapper(componentModel = "spring")
 public interface DivisionMapper {
-	@Mapping(target= "teams", source = "teams")
+	
+	@Mapping(target = "matchDays", expression = "java(new java.util.HashSet<>())")
+	@Mapping(target= "teams", ignore = true)
 	Division toEntity(DivisionRequestDTO dto);
 	DivisionResponseDTO toDTO(Division division);
 	

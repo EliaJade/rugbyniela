@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import rugbyniela.entity.dto.division.DivisionRequestDTO;
+import rugbyniela.entity.dto.division.DivisionResponseDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
@@ -52,6 +54,11 @@ public class CompetitiveController {
 		MatchDayResponseDTO response = competitiveService.addMatchToMatchDay(dto);
 		return ResponseEntity.ok(response);
 		
+	}
+	@PostMapping("/createDivision")
+	public ResponseEntity<DivisionResponseDTO> createDivision(@Valid@RequestBody DivisionRequestDTO dto){
+		DivisionResponseDTO response = competitiveService.createDivision(dto);
+		return ResponseEntity.ok(response);
 	}
 }
 

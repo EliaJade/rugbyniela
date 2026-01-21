@@ -2,6 +2,8 @@ package rugbyniela.service;
 
 
 import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -200,13 +202,20 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 		}catch (IllegalArgumentException e ) {
 			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		DivisionRequestDTO dtoWithEnumCategoru = new DivisionRequestDTO(
+		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
 				dto.name(),
 				cateegoryEnum.name(),
 				dto.matchDays(),
 				dto.teams());
 		//change mannually id to team and viceversa	
-		Division division = divisionMapper.toEntity(dtoWithEnumCategoru);
+		Division division = divisionMapper.toEntity(dtoWithEnumCategory);
+		
+		Set<Team> teams = dto.teams().stream()
+				.map(id ->teamRepository.findById(id)
+						.orElseThrow(()-> new RugbyException("Equipo no encontrado: "+ id, HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)))
+				.collect(Collectors.toSet());
+								
+		division.setTeams(teams);		
 		divisionRepository.save(division);
 		
 		return divisionMapper.toDTO(division);
