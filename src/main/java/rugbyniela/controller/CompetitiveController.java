@@ -20,15 +20,15 @@ import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
-import rugbyniela.service.CompetitiveService;
+import rugbyniela.service.ICompetitiveService;
 
 @RestController
 @RequestMapping("/admin")
 public class CompetitiveController {
 
-	private CompetitiveService competitiveService;
+	private ICompetitiveService competitiveService;
 
-	public CompetitiveController(CompetitiveService competitiveService) {
+	public CompetitiveController(ICompetitiveService competitiveService) {
 		super();
 		this.competitiveService = competitiveService;
 	}

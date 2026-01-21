@@ -35,7 +35,7 @@ import rugbyniela.repository.WeeklyBetTicketRepository;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class BettingServiceImp implements BettingService{
+public class BettingServiceImp implements IBettingService{
 	
 	private final UserSeasonScoreRepository userSeasonScoreRepository;
 	

@@ -31,6 +31,8 @@ public class LogoutService implements LogoutHandler{
 		}
 		jwt = authHeader.substring(7);
 		
+		//TODO: I need get the refresh token in order to set it revoked and expired
+		//the refresh is expired but the normal no
 		Token storedToken = tokenRepository.findByToken(jwt).orElse(null);
 		if(storedToken != null) {
 			storedToken.setExpired(true);

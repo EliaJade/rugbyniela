@@ -2,6 +2,7 @@ package rugbyniela.controller;
 
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,8 @@ public class UserController {
 			return ResponseEntity.ok(response);
 	}
 	@GetMapping("/{id}")
-	public ResponseEntity<UserResponseDTO> getUserById(@Valid@PathVariable Long id) {
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
 				return ResponseEntity.ok(userService.fetchUserById(id));
 	}
 	

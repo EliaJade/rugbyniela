@@ -25,7 +25,7 @@ import rugbyniela.exception.RugbyException;
 	    componentModel = "spring", // Para poder usar @Autowired UserMapper
 	    unmappedTargetPolicy = ReportingPolicy.IGNORE // Ignora campos que no coincidan (útil para password)
 	)
-public interface UserMapper {
+public interface IUserMapper {
 	
 		@Mapping(target = "gender",source="gender",qualifiedByName = "stringToGender")
 //		@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")

@@ -3,6 +3,7 @@ package rugbyniela.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -27,8 +29,12 @@ public class SecurityConfig {
 		.csrf(csrf -> csrf.disable())
 		.authorizeHttpRequests(
 				auth->auth
-					.requestMatchers("/**").permitAll()//allow public paths
-					.anyRequest().authenticated()//everything else required authentication
+				.requestMatchers(
+                        "/auth/**",           // Login/Register
+                        "/doc/**", "/v3/api-docs/**", // Swagger
+                        "/user/register"          // Cualquier cosa pública
+						).permitAll()
+						.anyRequest().authenticated()//everything else required authentication
 					)
 		.sessionManagement(sess->sess
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)

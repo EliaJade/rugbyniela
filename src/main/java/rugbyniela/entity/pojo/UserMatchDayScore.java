@@ -35,4 +35,16 @@ public class UserMatchDayScore {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_season_id", nullable = false)
 	private UserSeasonScore userSeason; //bidirectional relationship
+	
+	/**
+	 * Who did you play for? when you earned these points?
+	 * 
+	 * This attribute is to know if the user belongs to a coalition
+	 * and if it contribute to the total points of the coalition.
+	 * So in the case this user wants to swicth of coalition
+	 * the points added to the previous one be always there.
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "historical_coalition_id")
+	private Coalition historicalCoalition;
 }

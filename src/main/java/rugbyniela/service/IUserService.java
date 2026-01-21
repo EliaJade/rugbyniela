@@ -1,5 +1,8 @@
 package rugbyniela.service;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import jakarta.servlet.http.HttpServletRequest;
 import rugbyniela.entity.dto.user.LoginRequestDTO;
 import rugbyniela.entity.dto.user.LoginResponseDTO;
 import rugbyniela.entity.dto.user.UserRequestDTO;
@@ -11,9 +14,9 @@ public interface IUserService {
 	UserResponseDTO register(UserRequestDTO dto);
 	UserResponseDTO update(UserUpdatedRequestDTO dto, Long id);
 	UserResponseDTO fetchUserById(Long id);
+	UserResponseDTO fetchCurrentUser();
 	void changePassword();
 	void recoveryAccount();
-	LoginResponseDTO login(LoginRequestDTO loginRequestDTO);//TODO: this method possibly belong to security service
 	void registerInSeason();
 	void fetchSeasonPoints();
 	void fetchSeasonUserHaveBeenRegistered();

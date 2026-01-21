@@ -22,7 +22,7 @@ import rugbyniela.entity.pojo.Division;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 
-public interface CompetitiveService {
+public interface ICompetitiveService {
 
 	Page<Season> fetchAllSeasons(int page);
 	Season fetchSeasonById(Long seasonId);

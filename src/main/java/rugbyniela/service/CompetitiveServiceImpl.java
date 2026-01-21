@@ -56,7 +56,7 @@ import rugbyniela.utils.StringUtils;
 
 @Service
 @RequiredArgsConstructor
-public class CompetitiveServiceImpl implements CompetitiveService{
+public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	private final SeasonRepository seasonRepository;
 	private final DivisionRepository divisionRepository;

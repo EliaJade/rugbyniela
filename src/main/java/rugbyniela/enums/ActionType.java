@@ -6,5 +6,6 @@ public enum ActionType {
     REGISTRATION,   // User registraton
     BETTING,        // Bet
     SEASON_ADMIN,   // Create seasons
-    TEAM_MANAGEMENT	// Manage teams
+    TEAM_MANAGEMENT,	// Manage teams
+    TOURNAMENT	// Tournament actions
 }

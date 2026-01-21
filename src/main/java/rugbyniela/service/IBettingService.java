@@ -6,7 +6,8 @@ import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 
-public interface BettingService {
+
+public interface IBettingService {
 
 	WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto);
 
