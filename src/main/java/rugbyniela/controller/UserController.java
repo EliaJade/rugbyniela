@@ -4,6 +4,7 @@ package rugbyniela.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import rugbyniela.entity.dto.user.ChangePassworRequestDTO;
 import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.service.UserServiceImp;
@@ -42,8 +44,13 @@ public class UserController {
 	public ResponseEntity<String> test() {
 	    return ResponseEntity.ok("User controller is working!");
 	}
-
-
+	
+	@PatchMapping("/change-password")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePassworRequestDTO dto) {
+        userService.changePassword(dto);
+        return ResponseEntity.ok().build();
+    }
 	
 	
 }

@@ -1,8 +1,15 @@
 package rugbyniela.repository;
 
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.pojo.Season;
+import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
 
 /**
@@ -11,4 +18,6 @@ import rugbyniela.entity.pojo.UserSeasonScore;
 @Repository
 public interface UserSeasonScoreRepository extends JpaRepository<UserSeasonScore, Long>, JpaSpecificationExecutor<UserSeasonScore> {
 
+	public Optional<UserSeasonScore> findByUserAndSeason(User u, Season s);
+	Page<UserSeasonScore> findByUser_EmailAndCoalitionIsNotNull(String email, Pageable pageable);
 }

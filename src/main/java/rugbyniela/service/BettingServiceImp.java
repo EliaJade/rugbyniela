@@ -112,7 +112,8 @@ public class BettingServiceImp implements IBettingService{
 					}
 					// 7. Save the ticket (cascade saves bets)
 					weeklyBetTicketRepository.save(newTicket);
-					return bettingMapper.toDTO(newTicket);
+					//return bettingMapper.toDTO(newTicket);
+					return null;
 				
 		} else {
 			
@@ -147,7 +148,8 @@ public class BettingServiceImp implements IBettingService{
 			}
 			//Save new updated ticket
 			weeklyBetTicketRepository.save(existingTicket);
-			return bettingMapper.toDTO(existingTicket);
+			//return bettingMapper.toDTO(existingTicket);
+			return null;
 		}
 		
 		

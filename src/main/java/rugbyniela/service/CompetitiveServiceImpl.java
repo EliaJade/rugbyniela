@@ -39,7 +39,7 @@ import rugbyniela.entity.pojo.Team;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Category;
 import rugbyniela.exception.RugbyException;
-import rugbyniela.mapper.AddressMapper;
+import rugbyniela.mapper.IAddressMapper;
 import rugbyniela.mapper.DivisionMapper;
 import rugbyniela.mapper.MatchDayMapper;
 import rugbyniela.mapper.MatchMapper;
@@ -68,7 +68,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private final SeasonMapper seasonMapper;
 	private final TeamMapper teamMapper;
 	private final MatchMapper matchMapper;
-	private final AddressMapper addressMapper;
+	private final IAddressMapper addressMapper;
 	private final MatchDayMapper matchDayMapper;
 	private final DivisionMapper divisionMapper;
 	

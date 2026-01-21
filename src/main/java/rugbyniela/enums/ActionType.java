@@ -4,6 +4,7 @@ package rugbyniela.enums;
 public enum ActionType {
 	AUTHENTICATION, // Login, Tokens
     REGISTRATION,   // User registraton
+    USER_ACTION,
     BETTING,        // Bet
     SEASON_ADMIN,   // Create seasons
     TEAM_MANAGEMENT,	// Manage teams

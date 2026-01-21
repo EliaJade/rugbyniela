@@ -7,7 +7,7 @@ import rugbyniela.entity.dto.address.AddressResponseDTO;
 import rugbyniela.entity.pojo.Address;
 
 @Mapper(componentModel = "spring")
-public interface AddressMapper {
+public interface IAddressMapper {
 
 	Address toEntity(AddressRequestDTO dto);
 	AddressResponseDTO toDTO(Address address);

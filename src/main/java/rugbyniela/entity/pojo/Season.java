@@ -54,6 +54,7 @@ public class Season {
 	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<Division> divisions;
 
+	private Boolean isActive;
 	/**
 	 * Method to add a participant to the list of userSeasonScore
 	 * 

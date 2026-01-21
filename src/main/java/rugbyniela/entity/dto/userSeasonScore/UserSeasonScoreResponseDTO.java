@@ -5,4 +5,5 @@ public record UserSeasonScoreResponseDTO(
 		int totalPoints,
 		Long seasonId,
 		Long userId,
-		Long coalitionId){}
+		Long coalitionId,
+		String coalitionName){}

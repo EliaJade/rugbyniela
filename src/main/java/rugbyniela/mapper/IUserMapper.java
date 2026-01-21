@@ -42,6 +42,7 @@ public interface IUserMapper {
 		@Mapping(target = "isActive",source = "active")
 		UserResponseDTO toDTO(User entity);
 		
+		
 		@Named("normalizeEmail")
 		default String normalizeEmail(String email) {
 			if(email==null) return null;

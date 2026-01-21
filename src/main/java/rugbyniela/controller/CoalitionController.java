@@ -2,6 +2,9 @@ package rugbyniela.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -47,21 +50,16 @@ public class CoalitionController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<CoalitionSimpleResponseDTO>> getAllCoalitions(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Boolean active,
+    		@RequestParam(required = false) Boolean active,
+    		@PageableDefault(size = 10, sort = "name", direction = Direction.ASC) Pageable pageable,
             Authentication authentication // Inyectamos la auth para verificar el rol manualmente
     ) {
-        // Verificamos si tiene el rol ADMIN
         boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
-        // LÓGICA DE NEGOCIO EN CAPA CONTROLADOR (Filtrado de Seguridad)
         if (!isAdmin) {
-            active = true; // Forzamos a que solo vea las activas
+            active = true;
         }
-
-        return ResponseEntity.ok(coalitionService.fetchAllCoalitions(page, size, active));
+        return ResponseEntity.ok(coalitionService.fetchAllCoalitions(pageable, active));
     }
 
     @DeleteMapping
@@ -89,10 +87,9 @@ public class CoalitionController {
     @GetMapping("/requests")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<Page<CoalitionJoinResponseDTO>> getPendingRequests(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+    		@PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.ASC) Pageable pageable
     ) {
-        return ResponseEntity.ok(coalitionService.getPendingRequests(page, size));
+        return ResponseEntity.ok(coalitionService.getPendingRequests(pageable));
     }
 
     @PutMapping("/request/{requestId}")
@@ -121,6 +118,7 @@ public class CoalitionController {
         return ResponseEntity.ok().build();
     }
 
+    //TODO: teste this endpoint
     @PostMapping("/seasons/{seasonId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> registerInSeason(@PathVariable Long seasonId) {

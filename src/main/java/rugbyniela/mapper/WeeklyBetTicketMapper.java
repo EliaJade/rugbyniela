@@ -17,12 +17,12 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 		unmappedTargetPolicy = ReportingPolicy.IGNORE 
 		)
 public interface WeeklyBetTicketMapper {
-		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-		void updateTicketFromDTO(WeeklyBetTicketUpdateRequestDTO dto, @MappingTarget WeeklyBetTicket ticket);
-		
-		@Mapping(source = "userSeason.id", target = "userSeasonId")
-//	    @Mapping(source = "predictedLeaderBoardWinner.id", target = "predictedLeaderboardWinnerId")
-		WeeklyBetTicketResponseDTO toDTO (WeeklyBetTicket ticket);
+//		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+//		void updateTicketFromDTO(WeeklyBetTicketUpdateRequestDTO dto, @MappingTarget WeeklyBetTicket ticket);
+//		
+//		@Mapping(source = "userSeason.id", target = "userSeasonId")
+////	    @Mapping(source = "predictedLeaderBoardWinner.id", target = "predictedLeaderboardWinnerId")
+//		WeeklyBetTicketResponseDTO toDTO (WeeklyBetTicket ticket);
 		
 //		WeeklyBetTicket toEntity(WeeklyBetTicketRequestDTO dto);
 		
