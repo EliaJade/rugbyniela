@@ -22,6 +22,7 @@ import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.entity.dto.user.UserUpdatedRequestDTO;
 import rugbyniela.entity.pojo.SecurityUser;
+import rugbyniela.entity.pojo.Address;
 import rugbyniela.entity.pojo.Token;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.enums.ActionType;
@@ -29,11 +30,13 @@ import rugbyniela.enums.Gender;
 import rugbyniela.enums.Role;
 import rugbyniela.enums.TokenType;
 import rugbyniela.exception.RugbyException;
-
+import rugbyniela.mapper.AddressMapper;
 import rugbyniela.mapper.UserMapper;
+import rugbyniela.repository.AddressRepository;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
 import rugbyniela.security.JwtService;
+import rugbyniela.utils.StringUtils;
 
 @Service
 @Slf4j
@@ -51,6 +54,10 @@ public class UserServiceImp implements IUserService {
 	private PasswordEncoder encoder;
 	@Autowired
 	private TokenRepository tokenRepository;
+	@Autowired
+	private AddressRepository addressRepository;
+	@Autowired
+	private AddressMapper addressMapper;
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		
@@ -66,11 +73,21 @@ public class UserServiceImp implements IUserService {
 			log.warn("Intento fallido de registro. Instagram ya existe {}",dto.instagram());
 			throw new RugbyException("Este instagram ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
 		}
+		String street = StringUtils.normalize(dto.address().street());
+		String city = StringUtils.normalize(dto.address().city());
+		String postalCode = StringUtils.normalize(dto.address().postalCode());
+		String description = StringUtils.normalize(dto.address().description());
+		Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
+				.orElseGet(()->{
+					Address newAddress = addressMapper.toEntity(dto.address());
+					return addressRepository.save(newAddress);
+				});
 		//mapping
 		User user = userMapper.toEntity(dto);
 		//encrypt password
 		user.setPassword(encoder.encode(dto.password()));
 		user.setActive(true);
+		user.setAddress(address);
 		//save
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		log.info("Usuario creado!");

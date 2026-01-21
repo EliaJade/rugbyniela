@@ -31,8 +31,10 @@ import rugbyniela.entity.pojo.MatchStatus;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 import rugbyniela.enums.ActionType;
+import rugbyniela.enums.Category;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.mapper.AddressMapper;
+import rugbyniela.mapper.DivisionMapper;
 import rugbyniela.mapper.MatchDayMapper;
 import rugbyniela.mapper.MatchMapper;
 import rugbyniela.mapper.SeasonMapper;
@@ -43,6 +45,7 @@ import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TeamRepository;
+import rugbyniela.utils.StringUtils;
 
 
 @Service
@@ -61,6 +64,7 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 	private final MatchMapper matchMapper;
 	private final AddressMapper addressMapper;
 	private final MatchDayMapper matchDayMapper;
+	private final DivisionMapper divisionMapper;
 	
 	@Override
 	public Page<Season> fetchAllSeasons(int page) {
@@ -170,6 +174,17 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 		if(match.getTimeMatchStart().isBefore(matchDay.getDateBegin().atStartOfDay())) {
 			throw new RugbyException("No puede empezar el partido antes de la jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
+		boolean exists = matchDay.getMatches().stream()
+			    .anyMatch(existingMatch -> {
+			        boolean sameTeams = 
+			            (existingMatch.getLocalTeam().equals(match.getLocalTeam()) && existingMatch.getAwayTeam().equals(match.getAwayTeam())) ||
+			            (existingMatch.getLocalTeam().equals(match.getAwayTeam()) && existingMatch.getAwayTeam().equals(match.getLocalTeam()));
+			        return sameTeams;
+			    });
+
+			if (exists) {
+			    throw new RugbyException("Estos equipos ya juegan entre sí en esta jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			}
 		matchDay.addMatch(match);
 		match.setMatchDay(matchDay);
 		matchDayRepository.save(matchDay);
@@ -179,8 +194,22 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 	
 	@Override
 	public DivisionResponseDTO createDivision(DivisionRequestDTO dto) {
+		Category cateegoryEnum;
+		try {
+			cateegoryEnum = Category.valueOf(dto.category().toUpperCase());
+		}catch (IllegalArgumentException e ) {
+			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		DivisionRequestDTO dtoWithEnumCategoru = new DivisionRequestDTO(
+				dto.name(),
+				cateegoryEnum.name(),
+				dto.matchDays(),
+				dto.teams());
+		//change mannually id to team and viceversa	
+		Division division = divisionMapper.toEntity(dtoWithEnumCategoru);
+		divisionRepository.save(division);
 		
-		return null;
+		return divisionMapper.toDTO(division);
 		
 		
 	}
@@ -197,13 +226,23 @@ public class CompetitiveServiceImpl implements CompetitiveService{
 		
 		Team localTeam = teamRepository.findById(dto.localTeam()).orElseThrow(()-> new RugbyException("Equipo local no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
 		Team awayTeam = teamRepository.findById(dto.awayTeam()).orElseThrow(()-> new RugbyException("Equipo visitante no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
-		Address location = addressMapper.toEntity(dto.location());
-		location = addressRepository.save(location);
+		
+		String street = StringUtils.normalize(dto.location().street());
+	    String city = StringUtils.normalize(dto.location().city());
+	    String postalCode = StringUtils.normalize(dto.location().postalCode());
+	    String description = StringUtils.normalize(dto.location().description());
+
+		Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
+				.orElseGet(()->{
+					Address location = addressMapper.toEntity(dto.location());
+					return addressRepository.save(location);	
+				});
+		
 		Match match = matchMapper.toEntity(dto);
 		if(match.getStatus()==null) {
 			match.setStatus(MatchStatus.SCHEDULED);
 		}
-		match.setLocation(location);
+		match.setLocation(address);
 		match.setLocalTeam(localTeam);
 		match.setAwayTeam(awayTeam);
 		matchRepository.save(match); ;

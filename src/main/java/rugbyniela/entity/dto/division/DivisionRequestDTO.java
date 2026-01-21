@@ -8,12 +8,14 @@ import jakarta.validation.constraints.Size;
 import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 
 public record DivisionRequestDTO(
-		@NotBlank
-		@Size(max=50, min = 1)
+		@NotBlank(message = "La division debe tener nombre")
+		@Size(max=50, message = "El nombre de la division no puede superar los 50 caracteres")
 		String name,
-		@NotNull
+		@NotNull(message = "La division debe tener categoria")
 		String category,
+		@NotNull(message = "La division debe tener jornadas")
 		Set<MatchDayRequestDTO> matchDays,
+		@NotNull(message = "La division debe tener equipos")
 		Set<Long> teams) {
 
 }

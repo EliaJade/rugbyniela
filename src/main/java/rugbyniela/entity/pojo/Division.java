@@ -45,7 +45,7 @@ public class Division {
 	private Category category; //enum category for A and B
 	
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn( name= "season_id", nullable = false)
+	@JoinColumn( name= "season_id", nullable = false) 
 	private Season season;//bidirectional relationship
 	
 	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
@@ -56,9 +56,8 @@ public class Division {
     @JoinTable(
         name = "division_teams", // Nombre de la tabla intermedia en BD
         joinColumns = @JoinColumn(name = "division_id"),
-        inverseJoinColumns = @JoinColumn(name = "team_id")
-    )
-    private Set<Team> teams = new HashSet<>();
+        inverseJoinColumns = @JoinColumn(name = "team_id"))
+    private Set<Team> teams; //= new HashSet<>();
 	
 	/**
 	 * Method to add a matchDay in the list
@@ -72,6 +71,13 @@ public class Division {
 		this.matchDays.add(matchDay);
 		//in this case, when the next line is use, the relationship will be updated, because the MatchDay is the owner of the relationship
 		matchDay.setDivision(this);
+	}
+	
+	public void addTeam(Team team) {
+		if(this.teams==null) {
+			this.teams = new HashSet<Team>();
+		}
+		this.teams.add(team);
 	}
 
 	
