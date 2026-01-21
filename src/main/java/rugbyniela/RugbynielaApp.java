@@ -20,5 +20,6 @@ public class RugbynielaApp {
 	public static void main(String[] args) {
 		SpringApplication.run(RugbynielaApp.class, args);
 	}
+	
 
 }

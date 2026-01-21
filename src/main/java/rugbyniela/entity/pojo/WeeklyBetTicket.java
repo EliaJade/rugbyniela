@@ -40,6 +40,9 @@ public class WeeklyBetTicket {
 	@JoinColumn(name = "user_season_score_id", nullable = false)
 	private UserSeasonScore userSeason;//bidirectional relationship
 	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "predicted_leaderboard_winner_team_id", nullable = false)
+	private Team predictedLeaderBoardWinner;
 	
 	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)//bidirectional relationship
 	private Set<Bet> bets;

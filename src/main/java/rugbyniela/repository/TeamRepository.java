@@ -10,5 +10,6 @@ import rugbyniela.entity.pojo.Team;
 */
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
-
+	
+	boolean existsByName(String name);
 }

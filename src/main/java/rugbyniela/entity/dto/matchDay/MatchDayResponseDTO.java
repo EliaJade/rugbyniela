@@ -11,6 +11,7 @@ public record MatchDayResponseDTO(
 		Long divisionId,
 		Set<MatchResponseDTO> matches,
 		//we have to configure mapstruct to do this
-		Set<TeamResponseDTO> teamDivision) {
+		Set<TeamResponseDTO> teamDivision,
+		boolean arePointsCalculated) {
 
 }
