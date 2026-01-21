@@ -32,7 +32,7 @@ public class SecurityConfig {
 				.requestMatchers(
                         "/auth/**",           // Login/Register
                         "/doc/**", "/v3/api-docs/**", // Swagger
-                        "/user/register"          // Cualquier cosa pública
+                        "/user/register"         // Cualquier cosa pública
 						).permitAll()
 						.anyRequest().authenticated()//everything else required authentication
 					)
