@@ -134,12 +134,16 @@ public class UserServiceImp implements IUserService {
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
 		
-		if(!dto.currentPassword().equals(dto.confirmationPassword())) {
+		if(!encoder.matches(dto.currentPassword(), user.getPassword())) {
+			throw new RugbyException("La contraseña actual es incorrecta", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
+		}
+		if(!dto.newPassword().equals(dto.confirmationPassword())) {
 			throw new RugbyException("La nueva contraseña y la confirmación no coinciden", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
 		}
-		if(!encoder.matches(dto.newPassword(), user.getPassword())) {
+		if(encoder.matches(dto.newPassword(), user.getPassword())) {
 			throw new RugbyException("La nueva contraseña no puede ser igual a la anterior", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
 		}
+		
 		user.setPassword(encoder.encode(dto.newPassword()));
 		userRepository.save(user);
 		log.info("El usuario {} ha cambiado su contraseña exitosamente", user.getEmail());
@@ -152,7 +156,7 @@ public class UserServiceImp implements IUserService {
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
 		Season season = seasonRepository.findByIdAndIsActiveTrue(seasonId).orElseThrow(() ->{ 
-	    	throw new RugbyException("La temporada a la cual el usuario se quiere registrar no existe o ha terminado", HttpStatus.NO_CONTENT, ActionType.USER_ACTION);
+	    	throw new RugbyException("La temporada a la cual el usuario se quiere registrar no existe o ha terminado", HttpStatus.NOT_FOUND, ActionType.USER_ACTION);
 	    });
 		boolean isAlreadyRegistered = userSeasonScoreRepository.findByUserAndSeason(user, season).isPresent();
 		if (isAlreadyRegistered) {
@@ -195,7 +199,7 @@ public class UserServiceImp implements IUserService {
 		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
-		Page<UserSeasonScore> seasonScores = userSeasonScoreRepository.findByUser_EmailAndCoalitionIsNotNull(user.getEmail(), pageable);
+		Page<UserSeasonScore> seasonScores = userSeasonScoreRepository.findByUser_Email(user.getEmail(), pageable);
 
 		return seasonScores.map(historyMapper::toHistoryDTO);
 	}

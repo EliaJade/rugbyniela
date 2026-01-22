@@ -21,7 +21,8 @@ DOCUMENT TO WRITE IDEAS!.
   
   laura.martinez@example.com ->  Laura@2024
   andres.lopez@example.com -> Andres*99
-  sofia.ramirez@example.com -> Sofi!22abc
+  sofia.ramirez@example.com -> Abc22@Sofi
+  							   Sofi!22abc //this is the previous password
 ==========================================================================================================================
 
 
