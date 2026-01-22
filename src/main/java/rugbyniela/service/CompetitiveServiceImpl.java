@@ -27,6 +27,7 @@ import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
+import rugbyniela.entity.dto.team.TeamAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.entity.pojo.Address;
@@ -317,6 +318,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return matchDayMapper.toDTO(matchDay);
 	}
 
+	@Override
+	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 
 	@Override
@@ -365,6 +371,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 	}
+
+	
 
 	
 

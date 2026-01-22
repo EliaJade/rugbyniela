@@ -16,6 +16,7 @@ import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
+import rugbyniela.entity.dto.team.TeamAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.entity.pojo.Division;
@@ -38,6 +39,7 @@ public interface ICompetitiveService {
 	MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto);
 	DivisionResponseDTO addMatchDayToDivision(MatchDayAddToDivisionRequestDTO dto);
 	SeasonResponseDTO addDivisionToSeason(DivisionAddToSeasonRequestDTO dto);
+	DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto);
 	void fetchMatchesOfSeason();
 	void fetchMatchesOfSeasonByMatchDay();
 	void finishMatchesSeasonByMatchDay();
