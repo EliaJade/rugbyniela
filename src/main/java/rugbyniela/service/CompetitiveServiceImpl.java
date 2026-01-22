@@ -320,8 +320,19 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	@Override
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
+		Team team = teamRepository.findById(dto.team()).orElseThrow(()->new RugbyException("Equipo no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
+		Division division = checkDivision(dto.division());
+		boolean exists = division.getTeams().stream()
+				.anyMatch(existingTeam -> 
+							existingTeam.getId().equals(team.getId()));
+				
+		if(exists) {
+			throw new RugbyException("Este equipo ya juegan en la division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		division.addTeam(team);
+		divisionRepository.save(division);
+		
+		return divisionMapper.toDTO(division);
 	}
 	
 
