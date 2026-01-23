@@ -78,7 +78,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		//Validate there are seasons
 		checkNegativePage(page);
 
-		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("startSeason").descending());
 		Page<Season> seasons = seasonRepository.findAll(pageable);
 		
 		if(seasons.isEmpty()) {

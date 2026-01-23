@@ -1,11 +1,13 @@
 package rugbyniela.controller;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -32,6 +34,36 @@ public class CompetitiveController {
 
 	private final ICompetitiveService competitiveService;
 
+//	------------ALL-----------------	
+	
+	@GetMapping("/seasons")
+	public ResponseEntity<Page<SeasonResponseDTO>> getSeasons(@RequestParam(defaultValue = "0") int page){
+		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page));
+	}
+	
+	@GetMapping("/divisions")
+	public ResponseEntity<Page<DivisionResponseDTO>> getDivisions(@RequestParam(defaultValue = "0") int page){
+		return ResponseEntity.ok(competitiveService.fetchAllDivisions(page));
+	}
+	
+	@GetMapping("/match-days")
+	public ResponseEntity<Page<MatchDayResponseDTO>> getMatchDays(@RequestParam(defaultValue = "0") int page){
+		return ResponseEntity.ok(competitiveService.fetchAllMatchDays(page));
+	}
+	
+	@GetMapping("/matches")
+	public ResponseEntity<Page<MatchResponseDTO>> getMatches(@RequestParam(defaultValue = "0") int page){
+		return ResponseEntity.ok(competitiveService.fetchAllMatches(page));
+	}
+	
+	@GetMapping("/teams")
+	public ResponseEntity<Page<TeamResponseDTO>> getTeams(@RequestParam(defaultValue = "0") int page){
+		return ResponseEntity.ok(competitiveService.fetchAllTeams(page));
+	}
+	
+	
+//	------------BY ID-----------------
+	
 	@GetMapping("/season{id}")
 	public ResponseEntity<SeasonResponseDTO> getSeasonById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchSeasonById(id));
@@ -56,6 +88,8 @@ public class CompetitiveController {
 	public ResponseEntity<TeamResponseDTO> getTeamById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchTeamById(id));
 	}
+	
+//	------------CREATE-----------------
 	
 	@PostMapping("/createTeam")
 	public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto){
