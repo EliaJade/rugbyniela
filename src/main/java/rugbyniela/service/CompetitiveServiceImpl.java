@@ -74,9 +74,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private final DivisionMapper divisionMapper;
 	
 	@Override
-	public Page<Season> fetchAllSeasons(int page) {
+	public Page<SeasonResponseDTO> fetchAllSeasons(int page) {
 		//Validate there are seasons
 		checkNegativePage(page);
+
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
 		Page<Season> seasons = seasonRepository.findAll(pageable);
 		
@@ -84,61 +85,128 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			throw new RugbyException("No hay temporadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 			
 		}
-		return seasons;
+		return seasons.map(seasonMapper::toDTO);
 		
 		
 	}
 
 	@Override
-	public Season fetchSeasonById(Long seasonId) {
-		return checkSeason(seasonId);
-		
-		
-	}
-
-	@Override
-	public Page<Division> fetchDivisionsBySeason(Long seasonId, int page) {
-		checkNegativePage(page);
+	public SeasonResponseDTO fetchSeasonById(Long seasonId) {
 		Season season = checkSeason(seasonId);
-		Pageable pageable = PageRequest.of(page, 10);
-		return divisionRepository.findBySeason(season, pageable);
+		return seasonMapper.toDTO(season);
 		
+		
+	}
+	@Override
+	public Page<DivisionResponseDTO> fetchAllDivisions(int page) {
+		checkNegativePage(page);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").descending());
+		Page<Division> divisions = divisionRepository.findAll(pageable);
+		if(divisions.isEmpty()) {
+			throw new RugbyException("No hay divisiones", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			
+		}
+		return divisions.map(divisionMapper::toDTO);
 	}
 
 	@Override
-	public Division fetchDivisionBySeasonAndId(Long seasonId, Long divisionId) {
-		Season season = checkSeason(seasonId);
-		Division division = divisionRepository.findById(divisionId)
-				.orElseThrow(()-> new RugbyException("Division no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
+	public DivisionResponseDTO fetchDivisionById(Long divisionId) {
+		Division division = checkDivision(divisionId);
 		
-		
-		
-		return divisionRepository.findByIdAndSeason(divisionId, season)
-				.orElseThrow(()-> new RugbyException("Division no encontrada para esta temporada", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
-		
+		return divisionMapper.toDTO(division);
 	}
 
 	@Override
-	public Page<Team> fetchAllTeams(int page) {
+	public Page<MatchDayResponseDTO> fetchAllMatchDays(int page) {
+		checkNegativePage(page);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("dateBegin").descending());
+		Page<MatchDay> matchDays = matchDayRepository.findAll(pageable);
+		if(matchDays.isEmpty()) {
+			throw new RugbyException("No hay jornadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
+		return matchDays.map(matchDayMapper::toDTO);
+	}
+
+	@Override
+	public MatchDayResponseDTO fetchMatchDayById(long matchDayId) {
+		MatchDay matchDay = checkMatchDay(matchDayId);
+		
+		return matchDayMapper.toDTO(matchDay);
+	}
+
+	@Override
+	public Page<MatchResponseDTO> fetchAllMatches(int page) {
+		checkNegativePage(page);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("timeMatchStart").descending());
+		Page<Match> matches = matchRepository.findAll(pageable);
+		if(matches.isEmpty()) {
+			throw new RugbyException("No hay partidos", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+			
+		}
+		return matches.map(matchMapper::toDTO);
+	}
+
+	@Override
+	public MatchResponseDTO fetchMatchById(Long matchId) {
+		Match match = checkMatch(matchId);
+		return matchMapper.toDTO(match);
+	}
+	
+	@Override
+	public Page<TeamResponseDTO> fetchAllTeams(int page) {
 		
 		checkNegativePage(page);
-		Pageable pageble = PageRequest.of(page, 10, Sort.by("name").ascending());
+		Pageable pageble = PageRequest.of(page, 10, Sort.by("name").descending());
 		Page<Team> teams = teamRepository.findAll(pageble);
 		if(teams.isEmpty()) {
 			throw new RugbyException("No hay equipos", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
 		}
-		return teams;
+		return teams.map(teamMapper::toDTO);
 		
 	}
 
 	@Override
-	public Team fetchTeamById(Long teamId) {
-		Team team = teamRepository.findById(teamId)
-				.orElseThrow(()-> new RugbyException("Equipo no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
-		
-		return team;
+	public TeamResponseDTO fetchTeamById(Long teamId) {
+		Team team = checkTeam(teamId);
+		return teamMapper.toDTO(team);
 		
 	}
+
+	@Override
+	public Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page) {
+		checkNegativePage(page);
+		Season season = checkSeason(seasonId);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
+		
+		Page<Division> divisions =  divisionRepository.findBySeason(season, pageable);
+		
+		return divisions.map(divisionMapper::toDTO); //“Take every Division in this page, convert it to a DivisionResponseDTO using MapStruct, and return a new Page of DTOs while keeping pagination info.”
+		
+	}
+
+	@Override
+	public DivisionResponseDTO fetchDivisionBySeasonAndId(Long seasonId, Long divisionId) {
+		Season season = checkSeason(seasonId);
+		
+		
+		Division division = divisionRepository.findByIdAndSeason(divisionId, season)
+				.orElseThrow(()-> new RugbyException("Division no encontrada para esta temporada", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
+		return divisionMapper.toDTO(division);
+	}
+
+	@Override
+	public Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page) {
+		checkNegativePage(page);
+		Season season = checkSeason(seasonId);
+		
+		return null;
+		
+	}
+
+	
+//------------CREATE-------------------------------------------------------------------------
+	
 
 	@Transactional
 	@Override
@@ -168,6 +236,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}catch (IllegalArgumentException e ) {
 			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
+		//TODO: validation in name must contain year of division to order it
 		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
 				dto.name(),
 				cateegoryEnum.name(),
@@ -175,8 +244,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 				dto.teams());
 		Division division = divisionMapper.toEntity(dtoWithEnumCategory);
 		Set<Team> teams = dto.teams().stream()
-				.map(id ->teamRepository.findById(id)
-						.orElseThrow(()-> new RugbyException("Equipo no encontrado: "+ id, HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)))
+				.map(id ->checkTeam(id))
 				.collect(Collectors.toSet());
 								
 		division.setTeams(teams);		
@@ -256,7 +324,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Division division = checkDivision(dto.division());
 		LocalDate seasonStart = season.getStartSeason();
 		LocalDate seasonEnd = season.getEndSeason();
-		
+		//TODO: add a validation that there cant be two divisions fromthe same category in season
 		boolean anyOutside = division.getMatchDays().stream()
 				.map(MatchDay::getDateBegin)
 				.anyMatch(date -> date.isBefore(seasonStart)|| date.isAfter(seasonEnd));
@@ -296,7 +364,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Override
 	public MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
-		Match match = matchRepository.findById(dto.match()).orElseThrow(()-> new RugbyException("Partido no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)); 
+		Match match = checkMatch(dto.match());
 		if(match.getTimeMatchStart().isBefore(matchDay.getDateBegin().atStartOfDay())) {
 			throw new RugbyException("No puede empezar el partido antes de la jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
@@ -320,7 +388,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	@Override
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
-		Team team = teamRepository.findById(dto.team()).orElseThrow(()->new RugbyException("Equipo no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
+		Team team = checkTeam(dto.team());
 		Division division = checkDivision(dto.division());
 		boolean exists = division.getTeams().stream()
 				.anyMatch(existingTeam -> 
@@ -334,25 +402,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 		return divisionMapper.toDTO(division);
 	}
-	
 
-	@Override
-	public void fetchMatchesOfSeason() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void fetchMatchesOfSeasonByMatchDay() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void finishMatchesSeasonByMatchDay() {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	
 	public Season checkSeason(Long seasonId) {
@@ -376,12 +426,30 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return division;
 		
 	}
+	public Team checkTeam(Long teamId) {
+		Team team = teamRepository.findById(teamId)
+				.orElseThrow(()
+				-> new RugbyException("Equipo no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
+		return team;
+		
+	}
+	
+	public Match checkMatch(Long matchId) {
+		Match match = matchRepository.findById(matchId)
+				.orElseThrow(()
+				-> new RugbyException("Partido no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)); 
+		return match;
+	}
 	
 	public void checkNegativePage(int page) {
 		if(page<0) {
 			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 	}
+	
+	
+
+	
 
 	
 

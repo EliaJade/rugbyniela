@@ -1,12 +1,15 @@
 package rugbyniela.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
@@ -24,13 +27,34 @@ import rugbyniela.service.ICompetitiveService;
 
 @RestController
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class CompetitiveController {
 
-	private ICompetitiveService competitiveService;
+	private final ICompetitiveService competitiveService;
 
-	public CompetitiveController(ICompetitiveService competitiveService) {
-		super();
-		this.competitiveService = competitiveService;
+	@GetMapping("/season{id}")
+	public ResponseEntity<SeasonResponseDTO> getSeasonById(@PathVariable Long id){
+		return ResponseEntity.ok(competitiveService.fetchSeasonById(id));
+	}
+	
+	@GetMapping("/division{id}")
+	public ResponseEntity<DivisionResponseDTO> getDivisionById(@PathVariable Long id){
+		return ResponseEntity.ok(competitiveService.fetchDivisionById(id));
+	}
+	
+	@GetMapping("/match-day{id}")
+	public ResponseEntity<MatchDayResponseDTO> getMatchDayById(@PathVariable Long id){
+		return ResponseEntity.ok(competitiveService.fetchMatchDayById(id));
+	}
+	
+	@GetMapping("/match{id}")
+	public ResponseEntity<MatchResponseDTO> getMatchById(@PathVariable Long id){
+		return ResponseEntity.ok(competitiveService.fetchMatchById(id));
+	}
+	
+	@GetMapping("/team{id}")
+	public ResponseEntity<TeamResponseDTO> getTeamById(@PathVariable Long id){
+		return ResponseEntity.ok(competitiveService.fetchTeamById(id));
 	}
 	
 	@PostMapping("/createTeam")
