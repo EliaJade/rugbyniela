@@ -39,6 +39,8 @@ public interface ICompetitiveService {
 	Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page);
 	DivisionResponseDTO fetchDivisionBySeasonAndId(Long seasonId, Long divisionId);
 	Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page);
+	Page<TeamResponseDTO> fetchTeamBySeasonAndDivision (Long seasonId, Long divisionId, int page);
+	Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page);
 //	void fetchMatchesOfSeasonByMatchDay();
 //	void fetchMatchDaysByDivision();
 //	void fetchMatchDaysByDivisionAndId();
@@ -47,8 +49,26 @@ public interface ICompetitiveService {
 //	void fetchMatchesByDivisionAndSeason();
 //	void fetchTeamsByDivision();
 //	void fetchTeamsByDivisionAndSeason();
-//	
 //	void finishMatchesSeasonByMatchDay();
+	
+	
+//	void deleteSeason(Long id);
+//	void deleteDivision(Long id);
+//	void deleteMatchDay(Long id);
+//	void deleteMatch(Long id);
+//	void deleteTeam(Long id);
+	
+//	SeasonResponseDTO updateSeason(Long id, SeasonRequestDTO dto);
+//	void updateDivision();
+//	void updateMatchDay();
+//	void updateMatch();
+//	void updateTeam();
+//	
+//	SeasonResponseDTO removeDivisionFromSeason(Long divisionId, Long seasonId);
+//	void removeMatchFromMatchDay();
+//	void removeMatchDayFromDivision();
+//	void removeTeamFromDivision();
+//	void removeTeamFromMatch();
 	
 	SeasonResponseDTO createSeason(SeasonRequestDTO dto);
 	DivisionResponseDTO createDivision(DivisionRequestDTO dto);
@@ -60,6 +80,6 @@ public interface ICompetitiveService {
 	DivisionResponseDTO addMatchDayToDivision(MatchDayAddToDivisionRequestDTO dto);
 	SeasonResponseDTO addDivisionToSeason(DivisionAddToSeasonRequestDTO dto);
 	DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto);
-	
+//	void addTeamToMatch();
 	
 }

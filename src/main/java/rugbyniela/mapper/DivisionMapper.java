@@ -18,6 +18,8 @@ public interface DivisionMapper {
 	Division toEntity(DivisionRequestDTO dto);
 	DivisionResponseDTO toDTO(Division division);
 	
+	Set<Division> toEntitySet(Set<DivisionRequestDTO> dtos);
+	
 	
 	
 	

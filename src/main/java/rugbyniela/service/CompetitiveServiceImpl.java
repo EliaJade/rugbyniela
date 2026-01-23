@@ -3,6 +3,7 @@ package rugbyniela.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,6 +73,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private final IAddressMapper addressMapper;
 	private final MatchDayMapper matchDayMapper;
 	private final DivisionMapper divisionMapper;
+	
+	
+//------------all and by id-------------------------------------------------------------------------
+	
+
 	
 	@Override
 	public Page<SeasonResponseDTO> fetchAllSeasons(int page) {
@@ -172,6 +178,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return teamMapper.toDTO(team);
 		
 	}
+	
+//------------other fetch-------------------------------------------------------------------------
+	
+
 
 	@Override
 	public Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page) {
@@ -195,12 +205,31 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return divisionMapper.toDTO(division);
 	}
 
-	@Override
+	@Override 
+	public Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page) {
+		checkNegativePage(page);
+		Season season = checkSeason(seasonId);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
+		
+		Page<Team> teams = divisionRepository.findTeamsBySeason(season, pageable);
+		return teams.map(teamMapper::toDTO);
+	}
+	
 	public Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page) {
 		checkNegativePage(page);
 		Season season = checkSeason(seasonId);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("timeMatchStart").descending());
 		
-		return null;
+		Page<Match> matches = matchRepository.findByMatchDayDivisionSeason(season, pageable);
+		return matches.map(matchMapper::toDTO);
+	}
+	
+	public Page<TeamResponseDTO> fetchTeamBySeasonAndDivision (Long seasonId, Long divisionId, int page){
+		Season season = checkSeason(seasonId);
+		Division division = checkDivision(divisionId);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
+		Page<Team> teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
+		return teams.map(teamMapper::toDTO);
 		
 	}
 
@@ -217,10 +246,18 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(seasonRepository.existsByName(dto.name())) {
 			throw new RugbyException("Ya existe una temporada con este nombre", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		
+		Set<Division> divisions = divisionMapper.toEntitySet(dto.divisions());
 		
 		Season season = seasonMapper.toEntity(dto);
+
+		//so that division also saves season 
+		for (Division division : divisions) {
+			division.setSeason(season);
+		}
+		
+		season.setDivisions(divisions);
 		seasonRepository.save(season);
+		
 		return seasonMapper.toDTO(season);
 		
 	}
@@ -236,7 +273,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}catch (IllegalArgumentException e ) {
 			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		//TODO: validation in name must contain year of division to order it
+		//TODO: validation in name must contain year of division to order it or add a varaible in division that has localdate it was made
+		
+		if(!dto.name().matches(".*\\d.*")) {
+			throw new RugbyException("El nombre de la Division debe tener el año", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
 				dto.name(),
 				cateegoryEnum.name(),
@@ -324,7 +365,13 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Division division = checkDivision(dto.division());
 		LocalDate seasonStart = season.getStartSeason();
 		LocalDate seasonEnd = season.getEndSeason();
-		//TODO: add a validation that there cant be two divisions fromthe same category in season
+		boolean existsCat = season.getDivisions().stream()
+				.anyMatch(div -> div.getCategory().equals(division.getCategory()));
+		boolean existsName = season.getDivisions().stream()
+				.anyMatch(div -> div.getName().equals(division.getName()));
+		if(existsName && existsCat) {
+			throw new RugbyException("Ya existe una Division con este nombre y categoria", HttpStatus.BAD_REQUEST,  ActionType.SEASON_ADMIN);
+		} //TODO: check this validation works
 		boolean anyOutside = division.getMatchDays().stream()
 				.map(MatchDay::getDateBegin)
 				.anyMatch(date -> date.isBefore(seasonStart)|| date.isAfter(seasonEnd));
