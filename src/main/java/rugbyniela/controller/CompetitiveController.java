@@ -2,6 +2,7 @@ package rugbyniela.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -118,7 +119,7 @@ public class CompetitiveController {
 		return ResponseEntity.ok(competitiveService.fetchTeamBySeasonAndDivision(seasonId, divisionId, page));
 		
 	}
-//	------------CREATE-----------------
+//	------------CREATE and ADD-----------------
 	
 	@PostMapping("/create-team")
 	public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto){
@@ -127,9 +128,22 @@ public class CompetitiveController {
 		
 	}
 	
+	@PostMapping("/add-team")
+	public ResponseEntity<DivisionResponseDTO> addTeamToDivision(@Valid@RequestBody TeamAddToDivisionRequestDTO dto){
+		DivisionResponseDTO response = competitiveService.addTeamToDivision(dto);
+		return ResponseEntity.ok(response);
+	}
+	
 	@PostMapping("/create-match")
 	public ResponseEntity<MatchResponseDTO> createMatch(@Valid @RequestBody MatchRequestDTO dto){
 		MatchResponseDTO response = competitiveService.createMatch(dto);
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	@PostMapping("/add-match")
+	public ResponseEntity<MatchDayResponseDTO> addMatchToMatchDay(@Valid @RequestBody MatchAddToMatchDayRequestDTO dto){
+		MatchDayResponseDTO response = competitiveService.addMatchToMatchDay(dto);
 		return ResponseEntity.ok(response);
 		
 	}
@@ -140,11 +154,10 @@ public class CompetitiveController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PostMapping("/add-match")
-	public ResponseEntity<MatchDayResponseDTO> addMatchToMatchDay(@Valid @RequestBody MatchAddToMatchDayRequestDTO dto){
-		MatchDayResponseDTO response = competitiveService.addMatchToMatchDay(dto);
+	@PostMapping("/add-match-day")
+	public ResponseEntity<DivisionResponseDTO> addMatchDayToDivision(@Valid@RequestBody MatchDayAddToDivisionRequestDTO dto){
+		DivisionResponseDTO response = competitiveService.addMatchDayToDivision(dto);
 		return ResponseEntity.ok(response);
-		
 	}
 	
 	@PostMapping("/create-division")
@@ -153,9 +166,9 @@ public class CompetitiveController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PostMapping("/add-match-day")
-	public ResponseEntity<DivisionResponseDTO> addMatchDayToDivision(@Valid@RequestBody MatchDayAddToDivisionRequestDTO dto){
-		DivisionResponseDTO response = competitiveService.addMatchDayToDivision(dto);
+	@PostMapping("/add-division")
+	public ResponseEntity<SeasonResponseDTO> addDivisionToSeason(@Valid@RequestBody DivisionAddToSeasonRequestDTO dto){
+		SeasonResponseDTO response = competitiveService.addDivisionToSeason(dto);
 		return ResponseEntity.ok(response);
 	}
 	
@@ -165,18 +178,40 @@ public class CompetitiveController {
 		return ResponseEntity.ok(response);
 		
 	}
-	@PostMapping("/add-division")
-	public ResponseEntity<SeasonResponseDTO> addDivisionToSeason(@Valid@RequestBody DivisionAddToSeasonRequestDTO dto){
-		SeasonResponseDTO response = competitiveService.addDivisionToSeason(dto);
-		return ResponseEntity.ok(response);
+	
+	
+//	------------DELETE-----------------		 
+	
+	@DeleteMapping("/delete-season{id}")
+	public ResponseEntity<SeasonResponseDTO> deleteSeason(@PathVariable Long id){
+		competitiveService.deleteSeason(id);
+		return ResponseEntity.noContent().build();
 	}
 	
-	@PostMapping("/add-team")
-	public ResponseEntity<DivisionResponseDTO> addTeamToDivision(@Valid@RequestBody TeamAddToDivisionRequestDTO dto){
-		DivisionResponseDTO response = competitiveService.addTeamToDivision(dto);
-		return ResponseEntity.ok(response);
+	@DeleteMapping("/delete-division{id}")
+	public ResponseEntity<DivisionResponseDTO> deleteDivision(@PathVariable Long id){
+		competitiveService.deleteDivision(id);
+		return ResponseEntity.noContent().build();
 	}
-		 
+	
+	@DeleteMapping("/delete-match-day{id}")
+	public ResponseEntity<MatchDayResponseDTO> deleteMatchDay(@PathVariable Long id){
+		competitiveService.deleteMatchDay(id);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@DeleteMapping("/delete-match{id}")
+	public ResponseEntity<MatchRequestDTO> deleteMatch(@PathVariable Long id){
+		competitiveService.deleteMatch(id);
+		return ResponseEntity.noContent().build();
+	}
+	
+	@DeleteMapping("/delete-team{id}")
+	public ResponseEntity<TeamResponseDTO> deleteTeam(@PathVariable Long id){
+		competitiveService.deleteTeam(id);
+		return ResponseEntity.noContent().build();
+	}
+	
 	
 }
 

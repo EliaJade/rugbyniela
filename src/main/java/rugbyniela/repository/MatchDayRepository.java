@@ -3,6 +3,8 @@ package rugbyniela.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
 
 /**
@@ -11,5 +13,5 @@ import rugbyniela.entity.pojo.MatchDay;
 @Repository
 public interface MatchDayRepository extends JpaRepository<MatchDay, Long>, JpaSpecificationExecutor<MatchDay> {
 
-	
+//	boolean existsByMatch(Match match);
 }

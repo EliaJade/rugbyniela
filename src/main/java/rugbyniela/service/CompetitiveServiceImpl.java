@@ -264,7 +264,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	
 	
-	
+	@Transactional
 	@Override
 	public DivisionResponseDTO createDivision(DivisionRequestDTO dto) {
 		Category cateegoryEnum;
@@ -295,7 +295,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 		
 	}
-	
+	@Transactional
 	@Override
 	public MatchDayResponseDTO createMatchDay(MatchDayRequestDTO dto) {
 		if(dto.dateEnd()!= null) {
@@ -310,7 +310,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return matchDayMapper.toDTO(matchDay);
 		
 	}
-
+	@Transactional
 	@Override
 	public MatchResponseDTO createMatch(MatchRequestDTO dto) {
 		LocalDateTime now = LocalDateTime.now();
@@ -346,7 +346,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return matchMapper.toDTO(match);
 		
 	}
-
+	@Transactional
 	@Override
 	public TeamResponseDTO createTeam(TeamRequestDTO dto) {
 		if(teamRepository.existsByName(dto.name())) {
@@ -359,6 +359,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 		
 	}
+	@Transactional
 	@Override
 	public SeasonResponseDTO addDivisionToSeason(DivisionAddToSeasonRequestDTO dto) {
 		Season season = checkSeason(dto.season());
@@ -390,7 +391,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return seasonMapper.toDTO(season);
 		
 	}
-	
+	@Transactional
 	@Override
 	public DivisionResponseDTO addMatchDayToDivision(MatchDayAddToDivisionRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
@@ -408,6 +409,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return divisionMapper.toDTO(division);
 	}
 	
+	@Transactional
 	@Override
 	public MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
@@ -432,7 +434,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		matchRepository.save(match);
 		return matchDayMapper.toDTO(matchDay);
 	}
-
+	@Transactional
 	@Override
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
@@ -448,6 +450,71 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		divisionRepository.save(division);
 		
 		return divisionMapper.toDTO(division);
+	}
+	
+//------------DELETE-------------------------------------------------------------------------	
+	
+	@Transactional
+	@Override
+	public void deleteSeason(Long id) {
+		Season season = checkSeason(id);
+		if(!season.getDivisions().isEmpty()) {
+			throw new RugbyException("No se puede eliminar una temporada con divisiones asociadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(!season.getCoalSeasonScores().isEmpty()) {
+			throw new RugbyException("No se puede eliminar una temporada con coaliciones asociadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(!season.getSeasonParticipants().isEmpty()) {
+			throw new RugbyException("No se puede eliminar una temporada con usuarios asociadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
+		seasonRepository.delete(season);
+		
+	}
+
+	@Transactional
+	@Override
+	public void deleteDivision(Long id) {
+		Division division = checkDivision(id);
+		if(!division.getMatchDays().isEmpty()) {
+			throw new RugbyException("No se puede eliminar una división con jornadas asociadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
+		divisionRepository.delete(division);
+	}
+	
+	@Transactional
+	@Override
+	public void deleteMatchDay(Long id) {
+		MatchDay matchDay = checkMatchDay(id);
+		if(!matchDay.getMatches().isEmpty()) {
+			throw new RugbyException("No se puede eliminar una jornadas con partidos asociadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			
+		}
+		
+	}
+	@Transactional
+	@Override
+	public void deleteMatch(Long id) {
+		Match match = checkMatch(id);
+//		boolean isUsedInMatchDay = matchDayRepository.existsByMatch(match);
+//		if(isUsedInMatchDay) {
+//			throw new RugbyException("No se puede borrar un partido que esta associado a una jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+//			
+//		}
+		matchRepository.delete(match);
+		
+	}
+	@Transactional
+	@Override
+	public void deleteTeam(Long id) {
+		Team team = checkTeam(id);
+		boolean isUsedInMatch = matchRepository.existsByLocalTeamOrAwayTeam(team, team);
+		if(isUsedInMatch) {
+			throw new RugbyException("No se puede borrar un equipo que esta associado a un partido", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		teamRepository.delete(team);
+		
 	}
 
 	
@@ -493,6 +560,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 	}
+
+	
 	
 	
 

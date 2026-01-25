@@ -13,5 +13,7 @@ public interface MatchDayMapper {
 	MatchDay toEntity(MatchDayRequestDTO dto);
 	@Mapping(target = "matches", expression = "java(new java.util.HashSet<>())")
 	
+	
 	MatchDayResponseDTO toDTO(MatchDay matchDay);
+	
 }

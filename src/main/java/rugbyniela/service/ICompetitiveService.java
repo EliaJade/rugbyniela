@@ -52,11 +52,11 @@ public interface ICompetitiveService {
 //	void finishMatchesSeasonByMatchDay();
 	
 	
-//	void deleteSeason(Long id);
-//	void deleteDivision(Long id);
-//	void deleteMatchDay(Long id);
-//	void deleteMatch(Long id);
-//	void deleteTeam(Long id);
+	void deleteSeason(Long id);
+	void deleteDivision(Long id);
+	void deleteMatchDay(Long id);
+	void deleteMatch(Long id);
+	void deleteTeam(Long id);
 	
 //	SeasonResponseDTO updateSeason(Long id, SeasonRequestDTO dto);
 //	void updateDivision();

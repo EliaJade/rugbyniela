@@ -1,6 +1,8 @@
 package rugbyniela.mapper;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,8 +20,16 @@ public interface DivisionMapper {
 	Division toEntity(DivisionRequestDTO dto);
 	DivisionResponseDTO toDTO(Division division);
 	
-	Set<Division> toEntitySet(Set<DivisionRequestDTO> dtos);
-	
+	default Set<Division> toEntitySet(Set<DivisionRequestDTO> dtos){
+		
+	 if (dtos == null) {
+         return new HashSet<>();
+     }
+     return dtos.stream()
+             .map(this::toEntity)
+             .collect(Collectors.toSet());
+	}
+ 
 	
 	
 	
