@@ -48,6 +48,8 @@ public class Division {
 	@JoinColumn( name= "season_id", nullable = false) 
 	private Season season;//bidirectional relationship
 	
+	private Boolean isActive;
+	
 	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<MatchDay> matchDays; //bidirectional relationship
 	

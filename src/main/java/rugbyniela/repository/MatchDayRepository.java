@@ -13,5 +13,5 @@ import rugbyniela.entity.pojo.MatchDay;
 @Repository
 public interface MatchDayRepository extends JpaRepository<MatchDay, Long>, JpaSpecificationExecutor<MatchDay> {
 
-//	boolean existsByMatch(Match match);
+	boolean existsByMatchesContaining(Match match);
 }

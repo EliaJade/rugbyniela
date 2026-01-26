@@ -212,6 +212,12 @@ public class CompetitiveController {
 		return ResponseEntity.noContent().build();
 	}
 	
+//	------------REMOVE-----------------	
+//	@DeleteMapping("/remove-team{teamId}-from-match{matchId}")
+//	public ResponseEntity<MatchResponseDTO> removeTeamFromMatch(@PathVariable Long teamId, @PathVariable Long matchId){
+//		MatchResponseDTO response =competitiveService.removeTeamFromMatch(matchId, teamId);
+//		return ResponseEntity.ok(response);
+//	}
 	
 }
 

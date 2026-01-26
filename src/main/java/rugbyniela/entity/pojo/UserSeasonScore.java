@@ -40,6 +40,8 @@ public class UserSeasonScore {
 	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
 	//maybe call it ScorePerMatches??
 	
+	Boolean isActive;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="season_id", nullable = false)
 	private Season season;

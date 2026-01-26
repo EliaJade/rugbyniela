@@ -39,6 +39,8 @@ public class CoalitionSeasonScore {
 	@JoinColumn(name="season_id", nullable = false)
 	private Season season;//bidirectional relationship
 	
+	Boolean isActive;
+	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="coalition_id", nullable = false)

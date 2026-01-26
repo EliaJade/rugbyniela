@@ -45,6 +45,8 @@ public class Match {
 	@Column
 	private Integer awayResult; //null is notPlayedYet
 	
+	private Boolean isActive;
+	
 	
 	@Enumerated(EnumType.STRING)
 	@Column(length = 30)

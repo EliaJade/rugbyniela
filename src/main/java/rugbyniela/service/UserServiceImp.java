@@ -166,6 +166,7 @@ public class UserServiceImp implements IUserService {
 				0,
 				new HashSet<>(),
 				new HashSet<>(),
+				true,
 				season,
 				user,
 				user.getCurrentCoalition());

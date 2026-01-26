@@ -376,7 +376,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	        throw new RugbyException("Tu coalición ya está registrada en esta temporada.", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);
 	    }
 
-	    CoalitionSeasonScore inscription = new CoalitionSeasonScore(null, 0, season, coalition, new HashSet<CoalitionMatchDayScore>());
+	    CoalitionSeasonScore inscription = new CoalitionSeasonScore(null, 0, season, true, coalition, new HashSet<CoalitionMatchDayScore>());
 	    
 	    coalitionSeasonScoreRepository.save(inscription);
 

@@ -34,5 +34,8 @@ public class Team {
 	
 	@Column(length = 500)
 	private String teamPictureUrl;
+	
+	
+	private Boolean isActive;
 
 }
