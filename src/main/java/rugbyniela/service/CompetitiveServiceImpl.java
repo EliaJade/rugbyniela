@@ -3,7 +3,6 @@ package rugbyniela.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +24,7 @@ import rugbyniela.entity.dto.division.DivisionUpdateRequestDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.match.MatchUpdateRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
@@ -42,7 +42,6 @@ import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.MatchStatus;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
-import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Category;
@@ -278,7 +277,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO createDivision(DivisionRequestDTO dto) {
 		Category categoryEnum;
 		try {
-			categoryEnum = Category.valueOf(dto.category().toUpperCase());
+			categoryEnum = Category.valueOf(dto.category());
 		}catch (IllegalArgumentException e ) {
 			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
@@ -340,7 +339,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	    String postalCode = StringUtils.normalize(dto.location().postalCode());
 	    String description = StringUtils.normalize(dto.location().description());
 
-		Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
+	    Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
 				.orElseGet(()->{
 					Address location = addressMapper.toEntity(dto.location());
 					return addressRepository.save(location);	
@@ -566,7 +565,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	
-//------------REMOVE-------------------------------------------------------------------------	
+//------------UPDATE-------------------------------------------------------------------------	
 	
 	@Transactional
 	@Override
@@ -600,12 +599,67 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		if(dto.category()!=null) {
-//			division.setCategory(dto.category());
+			division.setCategory(Category.valueOf(dto.category()));
+		}
+		Category categoryEnum;
+		try {
+			categoryEnum = Category.valueOf(dto.category());
+		}catch (IllegalArgumentException e ) {
+			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		divisionRepository.save(division);
+		
+		
+		return divisionMapper.toDTO(division);
+		
+	}
+
+	public MatchDayResponseDTO updateMatchDay(Long id, MatchDayRequestDTO dto) {
+		MatchDay matchDay = checkMatchDay(id);
+		if(dto.dateBegin()!=null) {
+			matchDay.setDateBegin(dto.dateBegin());
+		}
+		if(dto.dateEnd()!=null) {
+			matchDay.setDateEnd(dto.dateEnd());
+		}
+		if(dto.name()!=null) {
+			matchDay.setName(dto.name());
+		}
+		matchDayRepository.save(matchDay);
+		return matchDayMapper.toDTO(matchDay);
+		
+	}
+	
+	public MatchResponseDTO updateMatch(Long id, MatchUpdateRequestDTO dto) {
+		Match match = checkMatch(id);
+		
+		if(dto.location()!=null) {
+			Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescriptionDTO(dto.location())
+				    .orElseGet(() -> addressRepository.save(addressMapper.toEntity(dto.location())));
+			
 		}
 		
+		if(dto.name()!=null) {
+			match.setName(dto.name());
+		}
+		
+		if(dto.timeMatchStart()!=null) {
+			match.setTimeMatchStart(dto.timeMatchStart());
+		}
+		
+		if(dto.localTeam()!=null) {
+//			match.setLocalTeam(dto.localTeam());
+		}
 		return null;
 		
 	}
+	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto) {
+		return null;
+		
+	}
+	
+	
+	
 
 //------------REMOVE-------------------------------------------------------------------------	
 	

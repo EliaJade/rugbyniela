@@ -12,6 +12,7 @@ import rugbyniela.entity.dto.division.DivisionUpdateRequestDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.match.MatchUpdateRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
@@ -62,9 +63,9 @@ public interface ICompetitiveService {
 	
 	SeasonResponseDTO updateSeason(Long id, SeasonUpdateRequestDTO dto);
 	DivisionResponseDTO updateDivision(Long id, DivisionUpdateRequestDTO dto);
-//	void updateMatchDay();
-//	void updateMatch();
-//	void updateTeam();
+	MatchDayResponseDTO updateMatchDay(Long id, MatchDayRequestDTO dto);
+	MatchResponseDTO updateMatch(Long id, MatchUpdateRequestDTO dto);
+	TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto);
 	
 //	SeasonResponseDTO removeDivisionFromSeason(Long divisionId, Long seasonId);
 //	MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId);

@@ -5,6 +5,8 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.dto.address.AddressRequestDTO;
 import rugbyniela.entity.pojo.Address;
 
 /**
@@ -18,4 +20,5 @@ public interface AddressRepository extends JpaRepository<Address, Long>, JpaSpec
 			String city,
 			String postalCode,
 			String description);
+	Optional<Address> findAddressByStreetAndCityAndPostalCodeAndDescriptionDTO(AddressRequestDTO dto);
 }
