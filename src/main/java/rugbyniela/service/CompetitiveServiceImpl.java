@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
+import rugbyniela.entity.dto.division.DivisionUpdateRequestDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
@@ -29,6 +30,7 @@ import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
+import rugbyniela.entity.dto.season.SeasonUpdateRequestDTO;
 import rugbyniela.entity.dto.team.TeamAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
@@ -562,6 +564,48 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		team.setName(name);
 		teamRepository.save(team);
 	}
+	
+	
+//------------REMOVE-------------------------------------------------------------------------	
+	
+	@Transactional
+	@Override
+	public SeasonResponseDTO updateSeason(Long id, SeasonUpdateRequestDTO dto) {
+		Season season = checkSeason(id);
+		
+		if(dto.name()!= null) {
+			season.setName(dto.name());
+		}
+		
+		if(dto.startSeason()!=null) {
+			season.setStartSeason(dto.startSeason());
+		}
+		
+		if(dto.endSeason()!=null) {
+			season.setEndSeason(dto.endSeason());
+		}
+		
+		seasonRepository.save(season);
+		
+		
+		return seasonMapper.toDTO(season);
+	}
+	
+	@Transactional
+	@Override
+	public DivisionResponseDTO updateDivision(Long id, DivisionUpdateRequestDTO dto) {
+		Division division = checkDivision(id);
+		if(dto.name()!= null) {
+			division.setName(dto.name());
+		}
+		
+		if(dto.category()!=null) {
+//			division.setCategory(dto.category());
+		}
+		
+		return null;
+		
+	}
 
 //------------REMOVE-------------------------------------------------------------------------	
 	
@@ -679,6 +723,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private String deletedName(String name) {
 	    return "DEL_" + name;
 	}
+
+	
 
 
 	

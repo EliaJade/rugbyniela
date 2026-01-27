@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
+import rugbyniela.entity.dto.division.DivisionUpdateRequestDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
@@ -16,6 +17,7 @@ import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
+import rugbyniela.entity.dto.season.SeasonUpdateRequestDTO;
 import rugbyniela.entity.dto.team.TeamAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
@@ -58,8 +60,8 @@ public interface ICompetitiveService {
 	void deleteMatch(Long id);
 	void deleteTeam(Long id);
 	
-//	SeasonResponseDTO updateSeason(Long id, SeasonRequestDTO dto);
-//	void updateDivision();
+	SeasonResponseDTO updateSeason(Long id, SeasonUpdateRequestDTO dto);
+	DivisionResponseDTO updateDivision(Long id, DivisionUpdateRequestDTO dto);
 //	void updateMatchDay();
 //	void updateMatch();
 //	void updateTeam();

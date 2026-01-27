@@ -16,4 +16,5 @@ public interface MatchDayMapper {
 	
 	MatchDayResponseDTO toDTO(MatchDay matchDay);
 	
+	
 }
