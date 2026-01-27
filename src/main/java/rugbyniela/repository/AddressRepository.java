@@ -20,5 +20,4 @@ public interface AddressRepository extends JpaRepository<Address, Long>, JpaSpec
 			String city,
 			String postalCode,
 			String description);
-	Optional<Address> findAddressByStreetAndCityAndPostalCodeAndDescriptionDTO(AddressRequestDTO dto);
-}
+	}

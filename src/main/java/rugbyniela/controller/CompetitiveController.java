@@ -16,14 +16,17 @@ import lombok.RequiredArgsConstructor;
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
+import rugbyniela.entity.dto.division.DivisionUpdateRequestDTO;
 import rugbyniela.entity.dto.match.MatchAddToMatchDayRequestDTO;
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
+import rugbyniela.entity.dto.match.MatchUpdateRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayRequestDTO;
 import rugbyniela.entity.dto.matchDay.MatchDayResponseDTO;
 import rugbyniela.entity.dto.season.SeasonRequestDTO;
 import rugbyniela.entity.dto.season.SeasonResponseDTO;
+import rugbyniela.entity.dto.season.SeasonUpdateRequestDTO;
 import rugbyniela.entity.dto.team.TeamAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
@@ -219,6 +222,34 @@ public class CompetitiveController {
 //		return ResponseEntity.ok(response);
 //	}
 	
+	
+//	------------UPDATE-----------------	
+	@PostMapping("/update-season{id}")
+	public ResponseEntity<SeasonResponseDTO> updateSeason(@PathVariable Long id, @Valid@RequestBody SeasonUpdateRequestDTO dto){
+		SeasonResponseDTO season = competitiveService.updateSeason(id, dto);
+		return ResponseEntity.ok(season);
+	}
+	
+	@PostMapping("/update-division{id}")
+	public ResponseEntity<DivisionResponseDTO> updateDivision(@PathVariable Long id, @Valid@RequestBody DivisionUpdateRequestDTO dto){
+		DivisionResponseDTO division = competitiveService.updateDivision(id, dto);
+		return ResponseEntity.ok(division);
+	}
+	@PostMapping("/update-match-day{id}")
+	public ResponseEntity<MatchDayResponseDTO> updateMatchDay(@PathVariable Long id, @Valid@RequestBody MatchDayRequestDTO dto){
+		MatchDayResponseDTO matchDay = competitiveService.updateMatchDay(id, dto);
+		return ResponseEntity.ok(matchDay);
+	}
+	@PostMapping("/update-match{id}")
+	public ResponseEntity<MatchResponseDTO> updateMatch(@PathVariable Long id, @Valid@RequestBody MatchUpdateRequestDTO dto){
+		MatchResponseDTO match = competitiveService.updateMatch(id, dto);
+		return ResponseEntity.ok(match);
+	}
+	@PostMapping("/update-team{id}")
+	public ResponseEntity<TeamResponseDTO> updateTeam(@PathVariable Long id, @Valid@RequestBody TeamRequestDTO dto){
+		TeamResponseDTO team = competitiveService.updateTeam(id, dto);
+		return ResponseEntity.ok(team);
+	}
 }
 
 

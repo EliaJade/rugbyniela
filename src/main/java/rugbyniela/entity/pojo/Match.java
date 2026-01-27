@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import rugbyniela.enums.Bonus;
+import rugbyniela.enums.MatchStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

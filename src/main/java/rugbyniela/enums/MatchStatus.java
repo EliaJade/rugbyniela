@@ -1,4 +1,4 @@
-package rugbyniela.entity.pojo;
+package rugbyniela.enums;
 
 public enum MatchStatus {
 	SCHEDULED,

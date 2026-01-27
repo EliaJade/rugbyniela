@@ -10,6 +10,8 @@ import rugbyniela.entity.pojo.MatchDay;
 @Mapper(componentModel = "spring")
 public interface MatchDayMapper {
 
+	
+
 	MatchDay toEntity(MatchDayRequestDTO dto);
 	@Mapping(target = "matches", expression = "java(new java.util.HashSet<>())")
 	

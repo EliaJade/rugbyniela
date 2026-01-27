@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.net.ssl.SSLEngineResult.Status;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import rugbyniela.entity.dto.address.AddressRequestDTO;
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
@@ -39,12 +42,13 @@ import rugbyniela.entity.pojo.CoalitionSeasonScore;
 import rugbyniela.entity.pojo.Division;
 import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
-import rugbyniela.entity.pojo.MatchStatus;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.enums.ActionType;
+import rugbyniela.enums.Bonus;
 import rugbyniela.enums.Category;
+import rugbyniela.enums.MatchStatus;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.mapper.IAddressMapper;
 import rugbyniela.mapper.DivisionMapper;
@@ -634,9 +638,17 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Match match = checkMatch(id);
 		
 		if(dto.location()!=null) {
-			Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescriptionDTO(dto.location())
-				    .orElseGet(() -> addressRepository.save(addressMapper.toEntity(dto.location())));
+			String street = StringUtils.normalize(dto.location().street());
+		    String city = StringUtils.normalize(dto.location().city());
+		    String postalCode = StringUtils.normalize(dto.location().postalCode());
+		    String description = StringUtils.normalize(dto.location().description());
+
 			
+					
+			Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(
+					street, city, postalCode, description)
+				    .orElseGet(() -> addressRepository.save(addressMapper.toEntity(dto.location())));
+			match.setLocation(address);
 		}
 		
 		if(dto.name()!=null) {
@@ -648,13 +660,47 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		if(dto.localTeam()!=null) {
-//			match.setLocalTeam(dto.localTeam());
+		
+			Team localTeam = checkTeam(dto.localTeam());
+			match.setLocalTeam(localTeam);
 		}
-		return null;
+		
+		if(dto.awayTeam()!=null) {
+			Team awayTeam = checkTeam(dto.awayTeam());
+			match.setAwayTeam(awayTeam);
+		}
+		
+		if(dto.localResult()!=null) {
+			match.setLocalResult(dto.localResult());
+		}
+		
+		if(dto.awayResult()!=null) {
+			match.setAwayResult(dto.awayResult());
+		}
+		
+		if(dto.bonus()!=null) {
+			match.setBonus(Bonus.valueOf(dto.bonus()));
+		}
+		
+		if(dto.status()!=null) {
+			match.setStatus(MatchStatus.valueOf(dto.status()));
+		}
+		matchRepository.save(match);
+		return matchMapper.toDTO(match);
 		
 	}
 	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto) {
-		return null;
+		
+		Team team = checkTeam(id);
+		if(dto.name()!=null) {
+			team.setName(dto.name());
+			
+		}
+		if(dto.url()!=null) {
+			team.setUrl(dto.url());
+		}
+		teamRepository.save(team);
+		return teamMapper.toDTO(team);
 		
 	}
 	
