@@ -34,8 +34,11 @@ public interface IUserMapper {
 		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	    void updateUserFromDto(UserUpdatedRequestDTO dto, @MappingTarget User user); // im not sure what this does need to check
 	    
+		@Mapping(target = "gender", source = "gender", qualifiedByName = "stringToGender")
+	    @Mapping(target = "role", source = "role", qualifiedByName = "stringToRole")
 		User toEntity(UserRequestDTO dto);
 		
+		@Mapping(target = "coalitonName",source="currentCoalition.name")
 		UserResponseDTO toDTO(User entity);
 		
 		AddressResponseDTO addressToDto(Address address);

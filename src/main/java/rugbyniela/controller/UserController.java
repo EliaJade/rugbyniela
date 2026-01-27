@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -33,11 +39,16 @@ import rugbyniela.service.UserServiceImp;
 public class UserController {
 
 	private final UserServiceImp userService;
+	private final ObjectMapper objectMapper;
 
 	
-	@PostMapping("/register")
-	public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody UserRequestDTO dto) {
-			UserResponseDTO response = userService.register(dto);
+	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<UserResponseDTO> register(
+			@RequestPart("user") String dto,
+            @RequestPart(value = "file", required = false) MultipartFile file)throws JsonProcessingException {
+		
+			UserRequestDTO userRequest = objectMapper.readValue(dto, UserRequestDTO.class);
+			UserResponseDTO response = userService.register(userRequest,file);
 			return ResponseEntity.ok(response);
 	}
 	

@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -69,9 +70,10 @@ public class UserServiceImp implements IUserService {
 	private final IUserSeasonScoreMaper userSeasonScoreMaper;
 	private final AddressRepository addressRepository;
 	private final IAddressMapper addressMapper;
+	private final ISupabaseStorageService supabaseStorageService;
 
 	@Override
-	public UserResponseDTO register(UserRequestDTO dto) {
+	public UserResponseDTO register(UserRequestDTO dto, MultipartFile profilePicture) {
 		
 		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
 			log.warn("Intento fallido de registro. Email ya existe {}",dto.email());
@@ -100,6 +102,16 @@ public class UserServiceImp implements IUserService {
 		user.setPassword(encoder.encode(dto.password()));
 		user.setActive(true);
 		user.setAddress(address);
+		if (profilePicture != null && !profilePicture.isEmpty()) {
+            // Generar nombre único: nickname_timestamp.jpg (para evitar sobrescribir)
+            String filename = StringUtils.normalize(user.getNickname()) + "_" + System.currentTimeMillis() + "_" + profilePicture.getOriginalFilename();
+            
+            // Subir a Supabase
+            String publicUrl = supabaseStorageService.uploadProfilePicture(profilePicture, filename);
+            
+            // Guardar URL en entidad
+            user.setProfilePictureUrl(publicUrl);
+        }
 		//save
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		log.info("Usuario creado!");

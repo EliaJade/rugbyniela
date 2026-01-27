@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import rugbyniela.entity.dto.user.ChangePassworRequestDTO;
@@ -19,7 +20,7 @@ import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 
 public interface IUserService {
 
-	UserResponseDTO register(UserRequestDTO dto);
+	UserResponseDTO register(UserRequestDTO dto, MultipartFile profilePicture);
 	UserResponseDTO update(UserUpdatedRequestDTO dto);
 	UserResponseDTO fetchUserById(Long id);
 	UserResponseDTO fetchCurrentUser();

@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import rugbyniela.entity.dto.user.LoginRequestDTO;
 import rugbyniela.entity.dto.user.LoginResponseDTO;
 import rugbyniela.service.IAuthService;
@@ -23,5 +25,11 @@ public class LoginController {
 	public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequestDTO){
 		LoginResponseDTO dto = authService.login(loginRequestDTO);
 		return ResponseEntity.ok(dto);
+	}
+	@PostMapping("/refresh-token")
+	public ResponseEntity<LoginResponseDTO> refreshToken(
+	    HttpServletRequest request
+	) {
+	    return ResponseEntity.ok(authService.refreshToken(request));
 	}
 }

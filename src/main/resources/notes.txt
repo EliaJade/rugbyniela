@@ -23,6 +23,7 @@ DOCUMENT TO WRITE IDEAS!.
   andres.lopez@example.com -> Andres*99
   sofia.ramirez@example.com -> Abc22@Sofi
   							   Sofi!22abc //this is the previous password
+  rigby.cardona@example.com -> rigby!77abc
 ==========================================================================================================================
 
 
