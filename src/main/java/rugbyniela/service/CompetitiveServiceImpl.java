@@ -14,6 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +47,7 @@ import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
+import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Bonus;
@@ -62,6 +66,7 @@ import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TeamRepository;
+import rugbyniela.repository.UserRepository;
 import rugbyniela.utils.StringUtils;
 
 
@@ -88,15 +93,26 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 //------------all and by id-------------------------------------------------------------------------
 	
 
-	
+	//TODO: check the authentication is correct
 	@Override
 	public Page<SeasonResponseDTO> fetchAllSeasons(int page) {
 		//Validate there are seasons
 		checkNegativePage(page);
 
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("startSeason").descending());
-		Page<Season> seasons = seasonRepository.findAll(pageable);
 		
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		
+		boolean isAdmin = auth.getAuthorities().stream()
+				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
+		
+		Page<Season> seasons;
+		if(isAdmin) {
+			seasons = seasonRepository.findAll(pageable);
+			
+		} else {
+			seasons = seasonRepository.findByIsActiveTrue(pageable);
+		}
 		if(seasons.isEmpty()) {
 			throw new RugbyException("No hay temporadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 			
@@ -248,6 +264,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	
 
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public SeasonResponseDTO createSeason(SeasonRequestDTO dto) {
 		if (dto.endSeason().isBefore(dto.startSeason())) {
@@ -277,6 +294,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	
 	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public DivisionResponseDTO createDivision(DivisionRequestDTO dto) {
 		Category categoryEnum;
@@ -310,6 +328,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public MatchDayResponseDTO createMatchDay(MatchDayRequestDTO dto) {
 		if(dto.dateEnd()!= null) {
@@ -325,6 +344,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public MatchResponseDTO createMatch(MatchRequestDTO dto) {
 		LocalDateTime now = LocalDateTime.now();
@@ -361,6 +381,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public TeamResponseDTO createTeam(TeamRequestDTO dto) {
 		if(teamRepository.existsByName(dto.name())) {
@@ -374,6 +395,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public SeasonResponseDTO addDivisionToSeason(DivisionAddToSeasonRequestDTO dto) {
 		Season season = checkSeason(dto.season());
@@ -406,6 +428,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public DivisionResponseDTO addMatchDayToDivision(MatchDayAddToDivisionRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
@@ -424,6 +447,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
@@ -449,6 +473,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return matchDayMapper.toDTO(matchDay);
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
@@ -469,9 +494,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 //------------DELETE-------------------------------------------------------------------------	
 	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public void deleteSeason(Long id) {
 		//Only admin
+		 
 		Season season = checkSeason(id);
 		boolean hasActiveDivisions = season.getDivisions().stream()
 				.anyMatch(Division::getIsActive);
@@ -497,6 +524,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public void deleteDivision(Long id) {
 		Division division = checkDivision(id);
@@ -514,6 +542,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public void deleteMatchDay(Long id) {
 		LocalDate now = LocalDate.now();
@@ -534,7 +563,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		matchDay.setName(name);
 		matchDayRepository.save(matchDay);
 	}
+	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public void deleteMatch(Long id) {
 		LocalDateTime now = LocalDateTime.now();
@@ -555,6 +586,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public void deleteTeam(Long id) {
 		Team team = checkTeam(id);
@@ -572,6 +604,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 //------------UPDATE-------------------------------------------------------------------------	
 	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public SeasonResponseDTO updateSeason(Long id, SeasonUpdateRequestDTO dto) {
 		Season season = checkSeason(id);
@@ -595,6 +628,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	@Override
 	public DivisionResponseDTO updateDivision(Long id, DivisionUpdateRequestDTO dto) {
 		Division division = checkDivision(id);
@@ -618,6 +652,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 
+	@Override
+	@PreAuthorize("hasRole('ADMIN')")
+	@Transactional
 	public MatchDayResponseDTO updateMatchDay(Long id, MatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(id);
 		if(dto.dateBegin()!=null) {
@@ -634,6 +671,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	
+	@Override
+	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	public MatchResponseDTO updateMatch(Long id, MatchUpdateRequestDTO dto) {
 		Match match = checkMatch(id);
 		

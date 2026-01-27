@@ -73,59 +73,59 @@ public class UserServiceImp implements IUserService {
 	@Override
 	public UserResponseDTO register(UserRequestDTO dto) {
 		
-//		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
-//			log.warn("Intento fallido de registro. Email ya existe {}",dto.email());
-//			throw new RugbyException("Este email ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
-//	    }
-//		if(userRepository.existsByPhoneNumber(dto.phoneNumber())) {
-//			log.warn("Intento fallido de registro. Numero de telefono ya existe {}",dto.phoneNumber());
-//			throw new RugbyException("Este numero de telefono ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
-//		}
-//		if(dto.instagram()!= null && userRepository.existsByInstagram(dto.instagram())) {
-//			log.warn("Intento fallido de registro. Instagram ya existe {}",dto.instagram());
-//			throw new RugbyException("Este instagram ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
-//		}
-//		String street = StringUtils.normalize(dto.address().street());
-//		String city = StringUtils.normalize(dto.address().city());
-//		String postalCode = StringUtils.normalize(dto.address().postalCode());
-//		String description = StringUtils.normalize(dto.address().description());
-//		Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
-//				.orElseGet(()->{
-//					Address newAddress = addressMapper.toEntity(dto.address());
-//					return addressRepository.save(newAddress);
-//				});
-//		//mapping
-//		User user = userMapper.toEntity(dto);
-//		//encrypt password
-//		user.setPassword(encoder.encode(dto.password()));
-//		user.setActive(true);
-//		user.setAddress(address);
-//		//save
-//		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
-//		log.info("Usuario creado!");
-//		return userMapper.toDTO(user);
+		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
+			log.warn("Intento fallido de registro. Email ya existe {}",dto.email());
+			throw new RugbyException("Este email ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
+	    }
+		if(userRepository.existsByPhoneNumber(dto.phoneNumber())) {
+			log.warn("Intento fallido de registro. Numero de telefono ya existe {}",dto.phoneNumber());
+			throw new RugbyException("Este numero de telefono ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
+		}
+		if(dto.instagram()!= null && userRepository.existsByInstagram(dto.instagram())) {
+			log.warn("Intento fallido de registro. Instagram ya existe {}",dto.instagram());
+			throw new RugbyException("Este instagram ya existe", HttpStatus.BAD_REQUEST, ActionType.REGISTRATION);
+		}
+		String street = StringUtils.normalize(dto.address().street());
+		String city = StringUtils.normalize(dto.address().city());
+		String postalCode = StringUtils.normalize(dto.address().postalCode());
+		String description = StringUtils.normalize(dto.address().description());
+		Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
+				.orElseGet(()->{
+					Address newAddress = addressMapper.toEntity(dto.address());
+					return addressRepository.save(newAddress);
+				});
+		//mapping
+		User user = userMapper.toEntity(dto);
+		//encrypt password
+		user.setPassword(encoder.encode(dto.password()));
+		user.setActive(true);
+		user.setAddress(address);
+		//save
+		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
+		log.info("Usuario creado!");
+		return userMapper.toDTO(user);
 		return null;
 	}
 
 	@Override
 	public UserResponseDTO update(UserUpdatedRequestDTO dto) {
 		//Find existing user
-//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
-//	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
-//	    });
-//		//partial update
-//		userMapper.updateUserFromDto(dto, user);
-//		User updatedUser = userRepository.save(user);
-//		return userMapper.toDTO(updatedUser);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
+	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
+	    });
+		//partial update
+		userMapper.updateUserFromDto(dto, user);
+		User updatedUser = userRepository.save(user);
+		return userMapper.toDTO(updatedUser);
 		return null;
 	}
 
 	@Override
 	public UserResponseDTO fetchUserById(Long id) {
-//		User user = userRepository.findById(id)
-//				.orElseThrow(()->new RugbyException("El usuario con id "+id+" no existe", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION));
-//		return userMapper.toDTO(user);
+		User user = userRepository.findById(id)
+				.orElseThrow(()->new RugbyException("El usuario con id "+id+" no existe", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION));
+		return userMapper.toDTO(user);
 		return null;
 	}
 
@@ -207,11 +207,11 @@ public class UserServiceImp implements IUserService {
 	@Override
 	@Transactional
 	public UserResponseDTO fetchCurrentUser() {
-//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
-//	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
-//	    });
-//		return userMapper.toDTO(user);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
+	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
+	    });
+		return userMapper.toDTO(user);
 		return null;
 	}
 
