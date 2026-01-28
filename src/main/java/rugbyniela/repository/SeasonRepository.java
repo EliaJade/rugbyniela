@@ -19,4 +19,5 @@ public interface SeasonRepository extends JpaRepository<Season, Long>, JpaSpecif
 	public Optional<Season> findByIdAndIsActiveTrue(Long id);
 	boolean existsByName(String name);
 	public Page<Season> findByIsActiveTrue(Pageable pageable);
+	public Page<Season> findByActive(Pageable pageable);
 }

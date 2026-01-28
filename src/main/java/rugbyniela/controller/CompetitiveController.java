@@ -2,6 +2,8 @@ package rugbyniela.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,8 +44,17 @@ public class CompetitiveController {
 //	------------ALL-----------------	
 	
 	@GetMapping("/seasons")
-	public ResponseEntity<Page<SeasonResponseDTO>> getSeasons(@RequestParam(defaultValue = "0") int page){
-		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page));
+	public ResponseEntity<Page<SeasonResponseDTO>> getSeasons(
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(required = false) Boolean isActive,
+			Authentication auth){
+		
+		boolean isAdmin = auth != null && auth.getAuthorities().stream()
+				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
+		if(!isAdmin) {
+			isActive=true;
+		}
+		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page, isActive));
 	}
 	
 	@GetMapping("/divisions")
@@ -123,58 +134,58 @@ public class CompetitiveController {
 		
 	}
 //	------------CREATE and ADD-----------------
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-team")
 	public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto){
 		TeamResponseDTO response = competitiveService.createTeam(dto);
 		return ResponseEntity.ok(response);
 		
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/add-team")
 	public ResponseEntity<DivisionResponseDTO> addTeamToDivision(@Valid@RequestBody TeamAddToDivisionRequestDTO dto){
 		DivisionResponseDTO response = competitiveService.addTeamToDivision(dto);
 		return ResponseEntity.ok(response);
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-match")
 	public ResponseEntity<MatchResponseDTO> createMatch(@Valid @RequestBody MatchRequestDTO dto){
 		MatchResponseDTO response = competitiveService.createMatch(dto);
 		return ResponseEntity.ok(response);
 		
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/add-match")
 	public ResponseEntity<MatchDayResponseDTO> addMatchToMatchDay(@Valid @RequestBody MatchAddToMatchDayRequestDTO dto){
 		MatchDayResponseDTO response = competitiveService.addMatchToMatchDay(dto);
 		return ResponseEntity.ok(response);
 		
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-match-day")
 	public ResponseEntity<MatchDayResponseDTO> createMatchDay(@Valid@RequestBody MatchDayRequestDTO dto){
 		MatchDayResponseDTO response = competitiveService.createMatchDay(dto);
 		return ResponseEntity.ok(response);
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/add-match-day")
 	public ResponseEntity<DivisionResponseDTO> addMatchDayToDivision(@Valid@RequestBody MatchDayAddToDivisionRequestDTO dto){
 		DivisionResponseDTO response = competitiveService.addMatchDayToDivision(dto);
 		return ResponseEntity.ok(response);
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-division")
 	public ResponseEntity<DivisionResponseDTO> createDivision(@Valid@RequestBody DivisionRequestDTO dto){
 		DivisionResponseDTO response = competitiveService.createDivision(dto);
 		return ResponseEntity.ok(response);
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/add-division")
 	public ResponseEntity<SeasonResponseDTO> addDivisionToSeason(@Valid@RequestBody DivisionAddToSeasonRequestDTO dto){
 		SeasonResponseDTO response = competitiveService.addDivisionToSeason(dto);
 		return ResponseEntity.ok(response);
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-season")
 	public ResponseEntity<SeasonResponseDTO> createSeason(@Valid@RequestBody SeasonRequestDTO dto){
 		SeasonResponseDTO response = competitiveService.createSeason(dto);
@@ -184,31 +195,31 @@ public class CompetitiveController {
 	
 	
 //	------------DELETE-----------------		 
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/delete-season{id}")
 	public ResponseEntity<SeasonResponseDTO> deleteSeason(@PathVariable Long id){
 		competitiveService.deleteSeason(id);
 		return ResponseEntity.noContent().build();
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/delete-division{id}")
 	public ResponseEntity<DivisionResponseDTO> deleteDivision(@PathVariable Long id){
 		competitiveService.deleteDivision(id);
 		return ResponseEntity.noContent().build();
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/delete-match-day{id}")
 	public ResponseEntity<MatchDayResponseDTO> deleteMatchDay(@PathVariable Long id){
 		competitiveService.deleteMatchDay(id);
 		return ResponseEntity.noContent().build();
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/delete-match{id}")
 	public ResponseEntity<MatchRequestDTO> deleteMatch(@PathVariable Long id){
 		competitiveService.deleteMatch(id);
 		return ResponseEntity.noContent().build();
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/delete-team{id}")
 	public ResponseEntity<TeamResponseDTO> deleteTeam(@PathVariable Long id){
 		competitiveService.deleteTeam(id);
@@ -223,28 +234,32 @@ public class CompetitiveController {
 //	}
 	
 	
-//	------------UPDATE-----------------	
+//	------------UPDATE-----------------
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-season{id}")
 	public ResponseEntity<SeasonResponseDTO> updateSeason(@PathVariable Long id, @Valid@RequestBody SeasonUpdateRequestDTO dto){
 		SeasonResponseDTO season = competitiveService.updateSeason(id, dto);
 		return ResponseEntity.ok(season);
 	}
-	
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-division{id}")
 	public ResponseEntity<DivisionResponseDTO> updateDivision(@PathVariable Long id, @Valid@RequestBody DivisionUpdateRequestDTO dto){
 		DivisionResponseDTO division = competitiveService.updateDivision(id, dto);
 		return ResponseEntity.ok(division);
 	}
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-match-day{id}")
 	public ResponseEntity<MatchDayResponseDTO> updateMatchDay(@PathVariable Long id, @Valid@RequestBody MatchDayRequestDTO dto){
 		MatchDayResponseDTO matchDay = competitiveService.updateMatchDay(id, dto);
 		return ResponseEntity.ok(matchDay);
 	}
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-match{id}")
 	public ResponseEntity<MatchResponseDTO> updateMatch(@PathVariable Long id, @Valid@RequestBody MatchUpdateRequestDTO dto){
 		MatchResponseDTO match = competitiveService.updateMatch(id, dto);
 		return ResponseEntity.ok(match);
 	}
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-team{id}")
 	public ResponseEntity<TeamResponseDTO> updateTeam(@PathVariable Long id, @Valid@RequestBody TeamRequestDTO dto){
 		TeamResponseDTO team = competitiveService.updateTeam(id, dto);

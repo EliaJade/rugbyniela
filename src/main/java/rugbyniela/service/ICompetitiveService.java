@@ -28,7 +28,7 @@ import rugbyniela.entity.pojo.Team;
 
 public interface ICompetitiveService {
 
-	Page<SeasonResponseDTO> fetchAllSeasons(int page);
+	Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive);
 	SeasonResponseDTO fetchSeasonById(Long seasonId);
 	Page<DivisionResponseDTO> fetchAllDivisions(int page);
 	DivisionResponseDTO fetchDivisionById(Long divisionId);
