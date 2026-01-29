@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import rugbyniela.entity.pojo.Division;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 
@@ -19,6 +18,7 @@ import rugbyniela.entity.pojo.Team;
 public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
 	
 	boolean existsByName(String name);
+	Page<Team> findByIsActive(Boolean isActive, Pageable pageable);
 
 	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId ORDER BY t.name")Page<Team> findTeamsBySeasonAndDivision(@Param("season")Season season, @Param("divisionId")Long divisionId, Pageable pageable);
 

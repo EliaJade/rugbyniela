@@ -7,22 +7,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.net.ssl.SSLEngineResult.Status;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import rugbyniela.entity.dto.address.AddressRequestDTO;
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
@@ -47,7 +42,6 @@ import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
-import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Bonus;
@@ -66,7 +60,6 @@ import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TeamRepository;
-import rugbyniela.repository.UserRepository;
 import rugbyniela.utils.StringUtils;
 
 
@@ -106,7 +99,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			seasons = seasonRepository.findAll(pageable);
 			
 		} else {
-			seasons = seasonRepository.findByActive(pageable);
+			seasons = seasonRepository.findByIsActive(isActive, pageable);
 		}
 		if(seasons.isEmpty()) {
 			throw new RugbyException("No hay temporadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
@@ -125,10 +118,16 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 	}
 	@Override
-	public Page<DivisionResponseDTO> fetchAllDivisions(int page) {
+	public Page<DivisionResponseDTO> fetchAllDivisions(int page, Boolean isActive) {
 		checkNegativePage(page);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").descending());
-		Page<Division> divisions = divisionRepository.findAll(pageable);
+		Page<Division> divisions;
+		if(isActive == null) {
+			divisions = divisionRepository.findAll(pageable);;
+			
+		} else {
+			divisions = divisionRepository.findByIsActive(isActive, pageable);
+		}
 		if(divisions.isEmpty()) {
 			throw new RugbyException("No hay divisiones", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 			
@@ -144,10 +143,16 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 
 	@Override
-	public Page<MatchDayResponseDTO> fetchAllMatchDays(int page) {
+	public Page<MatchDayResponseDTO> fetchAllMatchDays(int page, Boolean isActive) {
 		checkNegativePage(page);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("dateBegin").descending());
-		Page<MatchDay> matchDays = matchDayRepository.findAll(pageable);
+		Page<MatchDay> matchDays;
+		if(isActive == null) {
+			matchDays = matchDayRepository.findAll(pageable);
+			
+		} else {
+			matchDays = matchDayRepository.findByIsActive(isActive, pageable);
+		}
 		if(matchDays.isEmpty()) {
 			throw new RugbyException("No hay jornadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
@@ -163,10 +168,16 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 
 	@Override
-	public Page<MatchResponseDTO> fetchAllMatches(int page) {
+	public Page<MatchResponseDTO> fetchAllMatches(int page, Boolean isActive) {
 		checkNegativePage(page);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("timeMatchStart").descending());
-		Page<Match> matches = matchRepository.findAll(pageable);
+		Page<Match> matches; 
+		if(isActive == null) {
+			matches = matchRepository.findAll(pageable);
+			
+		} else {
+			matches = matchRepository.findByIsActive(isActive, pageable);
+		}
 		if(matches.isEmpty()) {
 			throw new RugbyException("No hay partidos", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
 			
@@ -181,11 +192,16 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	@Override
-	public Page<TeamResponseDTO> fetchAllTeams(int page) {
+	public Page<TeamResponseDTO> fetchAllTeams(int page, Boolean isActive) {
 		
 		checkNegativePage(page);
-		Pageable pageble = PageRequest.of(page, 10, Sort.by("name").descending());
-		Page<Team> teams = teamRepository.findAll(pageble);
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").descending());
+		Page<Team> teams;
+		if(isActive == null) {
+			teams = teamRepository.findAll(pageable);
+		} else {
+			teams = teamRepository.findByIsActive(isActive, pageable);
+		}
 		if(teams.isEmpty()) {
 			throw new RugbyException("No hay equipos", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
 		}
@@ -330,6 +346,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		MatchDay matchDay = matchDayMapper.toEntity(dto);
+		if(matchDay.getIsActive()==null) {
+			matchDay.setIsActive(true);
+		}
 		matchDayRepository.save(matchDay);
 		
 		return matchDayMapper.toDTO(matchDay);
@@ -361,6 +380,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 				});
 		
 		Match match = matchMapper.toEntity(dto);
+		if(match.getIsActive()==null) {
+			match.setIsActive(true);
+		}
 		if(match.getStatus()==null) {
 			match.setStatus(MatchStatus.SCHEDULED);
 		}
@@ -379,6 +401,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		Team team = teamMapper.toEntity(dto);
+		if(team.getIsActive()==null) {
+			team.setIsActive(true);
+		}
 		teamRepository.save(team);
 		return teamMapper.toDTO(team);
 		
@@ -616,14 +641,15 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		if(dto.category()!=null) {
-			division.setCategory(Category.valueOf(dto.category()));
+			Category categoryEnum;
+			try {
+				categoryEnum = Category.valueOf(dto.category());
+			}catch (IllegalArgumentException e ) {
+				throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			}
+			division.setCategory(categoryEnum);
 		}
-		Category categoryEnum;
-		try {
-			categoryEnum = Category.valueOf(dto.category());
-		}catch (IllegalArgumentException e ) {
-			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-		}
+		
 		divisionRepository.save(division);
 		
 		

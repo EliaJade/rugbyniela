@@ -20,4 +20,6 @@ public interface MatchRepository extends JpaRepository<Match, Long>, JpaSpecific
 	
 	boolean existsByLocalTeamOrAwayTeam(Team localTeam, Team awayTeam);
 
+	Page<Match> findByIsActive(Boolean isActive, Pageable pageable);
+
 }

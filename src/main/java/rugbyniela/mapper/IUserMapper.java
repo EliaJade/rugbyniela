@@ -26,7 +26,6 @@ import rugbyniela.exception.RugbyException;
 	    unmappedTargetPolicy = ReportingPolicy.IGNORE // Ignora campos que no coincidan (útil para password)
 	)
 public interface IUserMapper {
-	
 		@Mapping(target = "gender",source="gender",qualifiedByName = "stringToGender")
 //		@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
 		@Mapping(target = "password",ignore = true)//TODO: change this in order to allow mapstruct do this for us

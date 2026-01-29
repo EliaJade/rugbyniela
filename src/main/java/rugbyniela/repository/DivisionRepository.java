@@ -26,5 +26,7 @@ public interface DivisionRepository extends JpaRepository<Division, Long>, JpaSp
 	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season")
 	Page<Team> findTeamsBySeason(@Param("season") Season season, Pageable pageable);
 
+	Page<Division> findByIsActive(Boolean isActive, Pageable pageable);
+
 
 }
