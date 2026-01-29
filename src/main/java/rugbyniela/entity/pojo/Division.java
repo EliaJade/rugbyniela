@@ -50,7 +50,7 @@ public class Division {
 	
 	private Boolean isActive;
 	
-	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<MatchDay> matchDays; //bidirectional relationship
 	
 	//to know which teams we could pair with each other

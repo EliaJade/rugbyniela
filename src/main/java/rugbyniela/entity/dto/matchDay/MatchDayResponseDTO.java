@@ -14,7 +14,6 @@ public record MatchDayResponseDTO(
 		LocalDate dateEnd,
 		Set<MatchResponseDTO> matches,
 		//we have to configure mapstruct to do this
-		Set<TeamResponseDTO> teamDivision,
 		boolean arePointsCalculated) {
 
 }

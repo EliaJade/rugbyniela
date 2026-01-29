@@ -161,10 +161,13 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 
 	@Override
+	@Transactional
 	public MatchDayResponseDTO fetchMatchDayById(long matchDayId) {
 		MatchDay matchDay = checkMatchDay(matchDayId);
-		
-		return matchDayMapper.toDTO(matchDay);
+		System.out.println(matchDay);
+		MatchDayResponseDTO response = matchDayMapper.toDTO(matchDay);
+		System.out.println(response);
+		return response;
 	}
 
 	@Override
@@ -360,16 +363,19 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Transactional
 	@Override
 	public MatchDayResponseDTO createMatchDay(MatchDayRequestDTO dto) {
+		//TODO: validation that you cant create a matchday with the same name begin date and end date
+		Division division = checkDivision(dto.divisionId());
 		if(dto.dateEnd()!= null) {
 			if(dto.dateBegin().isAfter(dto.dateEnd())) {
 				throw new RugbyException("No puede acabar la jornada antes de que haya empezado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 			}
 		}
-		
+		//TODO: add id of division it belongs to
 		MatchDay matchDay = matchDayMapper.toEntity(dto);
 		if(matchDay.getIsActive()==null) {
 			matchDay.setIsActive(true);
 		}
+		matchDay.setDivision(division);
 		matchDayRepository.save(matchDay);
 		
 		return matchDayMapper.toDTO(matchDay);
