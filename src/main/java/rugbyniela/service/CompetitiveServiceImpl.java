@@ -290,6 +290,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			} else {
 			teams = teamRepository.findTeamsByIsActiveAndSeasonAndDivision(isActive, season, division.getId(), pageable);
 			}
+		//TODO:logs
 		return teams.map(teamMapper::toDTO);
 		
 	}
@@ -320,7 +321,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 		season.setDivisions(divisions);
 		seasonRepository.save(season);
-		
+		log.info("Se ha creado la temporada {} correctamente", 
+				season.getId());
 		return seasonMapper.toDTO(season);
 		
 	}
@@ -355,7 +357,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}						
 		division.setTeams(teams);		
 		divisionRepository.save(division);
-		
+		log.info("Se ha creado la division {} correctamente", 
+				division.getId());
 		return divisionMapper.toDTO(division);
 		
 		
@@ -377,7 +380,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		matchDay.setDivision(division);
 		matchDayRepository.save(matchDay);
-		
+		log.info("Se ha creado la jornada {} correctamente", 
+				matchDay.getId());
 		return matchDayMapper.toDTO(matchDay);
 		
 	}
@@ -416,7 +420,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		match.setLocation(address);
 		match.setLocalTeam(localTeam);
 		match.setAwayTeam(awayTeam);
-		matchRepository.save(match); ;
+		matchRepository.save(match); 
+		log.info("Se ha creado el partido {} correctamente", 
+				match.getId());
 		return matchMapper.toDTO(match);
 		
 	}
@@ -432,6 +438,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			team.setIsActive(true);
 		}
 		teamRepository.save(team);
+		log.info("Se ha creado el equipo {} correctamente", 
+				team.getId());
 		return teamMapper.toDTO(team);
 		
 		
@@ -441,6 +449,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public SeasonResponseDTO addDivisionToSeason(DivisionAddToSeasonRequestDTO dto) {
 		Season season = checkSeason(dto.season());
 		Division division = checkDivision(dto.division());
+		if(Boolean.FALSE.equals(season.getIsActive())) {
+			throw new RugbyException("No puedes añadir una division a una temporada eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes añadir una division eliminada a una temporada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		LocalDate seasonStart = season.getStartSeason();
 		LocalDate seasonEnd = season.getEndSeason();
 		LocalDate now = LocalDate.now();
@@ -469,7 +483,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		division.setSeason(season);
 		seasonRepository.save(season);
 		divisionRepository.save(division);
-		
+		log.info("Se ha añadido la division {} a la temporada {} correctamente", 
+				division.getId(), season.getId());
 		return seasonMapper.toDTO(season);
 		
 	}
@@ -478,6 +493,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO addMatchDayToDivision(MatchDayAddToDivisionRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
 		Division division = checkDivision(dto.division());
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes añadir una jornada a una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(Boolean.FALSE.equals(matchDay.getIsActive())) {
+			throw new RugbyException("No puedes añadir una jornada eliminada a una division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		Season season = checkSeason(division.getSeason().getId());
 		LocalDate now = LocalDate.now();
 		boolean teamOutside = matchDay.getMatches().stream()
@@ -494,6 +515,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		matchDay.setDivision(division);
 		matchDayRepository.save(matchDay);
 		divisionRepository.save(division);
+		log.info("Se ha añadido la jornada {} a la division {} correctamente", 
+				matchDay.getId(), division.getId());
 		return divisionMapper.toDTO(division);
 	}
 	
@@ -502,6 +525,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
 		Match match = checkMatch(dto.match());
+		if(Boolean.FALSE.equals(matchDay.getIsActive())) {
+			throw new RugbyException("No puedes añadir un partido a una jornada eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(Boolean.FALSE.equals(match.getIsActive())) {
+			throw new RugbyException("No puedes añadir un partido eliminado a una jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		LocalDate now = LocalDate.now();
 		if(match.getTimeMatchStart().isBefore(matchDay.getDateBegin().atStartOfDay())) {
 			throw new RugbyException("No puede empezar el partido antes de la jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
@@ -524,6 +553,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		match.setMatchDay(matchDay);
 		matchDayRepository.save(matchDay);
 		matchRepository.save(match);
+		log.info("Se ha añadido el partido {} a la jornada {} correctamente", 
+				match.getId(), matchDay.getId());
 		return matchDayMapper.toDTO(matchDay);
 	}
 	@Transactional
@@ -531,6 +562,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
 		Division division = checkDivision(dto.division());
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes añadir un equipo a una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(Boolean.FALSE.equals(team.getIsActive())) {
+			throw new RugbyException("No puedes añadir un equipo eliminado a una division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		Season season = checkSeason(division.getSeason().getId());
 		LocalDate now = LocalDate.now();
 		boolean exists = division.getTeams().stream()
@@ -545,7 +582,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		division.addTeam(team);
 		divisionRepository.save(division);
-		
+		log.info("Se ha añadido el equipo {} a la division {} correctamente", 
+				team.getId(), division.getId());
+//		log.debug(division.toString());
 		return divisionMapper.toDTO(division);
 	}
 	
@@ -554,9 +593,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Transactional
 	@Override
 	public void deleteSeason(Long id) {
-		//Only admin
 		 
 		Season season = checkSeason(id);
+		
+		if(Boolean.FALSE.equals(season.getIsActive())) {
+			throw new RugbyException("No puedes borrar una temporada ya eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		boolean hasActiveDivisions = season.getDivisions().stream()
 				.anyMatch(Division::getIsActive);
 		boolean hasActiveUsers = season.getSeasonParticipants().stream()
@@ -584,6 +626,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Override
 	public void deleteDivision(Long id) {
 		Division division = checkDivision(id);
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes borrar una division ya eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		boolean hasActiveMatchDays = division.getMatchDays().stream()
 				.anyMatch(MatchDay::getIsActive);
 		if(hasActiveMatchDays) {
@@ -594,7 +639,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		String name = deletedName(division.getName());
 		division.setName(name);
 		divisionRepository.save(division);
-		
+		log.info("Se ha eliminado la division {}", 
+				division.getId());
 	}
 	
 	@Transactional
@@ -602,6 +648,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public void deleteMatchDay(Long id) {
 		LocalDate now = LocalDate.now();
 		MatchDay matchDay = checkMatchDay(id);
+		if(Boolean.FALSE.equals(matchDay.getIsActive())) {
+			throw new RugbyException("No puedes borrar una jornada ya eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		boolean hasActiveMatches = matchDay.getMatches().stream()
 				.anyMatch(Match::getIsActive);
 		if(hasActiveMatches) {
@@ -610,13 +659,14 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		if(matchDay.getDateEnd().isBefore(now)) {
 			throw new RugbyException("No se puede borrar una jornada que ya ha terminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-//			
 		}
 		
 		matchDay.setIsActive(false);
 		String name = deletedName(matchDay.getName());
 		matchDay.setName(name);
 		matchDayRepository.save(matchDay);
+		log.info("Se ha eliminado la jornada {}", 
+				matchDay.getId());
 	}
 	
 	@Transactional
@@ -624,25 +674,26 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public void deleteMatch(Long id) {
 		LocalDateTime now = LocalDateTime.now();
 		Match match = checkMatch(id);
-//		boolean isUsedInMatchDay = matchDayRepository.existsByMatchesContaining(match);
-//		if(isUsedInMatchDay) {
-//			throw new RugbyException("No se puede borrar un partido que esta associado a una jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-//			
-//		}
+		if(Boolean.FALSE.equals(match.getIsActive())) {
+			throw new RugbyException("No puedes borrar un partido ya eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		if(match.getTimeMatchStart().isBefore(now)) {
-			throw new RugbyException("No se puede borrar un partido que ya se ha jugado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-//			
+			throw new RugbyException("No se puede borrar un partido que ya se ha jugado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);			
 		}
 		match.setIsActive(false);
 		String name = deletedName(match.getName());
 		match.setName(name);
 		matchRepository.save(match);
-		
+		log.info("Se ha eliminado el partido {}", 
+				match.getId());
 	}
 	@Transactional
 	@Override
 	public void deleteTeam(Long id) {
 		Team team = checkTeam(id);
+		if(Boolean.FALSE.equals(team.getIsActive())) {
+			throw new RugbyException("No puedes borrar un partido ya eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		boolean isUsedInMatch = matchRepository.existsByLocalTeamOrAwayTeam(team, team);
 		if(isUsedInMatch) {
 			throw new RugbyException("No se puede borrar un equipo que esta associado a un partido", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
@@ -651,6 +702,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		String name = deletedName(team.getName());
 		team.setName(name);
 		teamRepository.save(team);
+		log.info("Se ha eliminado el equipo {}", 
+				team.getId());
 	}
 	
 	
@@ -660,6 +713,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Override
 	public SeasonResponseDTO updateSeason(Long id, SeasonUpdateRequestDTO dto) {
 		Season season = checkSeason(id);
+		
+		if(Boolean.FALSE.equals(season.getIsActive())) {
+			throw new RugbyException("No puedes actualizar una temporada eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		
 		if(dto.name()!= null) {
 			season.setName(dto.name());
@@ -675,7 +732,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 		seasonRepository.save(season);
 		
-		
+		log.info("Se ha actualizado la temporada {} correctamente", 
+				season.getId());
 		return seasonMapper.toDTO(season);
 	}
 	
@@ -683,6 +741,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Override
 	public DivisionResponseDTO updateDivision(Long id, DivisionUpdateRequestDTO dto) {
 		Division division = checkDivision(id);
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes actualizar una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
 		if(dto.name()!= null) {
 			division.setName(dto.name());
 		}
@@ -698,7 +760,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		divisionRepository.save(division);
-		
+		log.info("Se ha actualizado la division {} correctamente", 
+				division.getId());
 		
 		return divisionMapper.toDTO(division);
 		
@@ -708,6 +771,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Transactional
 	public MatchDayResponseDTO updateMatchDay(Long id, MatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(id);
+		if(Boolean.FALSE.equals(matchDay.getIsActive())) {
+			throw new RugbyException("No puedes actualizar una jornada eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		if(dto.dateBegin()!=null) {
 			matchDay.setDateBegin(dto.dateBegin());
 		}
@@ -718,6 +784,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			matchDay.setName(dto.name());
 		}
 		matchDayRepository.save(matchDay);
+		log.info("Se ha actualizado la jornada {} correctamente", 
+				matchDay.getId());
 		return matchDayMapper.toDTO(matchDay);
 		
 	}
@@ -726,10 +794,29 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Transactional
 	public MatchResponseDTO updateMatch(Long id, MatchUpdateRequestDTO dto) {
 		Match match = checkMatch(id);
-		
+		if(Boolean.FALSE.equals(match.getIsActive())) {
+			throw new RugbyException("No puedes actualizar un partido eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		MatchDay matchDay = checkMatchDay(match.getMatchDay().getId());
 		
+		if(matchDay.isArePointsCalculated()) {
+			throw new RugbyException("No puedes actualizar un partido de una jornada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
 		if(match.getStatus().equals(MatchStatus.SCHEDULED)||match.getStatus().equals(MatchStatus.CANCELLED)) {
+			if(dto.localResult()!=null) {
+				throw new RugbyException("No puedes modificar los resultados del equipo local de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			}
+			
+			if(dto.awayResult()!=null) {
+				throw new RugbyException("No puedes modificar los resultados del equipo visitante de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				
+			}
+			
+			if(dto.bonus()!=null) {
+				throw new RugbyException("No puedes modificar los resultados del bonus de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				
+			}
 			if(dto.location()!=null) {
 				String street = StringUtils.normalize(dto.location().street());
 			    String city = StringUtils.normalize(dto.location().city());
@@ -767,7 +854,33 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			if(dto.status()!=null) {
 				match.setStatus(MatchStatus.valueOf(dto.status()));
 			}
+			
+			
+			
 		} else if(match.getStatus().equals(MatchStatus.IN_PLAY)||match.getStatus().equals(MatchStatus.FINISHED)){
+			if(dto.location()!=null) {
+				throw new RugbyException("No puedes modificar la localizacion de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+								
+			}
+			if(dto.name()!=null) {
+				throw new RugbyException("No puedes modificar el nombre de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				
+			}
+			
+			if(dto.timeMatchStart()!=null) {
+				throw new RugbyException("No puedes modificar la hora que empieza el partido de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				
+			}
+			
+			if(dto.localTeam()!=null) {
+				throw new RugbyException("No puedes modificar el equipo local de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				
+			}
+			
+			if(dto.awayTeam()!=null) {
+				throw new RugbyException("No puedes modificar el equipo visitante de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				
+			}
 			if(dto.localResult()!=null) {
 				match.setLocalResult(dto.localResult());
 			}
@@ -783,24 +896,21 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			if(dto.status()!=null) {
 				match.setStatus(MatchStatus.valueOf(dto.status()));
 			}
-			//should there be an error if they try to update the other dto values in this status?
 			
-			if(matchDay.isArePointsCalculated()) {
-				throw new RugbyException("No puedes actualizar un partido de una jornada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-			}
 		}
 		
-		
-		
-		
-		
 		matchRepository.save(match);
+		log.info("Se ha actualizado el partido {} correctamente", 
+				match.getId());
 		return matchMapper.toDTO(match);
 		
 	}
 	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto) {
 		
 		Team team = checkTeam(id);
+		if(Boolean.FALSE.equals(team.getIsActive())) {
+			throw new RugbyException("No puedes actualizar un equipo eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		
 		if(dto.name()!=null) {
 			team.setName(dto.name());
@@ -810,6 +920,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			team.setUrl(dto.url());
 		}
 		teamRepository.save(team);
+		log.info("Se ha actualizado el equipo {} correctamente", 
+				team.getId());
 		return teamMapper.toDTO(team);
 		
 	}
@@ -847,6 +959,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId) {
 		Match match = checkMatch(matchId);
 		MatchDay matchDay = checkMatchDay(matchDayId);
+		if(Boolean.FALSE.equals(matchDay.getIsActive())) {
+			throw new RugbyException("No puedes quitar un partido de una jornada eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		LocalDate now = LocalDate.now();
 
 		LocalDateTime nowTime = LocalDateTime.now();
@@ -870,6 +985,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		matchDay.getMatches().remove(match);
 		match.setMatchDay(null);
 		matchDayRepository.save(matchDay);
+		log.info("Se ha quitado el partido {} de la jornada {} correctamente", 
+				match.getId(), matchDay.getId());
 		return matchDayMapper.toDTO(matchDay);
 	}
 //	
@@ -902,6 +1019,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO removeMatchDayFromDivision(Long matchId, Long divisionId) {
 		MatchDay matchDay = checkMatchDay(matchId);
 		Division division = checkDivision(divisionId);
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes quitar una jornada de una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		
 		LocalDate now = LocalDate.now();
 		
@@ -916,6 +1036,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		division.getMatchDays().remove(matchDay);
 		matchDay.setDivision(null);
 		divisionRepository.save(division);
+		log.info("Se ha quitado la jornada {} de la division {} correctamente", 
+				matchDay.getId(), division.getId());
 		return divisionMapper.toDTO(division);
 	}
 	
@@ -923,6 +1045,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO removeTeamFromDivision(Long teamId, Long divisionId) {
 		Team team = checkTeam(teamId);
 		Division division = checkDivision(divisionId);
+		if(Boolean.FALSE.equals(division.getIsActive())) {
+			throw new RugbyException("No puedes quitar un equipo de una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		
 		if(!division.getTeams().contains(team)) {
 			throw new RugbyException("Esta division no contiene este equipo", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
@@ -930,7 +1055,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		
 		division.getTeams().remove(team);
 		divisionRepository.save(division);
-		
+		log.info("Se ha quitado el equipo {} de la division {} correctamente", 
+				team.getId(), division.getId());
 		return divisionMapper.toDTO(division);
 	}
 	

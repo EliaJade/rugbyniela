@@ -290,20 +290,20 @@ public class CompetitiveController {
 //		MatchResponseDTO response =competitiveService.removeTeamFromMatch(matchId, teamId);
 //		return ResponseEntity.ok(response);
 //	}
-//	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/remove-team{teamId}-from-division{divisionId}")
 	public ResponseEntity<DivisionResponseDTO> removeTeamFromDivision(@PathVariable Long teamId, @PathVariable Long divisionId){
 		DivisionResponseDTO response= competitiveService.removeTeamFromDivision(teamId, divisionId);
 		return ResponseEntity.ok(response);
 	}
-//	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/remove-match-day{matchDayId}-from-division{divisionId}")
 	public ResponseEntity<DivisionResponseDTO> removeMatchDayFromDivision(@PathVariable Long matchDayId, @PathVariable Long divisionId){
 		DivisionResponseDTO response= competitiveService.removeMatchDayFromDivision(matchDayId, divisionId);
 		return ResponseEntity.ok(response);
 	}
 	
-//	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/remove-match{matchId}-from-match-day{matchDayId}")
 	public ResponseEntity<MatchDayResponseDTO> removeMatchFromMatchDay(@PathVariable Long matchId, @PathVariable Long matchDayId){
 		MatchDayResponseDTO response= competitiveService.removeMatchFromMatchDay(matchId, matchDayId);

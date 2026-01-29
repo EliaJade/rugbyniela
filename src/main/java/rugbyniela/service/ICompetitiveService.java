@@ -1,8 +1,5 @@
 package rugbyniela.service;
 
-import java.time.LocalDate;
-import java.util.Set;
-
 import org.springframework.data.domain.Page;
 
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
@@ -22,9 +19,6 @@ import rugbyniela.entity.dto.season.SeasonUpdateRequestDTO;
 import rugbyniela.entity.dto.team.TeamAddToDivisionRequestDTO;
 import rugbyniela.entity.dto.team.TeamRequestDTO;
 import rugbyniela.entity.dto.team.TeamResponseDTO;
-import rugbyniela.entity.pojo.Division;
-import rugbyniela.entity.pojo.Season;
-import rugbyniela.entity.pojo.Team;
 
 public interface ICompetitiveService {
 
