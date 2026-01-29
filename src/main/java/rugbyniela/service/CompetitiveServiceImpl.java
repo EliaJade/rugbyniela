@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
+import org.antlr.v4.parse.ANTLRParser.throwsSpec_return;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -437,6 +437,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Division division = checkDivision(dto.division());
 		LocalDate seasonStart = season.getStartSeason();
 		LocalDate seasonEnd = season.getEndSeason();
+		LocalDate now = LocalDate.now();
 		boolean existsCat = season.getDivisions().stream()
 				.anyMatch(div -> div.getCategory().equals(division.getCategory()));
 		boolean existsName = season.getDivisions().stream()
@@ -450,6 +451,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(anyOutside) {
 			throw new RugbyException("Alguna jornada de la division esta fuera del rango de la temporada",HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
+		if(seasonStart.isBefore(now)) {
+			throw new RugbyException("No puedes añadir divisiones cuando ya ha empezado la temporada",HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
 		if(season.getIsActive()==null) {
 			season.setIsActive(false);
 		}
@@ -467,11 +472,17 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO addMatchDayToDivision(MatchDayAddToDivisionRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
 		Division division = checkDivision(dto.division());
+		Season season = checkSeason(division.getSeason().getId());
+		LocalDate now = LocalDate.now();
 		boolean teamOutside = matchDay.getMatches().stream()
 				.flatMap(match -> Stream.of(match.getAwayTeam(), match.getLocalTeam())) //flatMap collects both localTeam and awayTeam for each match into one stream.
 				.anyMatch(team -> !division.getTeams().contains(team)); //if at least one team playing in matchDay does not belong to the division it will give true, otherwise false
 		if(teamOutside) {
 			throw new RugbyException("Hay un equipo que juega en la jornada que no juega en esta division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(season.getEndSeason().isBefore(now)) {
+			throw new RugbyException("No se puede añadir una jornada a una division cuando ya ha terminado la temporada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			
 		}
 		division.addMatchDay(matchDay);
 		matchDay.setDivision(division);
@@ -485,8 +496,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto) {
 		MatchDay matchDay = checkMatchDay(dto.matchDay());
 		Match match = checkMatch(dto.match());
+		LocalDate now = LocalDate.now();
 		if(match.getTimeMatchStart().isBefore(matchDay.getDateBegin().atStartOfDay())) {
 			throw new RugbyException("No puede empezar el partido antes de la jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(matchDay.getDateBegin().isBefore(now)) {
+			throw new RugbyException("No se puede añadir un partido a una jornada ya empezada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		boolean exists = matchDay.getMatches().stream()
 			    .anyMatch(existingMatch -> {
@@ -496,9 +511,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			        return sameTeams;
 			    });
 
-			if (exists) {
-			    throw new RugbyException("Estos equipos ya juegan entre sí en esta jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-			}
+		if (exists) {
+			throw new RugbyException("Estos equipos ya juegan entre sí en esta jornada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		matchDay.addMatch(match);
 		match.setMatchDay(matchDay);
 		matchDayRepository.save(matchDay);
@@ -510,12 +525,17 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
 		Division division = checkDivision(dto.division());
+		Season season = checkSeason(division.getSeason().getId());
+		LocalDate now = LocalDate.now();
 		boolean exists = division.getTeams().stream()
 				.anyMatch(existingTeam -> 
 							existingTeam.getId().equals(team.getId()));
 				
 		if(exists) {
 			throw new RugbyException("Este equipo ya juegan en la division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if(season.getEndSeason().isBefore(now)) {
+			throw new RugbyException("No se puede añadir equipos a una temporada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		division.addTeam(team);
 		divisionRepository.save(division);
@@ -701,54 +721,73 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public MatchResponseDTO updateMatch(Long id, MatchUpdateRequestDTO dto) {
 		Match match = checkMatch(id);
 		
-		if(dto.location()!=null) {
-			String street = StringUtils.normalize(dto.location().street());
-		    String city = StringUtils.normalize(dto.location().city());
-		    String postalCode = StringUtils.normalize(dto.location().postalCode());
-		    String description = StringUtils.normalize(dto.location().description());
+		MatchDay matchDay = checkMatchDay(match.getMatchDay().getId());
+		
+		if(match.getStatus().equals(MatchStatus.SCHEDULED)||match.getStatus().equals(MatchStatus.CANCELLED)) {
+			if(dto.location()!=null) {
+				String street = StringUtils.normalize(dto.location().street());
+			    String city = StringUtils.normalize(dto.location().city());
+			    String postalCode = StringUtils.normalize(dto.location().postalCode());
+			    String description = StringUtils.normalize(dto.location().description());
 
+				
+						
+				Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(
+						street, city, postalCode, description)
+					    .orElseGet(() -> addressRepository.save(addressMapper.toEntity(dto.location())));
+				match.setLocation(address);
+				
+				
+			}
+			if(dto.name()!=null) {
+				match.setName(dto.name());
+			}
 			
-					
-			Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(
-					street, city, postalCode, description)
-				    .orElseGet(() -> addressRepository.save(addressMapper.toEntity(dto.location())));
-			match.setLocation(address);
+			if(dto.timeMatchStart()!=null) {
+				match.setTimeMatchStart(dto.timeMatchStart());
+			}
+			
+			if(dto.localTeam()!=null) {
+			
+				Team localTeam = checkTeam(dto.localTeam());
+				match.setLocalTeam(localTeam);
+			}
+			
+			if(dto.awayTeam()!=null) {
+				Team awayTeam = checkTeam(dto.awayTeam());
+				match.setAwayTeam(awayTeam);
+			}
+			
+			if(dto.status()!=null) {
+				match.setStatus(MatchStatus.valueOf(dto.status()));
+			}
+		} else if(match.getStatus().equals(MatchStatus.IN_PLAY)||match.getStatus().equals(MatchStatus.FINISHED)){
+			if(dto.localResult()!=null) {
+				match.setLocalResult(dto.localResult());
+			}
+			
+			if(dto.awayResult()!=null) {
+				match.setAwayResult(dto.awayResult());
+			}
+			
+			if(dto.bonus()!=null) {
+				match.setBonus(Bonus.valueOf(dto.bonus()));
+			}
+			
+			if(dto.status()!=null) {
+				match.setStatus(MatchStatus.valueOf(dto.status()));
+			}
+			//should there be an error if they try to update the other dto values in this status?
+			
+			if(matchDay.isArePointsCalculated()) {
+				throw new RugbyException("No puedes actualizar un partido de una jornada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			}
 		}
 		
-		if(dto.name()!=null) {
-			match.setName(dto.name());
-		}
 		
-		if(dto.timeMatchStart()!=null) {
-			match.setTimeMatchStart(dto.timeMatchStart());
-		}
 		
-		if(dto.localTeam()!=null) {
 		
-			Team localTeam = checkTeam(dto.localTeam());
-			match.setLocalTeam(localTeam);
-		}
 		
-		if(dto.awayTeam()!=null) {
-			Team awayTeam = checkTeam(dto.awayTeam());
-			match.setAwayTeam(awayTeam);
-		}
-		
-		if(dto.localResult()!=null) {
-			match.setLocalResult(dto.localResult());
-		}
-		
-		if(dto.awayResult()!=null) {
-			match.setAwayResult(dto.awayResult());
-		}
-		
-		if(dto.bonus()!=null) {
-			match.setBonus(Bonus.valueOf(dto.bonus()));
-		}
-		
-		if(dto.status()!=null) {
-			match.setStatus(MatchStatus.valueOf(dto.status()));
-		}
 		matchRepository.save(match);
 		return matchMapper.toDTO(match);
 		
@@ -756,6 +795,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto) {
 		
 		Team team = checkTeam(id);
+		
 		if(dto.name()!=null) {
 			team.setName(dto.name());
 			
@@ -796,24 +836,36 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 //		return seasonMapper.toDTO(season);
 //	}
 //
-//	@Transactional
-//	@Override
-//	public MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId) {
-//		Match match = checkMatch(matchId);
-//		MatchDay matchDay = checkMatchDay(matchDayId);
-//		if(!matchDay.getMatches().contains(match)) {
-//			throw new RugbyException("Esta jornada no contiene este partido", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
-//		}
-//		
-//		if(matchDay.isArePointsCalculated()) {
-//			throw new RugbyException("No se puede modificar las jornadas ya finalizado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-//		}
-//		
-//		matchDay.getMatches().remove(match);
-//		match.setMatchDay(null);
-//		matchDayRepository.save(matchDay);
-//		return matchDayMapper.toDTO(matchDay);
-//	}
+	@Transactional
+	@Override
+	public MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId) {
+		Match match = checkMatch(matchId);
+		MatchDay matchDay = checkMatchDay(matchDayId);
+		LocalDate now = LocalDate.now();
+
+		LocalDateTime nowTime = LocalDateTime.now();
+		if(!matchDay.getMatches().contains(match)) {
+			throw new RugbyException("Esta jornada no contiene este partido", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+		}
+		if(matchDay.getDateBegin().isBefore(now)) {
+			throw new RugbyException("No se puede quitar una jornada empezada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			
+		}
+		
+		if(match.getTimeMatchStart().isBefore(nowTime)) {
+			throw new RugbyException("No se puede quitar un partido empezado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			//unnecessary since it would never happen since the match day needs to start before the match
+		}
+		
+		if(matchDay.isArePointsCalculated()) {
+			throw new RugbyException("No se puede modificar las jornadas ya finalizado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
+		matchDay.getMatches().remove(match);
+		match.setMatchDay(null);
+		matchDayRepository.save(matchDay);
+		return matchDayMapper.toDTO(matchDay);
+	}
 //	
 //	@Transactional
 //	@Override
@@ -840,6 +892,41 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 //		matchRepository.save(match);
 //		return matchMapper.toDTO(match);
 //	}
+	@Override
+	public DivisionResponseDTO removeMatchDayFromDivision(Long matchId, Long divisionId) {
+		MatchDay matchDay = checkMatchDay(matchId);
+		Division division = checkDivision(divisionId);
+		
+		LocalDate now = LocalDate.now();
+		
+		if(!division.getMatchDays().contains(matchDay)) {
+			throw new RugbyException("Esta division no contiene este jornada", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+		}
+		
+		if(matchDay.getDateBegin().isBefore(now)) {
+			throw new RugbyException("No se puede quitar una jornada empezada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
+		division.getMatchDays().remove(matchDay);
+		matchDay.setDivision(null);
+		divisionRepository.save(division);
+		return divisionMapper.toDTO(division);
+	}
+	
+	@Override
+	public DivisionResponseDTO removeTeamFromDivision(Long teamId, Long divisionId) {
+		Team team = checkTeam(teamId);
+		Division division = checkDivision(divisionId);
+		
+		if(!division.getTeams().contains(team)) {
+			throw new RugbyException("Esta division no contiene este equipo", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+		}
+		
+		division.getTeams().remove(team);
+		divisionRepository.save(division);
+		
+		return divisionMapper.toDTO(division);
+	}
 	
 	
 	public Season checkSeason(Long seasonId) {
@@ -887,6 +974,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private String deletedName(String name) {
 	    return "DEL_" + name;
 	}
+
+	
+
+	
 
 	
 

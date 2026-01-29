@@ -68,9 +68,9 @@ public interface ICompetitiveService {
 	TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto);
 	
 //	SeasonResponseDTO removeDivisionFromSeason(Long divisionId, Long seasonId);
-//	MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId);
-////	void removeMatchDayFromDivision();
-////	void removeTeamFromDivision();
+	MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId);
+	DivisionResponseDTO removeTeamFromDivision(Long teamId, Long divisionId);
+	DivisionResponseDTO removeMatchDayFromDivision(Long matchId, Long divisionId);
 //	MatchResponseDTO removeTeamFromMatch(Long matchId, Long teamId);
 	
 	SeasonResponseDTO createSeason(SeasonRequestDTO dto);
