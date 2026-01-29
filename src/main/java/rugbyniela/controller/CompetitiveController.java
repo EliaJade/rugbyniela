@@ -136,29 +136,59 @@ public class CompetitiveController {
 //	------------OTHER FETCHES-----------------	
 	
 	@GetMapping("/season/{id}/divisions")
-	public ResponseEntity<Page<DivisionResponseDTO>> getDivisionsBySeason(@PathVariable Long id, @RequestParam(defaultValue = "0") int page){
-		return ResponseEntity.ok(competitiveService.fetchDivisionsBySeason(id, page));
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<Page<DivisionResponseDTO>> getDivisionsBySeason(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(required = false) Boolean isActive,
+			Authentication auth){
+		boolean isAdmin = auth != null && auth.getAuthorities().stream()
+				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
+		if(!isAdmin) {
+			isActive=true;
+		}
+		return ResponseEntity.ok(competitiveService.fetchDivisionsBySeason(id, page, isActive));
 	}
 	
 	@GetMapping("/season/{seasonId}/division/{divisionId}")
+    @PreAuthorize("isAuthenticated()")
 	public ResponseEntity<DivisionResponseDTO> getDivisionsBySeasonAndId(@PathVariable Long seasonId, @PathVariable Long divisionId){
+		
 		return ResponseEntity.ok(competitiveService.fetchDivisionBySeasonAndId(seasonId, divisionId));
 	}
 	
 	@GetMapping("/season/{id}/matches")
-	public ResponseEntity<Page<MatchResponseDTO>> getMatchesBySeason(@PathVariable Long id, @RequestParam(defaultValue = "0") int page){
-		return ResponseEntity.ok(competitiveService.fetchMatchesBySeason(id, page));
+    @PreAuthorize("isAuthenticated()")
+	public ResponseEntity<Page<MatchResponseDTO>> getMatchesBySeason(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(required = false) Boolean isActive,
+			Authentication auth){
+		boolean isAdmin = auth != null && auth.getAuthorities().stream()
+				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
+		if(!isAdmin) {
+			isActive=true;
+		}
+		return ResponseEntity.ok(competitiveService.fetchMatchesBySeason(id, page, isActive));
 	}
 	
 	@GetMapping("/season/{id}/teams")
-	public ResponseEntity<Page<TeamResponseDTO>> getTeamsBySeason(@PathVariable Long id, @RequestParam(defaultValue = "0") int page){
-		return ResponseEntity.ok(competitiveService.fetchTeamsBySeason(id, page));
+    @PreAuthorize("isAuthenticated()")
+	public ResponseEntity<Page<TeamResponseDTO>> getTeamsBySeason(@PathVariable Long id, @RequestParam(defaultValue = "0") int page, @RequestParam(required = false) Boolean isActive,
+			Authentication auth){
+		boolean isAdmin = auth != null && auth.getAuthorities().stream()
+				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
+		if(!isAdmin) {
+			isActive=true;
+		}
+		return ResponseEntity.ok(competitiveService.fetchTeamsBySeason(id, page, isActive));
 		
 	}
 	
 	@GetMapping("/season/{seasonId}/division/{divisionId}/teams")
-	public ResponseEntity<Page<TeamResponseDTO>> getTeamsBySeason(@PathVariable Long seasonId, @PathVariable Long divisionId, @RequestParam(defaultValue = "0") int page){
-		return ResponseEntity.ok(competitiveService.fetchTeamBySeasonAndDivision(seasonId, divisionId, page));
+    @PreAuthorize("isAuthenticated()")
+	public ResponseEntity<Page<TeamResponseDTO>> getTeamsBySeason(@PathVariable Long seasonId, @PathVariable Long divisionId, @RequestParam(defaultValue = "0") int page, @RequestParam(required = false) Boolean isActive,
+			Authentication auth){
+		boolean isAdmin = auth != null && auth.getAuthorities().stream()
+				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
+		if(!isAdmin) {
+			isActive=true;
+		}
+		return ResponseEntity.ok(competitiveService.fetchTeamsBySeasonAndDivision(seasonId, divisionId, page, isActive));
 		
 	}
 //	------------CREATE and ADD-----------------

@@ -221,12 +221,17 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 
 	@Override
-	public Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page) {
+	public Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page, Boolean isActive) {
 		checkNegativePage(page);
 		Season season = checkSeason(seasonId);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
 		
-		Page<Division> divisions =  divisionRepository.findBySeason(season, pageable);
+		Page<Division> divisions ;
+		if(isActive == null) {
+			divisions =  divisionRepository.findBySeason(season, pageable);
+		} else {
+			divisions =  divisionRepository.findByIsActiveAndSeason(isActive, season, pageable);
+		}
 		
 		return divisions.map(divisionMapper::toDTO); //“Take every Division in this page, convert it to a DivisionResponseDTO using MapStruct, and return a new Page of DTOs while keeping pagination info.”
 		
@@ -243,29 +248,45 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 
 	@Override 
-	public Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page) {
+	public Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page, Boolean isActive) {
 		checkNegativePage(page);
 		Season season = checkSeason(seasonId);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
 		
-		Page<Team> teams = divisionRepository.findTeamsBySeason(season, pageable);
+		Page<Team> teams; 
+		if(isActive == null) {
+			teams = teamRepository.findTeamsBySeason(season, pageable);
+		} else {
+			teams = teamRepository.findTeamsBySeasonAndIsActive(season, isActive, pageable);
+		}
+		
 		return teams.map(teamMapper::toDTO);
 	}
 	
-	public Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page) {
+	public Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page, Boolean isActive) {
 		checkNegativePage(page);
 		Season season = checkSeason(seasonId);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("timeMatchStart").descending());
 		
-		Page<Match> matches = matchRepository.findByMatchDayDivisionSeason(season, pageable);
+		Page<Match> matches;
+		if(isActive == null) {
+			matches = matchRepository.findByMatchDayDivisionSeason(season, pageable);
+			} else {
+			matches = matchRepository.findByIsActiveAndMatchDay_Division_Season(isActive, season, pageable);
+			}
 		return matches.map(matchMapper::toDTO);
 	}
-	
-	public Page<TeamResponseDTO> fetchTeamBySeasonAndDivision (Long seasonId, Long divisionId, int page){
+	 
+	public Page<TeamResponseDTO> fetchTeamsBySeasonAndDivision (Long seasonId, Long divisionId, int page, Boolean isActive){
 		Season season = checkSeason(seasonId);
 		Division division = checkDivision(divisionId);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
-		Page<Team> teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
+		Page<Team> teams;
+		if(isActive == null) {
+			teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
+			} else {
+			teams = teamRepository.findTeamsByIsActiveAndSeasonAndDivision(isActive, season, division.getId(), pageable);
+			}
 		return teams.map(teamMapper::toDTO);
 		
 	}

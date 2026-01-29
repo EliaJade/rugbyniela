@@ -22,4 +22,6 @@ public interface MatchRepository extends JpaRepository<Match, Long>, JpaSpecific
 
 	Page<Match> findByIsActive(Boolean isActive, Pageable pageable);
 
+	Page<Match> findByIsActiveAndMatchDay_Division_Season(Boolean isActive, Season season, Pageable pageable);
+
 }

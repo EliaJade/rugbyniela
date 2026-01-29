@@ -39,11 +39,11 @@ public interface ICompetitiveService {
 	Page<TeamResponseDTO> fetchAllTeams(int page, Boolean isActive);
 	TeamResponseDTO fetchTeamById(Long teamId);
 	
-	Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page);
+	Page<DivisionResponseDTO> fetchDivisionsBySeason(Long seasonId, int page, Boolean isActive);
 	DivisionResponseDTO fetchDivisionBySeasonAndId(Long seasonId, Long divisionId);
-	Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page);
-	Page<TeamResponseDTO> fetchTeamBySeasonAndDivision (Long seasonId, Long divisionId, int page);
-	Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page);
+	Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page, Boolean isActive);
+	Page<TeamResponseDTO> fetchTeamsBySeasonAndDivision (Long seasonId, Long divisionId, int page, Boolean isActive);
+	Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page, Boolean isActive);
 //	void fetchMatchesOfSeasonByMatchDay();
 //	void fetchMatchDaysByDivision();
 //	void fetchMatchDaysByDivisionAndId();
