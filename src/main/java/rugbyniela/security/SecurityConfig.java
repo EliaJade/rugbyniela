@@ -65,7 +65,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:3000")); 
         
         // Permitir todos los métodos (GET, POST, PUT, DELETE, OPTIONS)
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         
         // Permitir todas las cabeceras (Authorization, Content-Type, etc)
         configuration.setAllowedHeaders(List.of("*"));

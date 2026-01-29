@@ -39,18 +39,8 @@ import rugbyniela.service.UserServiceImp;
 public class UserController {
 
 	private final UserServiceImp userService;
-	private final ObjectMapper objectMapper;
 
-	
-	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<UserResponseDTO> register(
-			@RequestPart("user") String dto,
-            @RequestPart(value = "file", required = false) MultipartFile file)throws JsonProcessingException {
-		
-			UserRequestDTO userRequest = objectMapper.readValue(dto, UserRequestDTO.class);
-			UserResponseDTO response = userService.register(userRequest,file);
-			return ResponseEntity.ok(response);
-	}
+
 	
 	@PutMapping("/update")
 	@PreAuthorize("hasRole('USER')")
