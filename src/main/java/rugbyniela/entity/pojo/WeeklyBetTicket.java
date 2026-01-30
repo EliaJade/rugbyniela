@@ -48,7 +48,7 @@ public class WeeklyBetTicket {
 	private Set<Bet> bets;
 	
 	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DivisionBet> divisionBets;
+//    private Set<DivisionBet> divisionBets;
 	
 	
 	/**
@@ -67,9 +67,5 @@ public class WeeklyBetTicket {
 		this.bets.add(bet);
 		bet.setWeeklyBetTicket(this);
 	}
-	public void addDivisionBet(DivisionBet divBet) {
-        if (this.divisionBets == null) this.divisionBets = new HashSet<>();
-        this.divisionBets.add(divBet);
-        divBet.setWeeklyBetTicket(this);
-    }
+//	
 }

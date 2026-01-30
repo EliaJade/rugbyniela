@@ -7,6 +7,8 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
+import rugbyniela.entity.dto.divisionBet.DivisionBetDTO;
+import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketUpdateRequestDTO;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
@@ -19,13 +21,19 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 public interface WeeklyBetTicketMapper {
 //		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 //		void updateTicketFromDTO(WeeklyBetTicketUpdateRequestDTO dto, @MappingTarget WeeklyBetTicket ticket);
-//		
-//		@Mapping(source = "userSeason.id", target = "userSeasonId")
-////	    @Mapping(source = "predictedLeaderBoardWinner.id", target = "predictedLeaderboardWinnerId")
-//		WeeklyBetTicketResponseDTO toDTO (WeeklyBetTicket ticket);
 		
-//		WeeklyBetTicket toEntity(WeeklyBetTicketRequestDTO dto);
+		@Mapping(target= "predictedLeaderboardWinner", source= "predictedLeaderBoardWinner.id")
+		@Mapping(source = "userSeason.id", target = "userSeasonId")
+	   WeeklyBetTicketResponseDTO toDTO (WeeklyBetTicket ticket);
 		
+		@Mapping(target= "predictedLeaderBoardWinner.id", source="predictedLeaderboardWinner")
+		@Mapping(target = "userSeason.id", source = "userSeasonId")
+		@Mapping(target = "creationDate", ignore = true)
+		@Mapping(target = "coalitionAtBetTime", ignore = true)
+		WeeklyBetTicket toEntity(WeeklyBetTicketRequestDTO dto);
+		
+//		@Mapping(target = "predictedLeaderBoardWinner.id", source = "predictedLeaderboardWinnerId")
+//		WeeklyBetTicket toEntity(DivisionBetDTO dto);
 		
 
 }

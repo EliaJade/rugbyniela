@@ -26,6 +26,7 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.mapper.WeeklyBetTicketMapper;
+import rugbyniela.repository.BetRepository;
 import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.TeamRepository;
@@ -46,41 +47,63 @@ public class BettingServiceImp implements IBettingService{
 	private final MatchRepository matchRepository;
 	
 	private final TeamRepository teamRepository;
+	private final BetRepository betRepository;
 	
-	private  final WeeklyBetTicketMapper bettingMapper;
+	private  final WeeklyBetTicketMapper weeklyBetTicketMapper;
 	@Override
 	@Transactional
 	public WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto) {
 		
 		LocalDateTime now = LocalDateTime.now();
-		
+		log.debug("Time now: " + now);
 		// 1. Validate UserSeasonScore exists
 		UserSeasonScore userSeason = checkUserSeason(dto.userSeasonId());
-				
+		log.debug("User: " + userSeason.getUser().getName());
 		// 2. Validate MatchDay exists and fetch matches
 		MatchDay matchDay = matchDayRepository.findById(dto.matchDayId())
 				.orElseThrow(() -> new RugbyException("No se ha encontrado la jornada", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-		
+		log.debug("Match Day: " + matchDay.getName());
 		//Find earliest match start time in this MatchDay
 		LocalDateTime earliestMatchStart = matchDay.getMatches().stream()
 				.map(Match::getTimeMatchStart)
 				.min(LocalDateTime::compareTo)
 				.orElseThrow(() -> new RugbyException("No hay partidos en esta jornada", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-		
+		log.debug("Earliest Match of jornada: " + earliestMatchStart);
 		// 3. Validate predicted leaderboard winner team exists
-		Team predictedLeaderboardWinner = teamRepository.findById(dto.predictedLeaderboardWinner())
-				.orElseThrow(()-> new RugbyException("No se ha encontrador el equipo elegido como lider", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-		
+		Team predictedWinner = teamRepository.findById(dto.predictedLeaderboardWinner())
+				.orElseThrow(() -> new RugbyException("No se ha encontrado el equipo", HttpStatus.BAD_REQUEST, ActionType.BETTING));
+//		Long winnerId = dto.predictedLeaderboardWinner();
+//		        .stream()
+//		        .findFirst()
+//		        .orElseThrow(() -> new RugbyException(
+//		                "No hay apuesta de división",
+//		                HttpStatus.BAD_REQUEST,
+//		                ActionType.USER_ACTION
+//		        ))
+//		        .predictedLeaderboardWinnerId();
+
+		log.debug("Winner Id: " + predictedWinner.getName());
+//		Team predictedLeaderboardWinner =
+//		        teamRepository.findById(winnerId)
+//		                .orElseThrow(() -> new RugbyException(
+//		                        "Equipo ganador no encontrado",
+//		                        HttpStatus.NOT_FOUND,
+//		                        ActionType.USER_ACTION
+//		                ));
+//		log.debug("PredictedLeaderboardWinner: " + predictedLeaderboardWinner.getName());
 		
 		// 4. Retrieve or create WeeklyBetTicket
 		Optional<WeeklyBetTicket> ticketThatExists = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userSeason, matchDay);
-				
+		log.debug("ticketThatExists: " + ticketThatExists);		
 		if(ticketThatExists.isEmpty()) {
 			// makes sure that no matches have started before doing that validation		
 			if(earliestMatchStart.isAfter(now)) {
+				log.debug("Matches start before now: " + earliestMatchStart.isAfter(now));				
 				// 4. Validate that bets cover all matches in matchDay
 					Set<Match> matchesInMatchDay = matchDay.getMatches();
 					if(dto.bets().size() != matchesInMatchDay.size()) {
+						log.debug("How many matches did you bet on: " + dto.bets().size());	
+						log.debug("How many matches should you have bet on: " + matchesInMatchDay.size());
 						throw new RugbyException("Debe apostar a todos los partidos", HttpStatus.BAD_REQUEST, ActionType.BETTING);
 					}
 			}
@@ -89,31 +112,40 @@ public class BettingServiceImp implements IBettingService{
 					WeeklyBetTicket newTicket = new WeeklyBetTicket();
 					newTicket.setUserSeason(userSeason);
 					newTicket.setCreationDate(LocalDateTime.now());
-					if(!earliestMatchStart.isAfter(now)) {						
-						newTicket.setPredictedLeaderBoardWinner(predictedLeaderboardWinner);
+					if(earliestMatchStart.isAfter(now)) {						
+						newTicket.setPredictedLeaderBoardWinner(predictedWinner);
+						log.debug("newTicketId with predictedWinnerLeaderBoard {}, {}, {}, ", newTicket.getCreationDate(), newTicket.getPredictedLeaderBoardWinner().getName(), newTicket.getUserSeason().getUser().getName()  );
+						
 					}
+					log.debug("newTicketId {}, {}, ", newTicket.getCreationDate(),  newTicket.getUserSeason().getUser().getName()  );
+					
 					
 					// 6. Create Bet for all matches
 					for(BetRequestDTO betDTO : dto.bets()) {
 						//make sure match exists
 						Match match = matchRepository.findById(betDTO.matchId()).orElseThrow(()-> new RugbyException("Partido no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-						
+						log.debug("Match: " + match.getName());
 						//Check current time is before match start time
 						if(now.isAfter(match.getTimeMatchStart())) {
 							throw new RugbyException("La apuesta al partido de " + match.getName() + "no es valido porque ya ha empezado el partido", HttpStatus.BAD_REQUEST, ActionType.BETTING);
 						}
 						Bet bet = new Bet();
+						log.debug("Bet: " + bet.getId());
 						bet.setMatch(match);
 						bet.setPredictedWinner(teamRepository.findById(betDTO.predictedWinnerId())
 								.orElseThrow(() -> new RugbyException("Equipo no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING)));
 						bet.setBonus(betDTO.bonus()); 
 						bet.setPointsAwarded(0);
+						log.debug("Bet: " + bet.getId());
+						betRepository.save(bet);
+
+						log.debug("Bet after save: " + bet.getId());
 						newTicket.addBet(bet);
 					}
 					// 7. Save the ticket (cascade saves bets)
 					weeklyBetTicketRepository.save(newTicket);
 					//return bettingMapper.toDTO(newTicket);
-					return null;
+					return weeklyBetTicketMapper.toDTO(newTicket);
 				
 		} else {
 			
@@ -121,7 +153,7 @@ public class BettingServiceImp implements IBettingService{
 			WeeklyBetTicket existingTicket = ticketThatExists.get();
 			
 			if(now.isBefore(earliestMatchStart)) {
-				existingTicket.setPredictedLeaderBoardWinner(predictedLeaderboardWinner);
+				existingTicket.setPredictedLeaderBoardWinner(predictedWinner);
 			} else {
 				log.warn("No se puede modificar el líder predicho porque ya empezó el primer partido.");
 			}
@@ -149,7 +181,7 @@ public class BettingServiceImp implements IBettingService{
 			//Save new updated ticket
 			weeklyBetTicketRepository.save(existingTicket);
 			//return bettingMapper.toDTO(existingTicket);
-			return null;
+			return weeklyBetTicketMapper.toDTO(existingTicket);
 		}
 		
 		
