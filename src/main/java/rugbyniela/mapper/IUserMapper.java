@@ -30,11 +30,13 @@ import rugbyniela.exception.RugbyException;
 public interface IUserMapper {
 	
 		@Mapping(target = "gender",source="gender",qualifiedByName = "stringToGender")
-		@Mapping(target = "password",ignore = true)
+		@Mapping(target = "password",ignore = true)//TODO: change this in order to allow mapstruct do this for us
+//		@Mapping(target="email",source="email",qualifiedByName = "normalizeEmail")
+
+		//@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
 		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	    void updateUserFromDto(UserUpdatedRequestDTO dto, @MappingTarget User user); // im not sure what this does need to check
-	    
-		@Mapping(target = "gender", source = "gender", qualifiedByName = "stringToGender")
+
 	    @Mapping(target = "role", source = "role", qualifiedByName = "stringToRole")
 		User toEntity(UserRequestDTO dto);
 		

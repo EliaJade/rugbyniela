@@ -1,14 +1,9 @@
 package rugbyniela.service;
 
-import java.security.DrbgParameters.Capability;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -377,7 +372,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	        throw new RugbyException("Tu coalición ya está registrada en esta temporada.", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);
 	    }
 
-	    CoalitionSeasonScore inscription = new CoalitionSeasonScore(null, 0, season, coalition, new HashSet<CoalitionMatchDayScore>());
+	    CoalitionSeasonScore inscription = new CoalitionSeasonScore(null, 0, season, true, coalition, new HashSet<CoalitionMatchDayScore>());
 	    
 	    coalitionSeasonScoreRepository.save(inscription);
 

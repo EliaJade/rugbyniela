@@ -35,8 +35,8 @@ public class Season {
 	@NotBlank
 	@Column(nullable = false, length = 100, unique=true)
 	private String name;
-	
-	@NotBlank
+
+	@NotNull
 	@Column(nullable = false, unique = true)
 	private LocalDate startSeason;// here we use the LocalDate in order to get the just the date not time
 									// (recommended)

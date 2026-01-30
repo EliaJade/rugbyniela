@@ -116,6 +116,7 @@ public class UserServiceImp implements IUserService {
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		log.info("Usuario creado!");
 		return userMapper.toDTO(user);
+//		return null;
 	}
 
 	@Override
@@ -129,6 +130,7 @@ public class UserServiceImp implements IUserService {
 		userMapper.updateUserFromDto(dto, user);
 		User updatedUser = userRepository.save(user);
 		return userMapper.toDTO(updatedUser);
+//		return null;
 	}
 
 	@Override
@@ -136,6 +138,7 @@ public class UserServiceImp implements IUserService {
 		User user = userRepository.findById(id)
 				.orElseThrow(()->new RugbyException("El usuario con id "+id+" no existe", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION));
 		return userMapper.toDTO(user);
+//		return null;
 	}
 
 	@Override
@@ -179,6 +182,7 @@ public class UserServiceImp implements IUserService {
 				0,
 				new HashSet<>(),
 				new HashSet<>(),
+				true,
 				season,
 				user,
 				user.getCurrentCoalition());
@@ -224,6 +228,7 @@ public class UserServiceImp implements IUserService {
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
 		return userMapper.toDTO(user);
+//		return null;
 	}
 
 	

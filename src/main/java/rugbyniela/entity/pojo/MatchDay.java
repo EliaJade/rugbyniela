@@ -43,6 +43,8 @@ public class MatchDay {
 
 	@Column(nullable = false, length = 100)
 	private String name; //jornada 1, jornada 2....
+	
+	Boolean isActive;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "division_id", nullable = true)

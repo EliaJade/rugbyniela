@@ -1,5 +1,6 @@
 package rugbyniela.entity.dto.matchDay;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 import rugbyniela.entity.dto.match.MatchResponseDTO;
@@ -9,9 +10,10 @@ public record MatchDayResponseDTO(
 		Long id,
 		String name,
 		Long divisionId,
+		LocalDate dateBegin,
+		LocalDate dateEnd,
 		Set<MatchResponseDTO> matches,
 		//we have to configure mapstruct to do this
-		Set<TeamResponseDTO> teamDivision,
 		boolean arePointsCalculated) {
 
 }
