@@ -35,6 +35,12 @@ public class CoalitionController {
 
     private final ICoalitionService coalitionService;
 
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<CoalitionResponseDTO> getUserCoalition(){
+    	return  ResponseEntity.ok(coalitionService.getMyCoalition());
+    }
+    
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CoalitionResponseDTO> createCoalition(@Valid @RequestBody CoalitionRequestDTO dto) {
@@ -87,7 +93,7 @@ public class CoalitionController {
     @GetMapping("/requests")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<Page<CoalitionJoinResponseDTO>> getPendingRequests(
-    		@PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.ASC) Pageable pageable
+    		@PageableDefault(page = 0, size = 10, sort = "requestedAt", direction = Direction.ASC) Pageable pageable
     ) {
         return ResponseEntity.ok(coalitionService.getPendingRequests(pageable));
     }

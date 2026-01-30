@@ -47,7 +47,7 @@ public class BettingServiceImp implements IBettingService{
 	
 	private final TeamRepository teamRepository;
 	
-	private  final WeeklyBetTicketMapper bettingMapper;
+	//private  final WeeklyBetTicketMapper bettingMapper;
 	@Override
 	@Transactional
 	public WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto) {

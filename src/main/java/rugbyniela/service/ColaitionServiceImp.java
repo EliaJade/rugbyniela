@@ -173,6 +173,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	}
 
 	@Override
+	@Transactional
 	public Page<CoalitionJoinResponseDTO> getPendingRequests( Pageable pageable) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
@@ -381,6 +382,21 @@ public class ColaitionServiceImp implements ICoalitionService {
 	    coalitionSeasonScoreRepository.save(inscription);
 
 	    log.info("Coalición '{}' inscrita en la temporada '{}'", coalition.getName(), season.getName());
+	}
+
+	@Override
+	@Transactional
+	public CoalitionResponseDTO getMyCoalition() {
+		   Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		    User captain = userRepository.findByEmail(auth.getName()).orElseThrow(() -> 
+		        new RugbyException("Usuario no encontrado", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION)
+		    );
+
+		    Coalition coalition = captain.getCurrentCoalition();
+		    if (coalition == null) {
+		        throw new RugbyException("No tienes una coalición para registrar.", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
+		    }
+		return coalitionMapper.toDto(coalition);
 	}
 
 }

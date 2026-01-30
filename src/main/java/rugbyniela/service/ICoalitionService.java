@@ -13,6 +13,8 @@ import rugbyniela.entity.dto.coalition.CoalitionSimpleResponseDTO;
 
 public interface ICoalitionService {
 
+	//method to get the coalition of the current user
+	CoalitionResponseDTO getMyCoalition();
 	//--- generic basic CRUD
 	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
 	CoalitionResponseDTO fetchCoalitionById(Long id);
