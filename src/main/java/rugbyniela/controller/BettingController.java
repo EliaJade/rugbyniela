@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreRequestDTO;
+import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
 import rugbyniela.service.BettingServiceImp;
@@ -25,6 +27,15 @@ public class BettingController {
 	@PostMapping("/submit-ticket")
 	public ResponseEntity<WeeklyBetTicketResponseDTO>submitTicket(@Valid @RequestBody WeeklyBetTicketRequestDTO dto){
 		WeeklyBetTicketResponseDTO response = bettingService.submitTicket(dto);
+		return ResponseEntity.ok(response);
+		
+		
+	}
+	
+	@PreAuthorize("hasRole('USER')")
+	@PostMapping("/participate-season")
+	public ResponseEntity<UserSeasonScoreResponseDTO>participateInSeason(@Valid @RequestBody UserSeasonScoreRequestDTO dto){
+		UserSeasonScoreResponseDTO response = bettingService.participateInSeason(dto);
 		return ResponseEntity.ok(response);
 		
 		
