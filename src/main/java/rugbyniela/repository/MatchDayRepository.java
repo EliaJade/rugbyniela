@@ -1,8 +1,12 @@
 package rugbyniela.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
 
 /**
@@ -11,5 +15,7 @@ import rugbyniela.entity.pojo.MatchDay;
 @Repository
 public interface MatchDayRepository extends JpaRepository<MatchDay, Long>, JpaSpecificationExecutor<MatchDay> {
 
-	
+	boolean existsByMatchesContaining(Match match);
+
+	Page<MatchDay> findByIsActive(Boolean isActive, Pageable pageable);
 }

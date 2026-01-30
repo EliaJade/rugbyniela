@@ -1,8 +1,14 @@
 package rugbyniela.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 
 /**
@@ -12,4 +18,22 @@ import rugbyniela.entity.pojo.Team;
 public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
 	
 	boolean existsByName(String name);
-}
+	Page<Team> findByIsActive(Boolean isActive, Pageable pageable);
+
+	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId ORDER BY t.name")
+	Page<Team> findTeamsBySeasonAndDivision(@Param("season")Season season, @Param("divisionId")Long divisionId, Pageable pageable);
+	
+	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season ORDER BY t.name")
+	Page<Team> findTeamsBySeason(@Param("season") Season season, Pageable pageable);
+	
+	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND t.isActive = :isActive ORDER BY t.name")
+	Page<Team> findTeamsBySeasonAndIsActive(@Param("season") Season season, @Param("isActive") Boolean isActive, Pageable pageable);
+	
+	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId AND t.isActive = :isActive ORDER BY t.name")
+	Page<Team> findTeamsByIsActiveAndSeasonAndDivision(
+	    @Param("isActive") Boolean isActive,
+	    @Param("season") Season season,
+	    @Param("divisionId") Long divisionId,
+	    Pageable pageable
+	);
+	}

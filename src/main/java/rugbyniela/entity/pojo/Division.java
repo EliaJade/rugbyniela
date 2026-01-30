@@ -37,7 +37,7 @@ public class Division {
 	private Long id;
 	
 
-	@Column(nullable = false, length = 50)
+	@Column(nullable = false, length = 50, unique = true)
 	private String name; //default "Division de Honor"
 	
 	@Enumerated(EnumType.STRING)
@@ -48,7 +48,9 @@ public class Division {
 	@JoinColumn( name= "season_id", nullable = false) 
 	private Season season;//bidirectional relationship
 	
-	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+	private Boolean isActive;
+	
+	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<MatchDay> matchDays; //bidirectional relationship
 	
 	//to know which teams we could pair with each other

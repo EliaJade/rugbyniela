@@ -21,3 +21,4 @@ public record SeasonRequestDTO(
 		@Size(min = 1, message = "Debe haber al menos una division")
 		Set<DivisionRequestDTO> divisions) {
 }
+

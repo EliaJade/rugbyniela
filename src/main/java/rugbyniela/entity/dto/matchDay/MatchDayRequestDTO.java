@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 public record MatchDayRequestDTO(
 		LocalDate dateBegin,
 		LocalDate dateEnd,
+		Long divisionId,
 		@NotBlank(message = "La jornada debe tener un nombre")
 		@Size(max=100, message = "El nombre de la jornada no puede tener mas de 100 caracteres")
 		String name) {

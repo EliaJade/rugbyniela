@@ -1,18 +1,13 @@
 package rugbyniela.mapper;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 
 import rugbyniela.entity.dto.match.MatchRequestDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
-import rugbyniela.entity.dto.match.MatchUpdateRequestDTO;
 import rugbyniela.entity.pojo.Match;
-import rugbyniela.entity.pojo.Team;
 
 
 @Mapper(componentModel = "spring")

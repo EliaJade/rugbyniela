@@ -14,6 +14,7 @@ import rugbyniela.entity.pojo.Season;
 
 @Mapper(componentModel = "spring")
 public interface SeasonMapper {
+	
 
 	void updateSeasonFromDTO(SeasonUpdateRequestDTO dto, @MappingTarget Season season);
 	
