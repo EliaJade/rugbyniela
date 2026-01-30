@@ -2,7 +2,7 @@ package rugbyniela.entity.dto.bet;
 
 public record BetResponseDTO(
 		Long id,
-		int pointsAwared,
+		int pointsAwarded,
 		Long weeklyBetTicketId,
 		Long predictedWinnerId,
 		String bonus,

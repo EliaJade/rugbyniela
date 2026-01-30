@@ -19,7 +19,7 @@ public interface IBettingService {
 	
 	UserSeasonScoreResponseDTO participateInSeason(UserSeasonScoreRequestDTO userScoreDTO);
 
-	Page<WeeklyBetTicket> fetchUserSeasonTickets(Long userSeasonId, int page);
+	Page<WeeklyBetTicketResponseDTO> fetchUserSeasonTickets(Long userSeasonId, int page);
 
 	WeeklyBetTicket fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId);
 }

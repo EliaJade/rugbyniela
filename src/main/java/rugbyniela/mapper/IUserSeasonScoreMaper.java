@@ -14,6 +14,7 @@ import rugbyniela.entity.pojo.UserSeasonScore;
 		    unmappedTargetPolicy = ReportingPolicy.IGNORE
 	)
 public interface IUserSeasonScoreMaper {
+	
 
 	@Mapping(target = "seasonId",source = "season.id")
 	@Mapping(target = "userId",source = "user.id")

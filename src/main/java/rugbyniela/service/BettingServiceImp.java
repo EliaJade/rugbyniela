@@ -1,8 +1,11 @@
 package rugbyniela.service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +26,8 @@ import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
 import rugbyniela.entity.pojo.Bet;
 import rugbyniela.entity.pojo.Coalition;
+import rugbyniela.entity.pojo.Division;
+import rugbyniela.entity.pojo.DivisionBet;
 import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Season;
@@ -32,10 +37,12 @@ import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
 import rugbyniela.exception.RugbyException;
+import rugbyniela.mapper.IBetMapper;
 import rugbyniela.mapper.IUserSeasonScoreMaper;
 import rugbyniela.mapper.WeeklyBetTicketMapper;
 import rugbyniela.repository.BetRepository;
 import rugbyniela.repository.CoalitionRepository;
+import rugbyniela.repository.DivisionRepository;
 import rugbyniela.repository.MatchDayRepository;
 import rugbyniela.repository.MatchRepository;
 import rugbyniela.repository.SeasonRepository;
@@ -58,7 +65,9 @@ public class BettingServiceImp implements IBettingService{
 	private final SeasonRepository seasonRepository;
 	private final UserRepository userRepository;
 	private final CoalitionRepository coalitionRepository;
+	private final DivisionRepository divisionRepository;
 	
+	private final IBetMapper betMapper;
 	private  final WeeklyBetTicketMapper weeklyBetTicketMapper;
 	private final IUserSeasonScoreMaper userSeasonScoreMapper;
 	
@@ -100,147 +109,115 @@ public class BettingServiceImp implements IBettingService{
 	@Transactional
 	public WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto) {
 		
+		LocalDateTime now = LocalDateTime.now();
+		
 		UserSeasonScore userScore = checkUserSeason(dto.userSeasonId());
 		
+		MatchDay matchDay = checkMatchDay(dto.matchDayId());
 		
+		Optional<WeeklyBetTicket> optionalTicket = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userScore, matchDay);
 		
-		return null;
+		boolean isNewTicket = optionalTicket.isEmpty(); //true it's new false it already existed
 		
+		LocalDateTime earliestMatchStart = matchDay.getMatches().stream()
+				.map(Match::getTimeMatchStart)
+				.min(LocalDateTime::compareTo)
+				.orElseThrow(() -> new RugbyException("No hay partidos en esta jornada", HttpStatus.BAD_REQUEST, ActionType.BETTING));
 		
-//		LocalDateTime now = LocalDateTime.now();
-//		log.debug("Time now: " + now);
-//		// 1. Validate UserSeasonScore exists
-//		UserSeasonScore userSeason = checkUserSeason(dto.userSeasonId());
-//		log.debug("User: " + userSeason.getUser().getName());
-//		// 2. Validate MatchDay exists and fetch matches
-//		MatchDay matchDay = matchDayRepository.findById(dto.matchDayId())
-//				.orElseThrow(() -> new RugbyException("No se ha encontrado la jornada", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-//		log.debug("Match Day: " + matchDay.getName());
-//		//Find earliest match start time in this MatchDay
-//		LocalDateTime earliestMatchStart = matchDay.getMatches().stream()
-//				.map(Match::getTimeMatchStart)
-//				.min(LocalDateTime::compareTo)
-//				.orElseThrow(() -> new RugbyException("No hay partidos en esta jornada", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-//		log.debug("Earliest Match of jornada: " + earliestMatchStart);
-//		// 3. Validate predicted leaderboard winner team exists
-//		Team predictedWinner = teamRepository.findById(dto.predictedLeaderboardWinner())
-//				.orElseThrow(() -> new RugbyException("No se ha encontrado el equipo", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-////		Long winnerId = dto.predictedLeaderboardWinner();
-////		        .stream()
-////		        .findFirst()
-////		        .orElseThrow(() -> new RugbyException(
-////		                "No hay apuesta de división",
-////		                HttpStatus.BAD_REQUEST,
-////		                ActionType.USER_ACTION
-////		        ))
-////		        .predictedLeaderboardWinnerId();
-//
-//		log.debug("Winner Id: " + predictedWinner.getName());
-////		Team predictedLeaderboardWinner =
-////		        teamRepository.findById(winnerId)
-////		                .orElseThrow(() -> new RugbyException(
-////		                        "Equipo ganador no encontrado",
-////		                        HttpStatus.NOT_FOUND,
-////		                        ActionType.USER_ACTION
-////		                ));
-////		log.debug("PredictedLeaderboardWinner: " + predictedLeaderboardWinner.getName());
+		Set<Match> matchesInMatchDay = matchDay.getMatches();
+		boolean matchDayStarted =earliestMatchStart.isBefore(now);
+		
+		if(isNewTicket && matchDayStarted && dto.bets().size() != matchesInMatchDay.size()) {
+				log.debug("How many matches did you bet on: " + dto.bets().size());	
+				log.debug("How many matches should you have bet on: " + matchesInMatchDay.size());
+				throw new RugbyException("La primera vez que apuesta a un partido debe apostar a todos los partidos", HttpStatus.BAD_REQUEST, ActionType.BETTING);
+			
+		}
+//		Team predictedLeaderboardWinnerTeam =
+//		        dto.predictedLeaderboardWinner() != null
+//		                ? checkTeam(dto.predictedLeaderboardWinner())
+//		                : null;
 //		
-//		// 4. Retrieve or create WeeklyBetTicket
-//		Optional<WeeklyBetTicket> ticketThatExists = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userSeason, matchDay);
-//		log.debug("ticketThatExists: " + ticketThatExists);		
-//		if(ticketThatExists.isEmpty()) {
-//			// makes sure that no matches have started before doing that validation		
-//			if(earliestMatchStart.isAfter(now)) {
-//				log.debug("Matches start before now: " + earliestMatchStart.isAfter(now));				
-//				// 4. Validate that bets cover all matches in matchDay
-//					Set<Match> matchesInMatchDay = matchDay.getMatches();
-//					if(dto.bets().size() != matchesInMatchDay.size()) {
-//						log.debug("How many matches did you bet on: " + dto.bets().size());	
-//						log.debug("How many matches should you have bet on: " + matchesInMatchDay.size());
-//						throw new RugbyException("Debe apostar a todos los partidos", HttpStatus.BAD_REQUEST, ActionType.BETTING);
-//					}
-//			}
-//					
-//					//5. Create weeklybetTicket
-//					WeeklyBetTicket newTicket = new WeeklyBetTicket();
-//					newTicket.setUserSeason(userSeason);
-//					newTicket.setCreationDate(LocalDateTime.now());
-//					if(earliestMatchStart.isAfter(now)) {						
-//						newTicket.setPredictedLeaderBoardWinner(predictedWinner);
-//						log.debug("newTicketId with predictedWinnerLeaderBoard {}, {}, {}, ", newTicket.getCreationDate(), newTicket.getPredictedLeaderBoardWinner().getName(), newTicket.getUserSeason().getUser().getName()  );
-//						
-//					}
-//					log.debug("newTicketId {}, {}, ", newTicket.getCreationDate(),  newTicket.getUserSeason().getUser().getName()  );
-//					
-//					
-//					// 6. Create Bet for all matches
-//					for(BetRequestDTO betDTO : dto.bets()) {
-//						//make sure match exists
-//						Match match = matchRepository.findById(betDTO.matchId()).orElseThrow(()-> new RugbyException("Partido no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING));
-//						log.debug("Match: " + match.getName());
-//						//Check current time is before match start time
-//						if(now.isAfter(match.getTimeMatchStart())) {
-//							throw new RugbyException("La apuesta al partido de " + match.getName() + "no es valido porque ya ha empezado el partido", HttpStatus.BAD_REQUEST, ActionType.BETTING);
-//						}
-//						Bet bet = new Bet();
-//						log.debug("Bet: " + bet.getId());
-//						bet.setMatch(match);
-//						bet.setPredictedWinner(teamRepository.findById(betDTO.predictedWinnerId())
-//								.orElseThrow(() -> new RugbyException("Equipo no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING)));
-//						bet.setBonus(betDTO.bonus()); 
-//						bet.setPointsAwarded(0);
-//						log.debug("Bet: " + bet.getId());
-//						betRepository.save(bet);
-//
-//						log.debug("Bet after save: " + bet.getId());
-//						newTicket.addBet(bet);
-//					}
-//					// 7. Save the ticket (cascade saves bets)
-//					weeklyBetTicketRepository.save(newTicket);
-//					//return bettingMapper.toDTO(newTicket);
-//					return weeklyBetTicketMapper.toDTO(newTicket);
+		
+		Set<Bet> bets = dto.bets().stream().map(betDTO->{
+			Match match = checkMatch(betDTO.matchId());
+			
+			if(match.getTimeMatchStart().isBefore(now)) {
+				log.debug("Ignoring bet for match {} because it already started", match.getId());
+				
+				return null;
+				
+			}
+			
+			Team predictedWinner =betDTO.predictedWinnerId() != null ? checkTeam(betDTO.predictedWinnerId()) : null;
+			
+			Bet bet = 	betMapper.toEntity(betDTO);
+			bet.setPredictedWinner(predictedWinner);
+			bet.setMatch(match);
+			return bet;
+			})
+			.filter(Objects::nonNull)
+			.collect(Collectors.toSet());
+		
+		
+		
+		WeeklyBetTicket ticket = optionalTicket.orElseGet(()->{ 
+					log.debug("Created a new ticket");
+					WeeklyBetTicket newTicket = new WeeklyBetTicket();
+					newTicket.setUserSeason(userScore);
+					newTicket.setCreationDate(now);
+					return newTicket;
+					});
+		
+		if(dto.divisionBets() != null && !dto.divisionBets().isEmpty()) {
+			if(matchDayStarted) {
+				throw new RugbyException("No se puede modificar el ganador del leaderboard cuando ya ha empezado la jornada", HttpStatus.BAD_REQUEST,ActionType.BETTING);
+			}
+			
+			Set<DivisionBet> divisionBets = dto.divisionBets().stream().map(divisionBetDTO ->{
+				Division division = checkDivision(divisionBetDTO.divisionId());
+				Team predictedLeader = checkTeam(divisionBetDTO.predictedLeaderboardWinnerId());
+				
+				DivisionBet divisionBet = new DivisionBet();
+				divisionBet.setDivision(division);
+				divisionBet.setPredictedLeader(predictedLeader);
+				return divisionBet;
+			}).collect(Collectors.toSet());
+			
+			ticket.updateDivisionBets(divisionBets);
+		}
+		
+//		if(predictedLeaderboardWinnerTeam!=null) {
+//			if(earliestMatchStart.isBefore(now)) {
+//				throw new RugbyException("No se puede modificar el ganador del leaderboard cuando ya ha empezado la jornada", HttpStatus.BAD_REQUEST,
+//	                    ActionType.BETTING);
+//			}else {
+//				ticket.setPredictedLeaderBoardWinner(predictedLeaderboardWinnerTeam);
 //				
-//		} else {
-//			
-//			//8. Update existing ticket
-//			WeeklyBetTicket existingTicket = ticketThatExists.get();
-//			
-//			if(now.isBefore(earliestMatchStart)) {
-//				existingTicket.setPredictedLeaderBoardWinner(predictedWinner);
-//			} else {
-//				log.warn("No se puede modificar el líder predicho porque ya empezó el primer partido.");
 //			}
-//			
-//			for(BetRequestDTO betDTO : dto.bets()) {
-//				//find existing bet from the selected match
-//				Optional<Bet> betThatExists = existingTicket.getBets().stream()
-//						.filter(b -> b.getMatch().getId().equals(betDTO.matchId())).findFirst();
-//				
-//				if(betThatExists.isPresent()) {
-//					Bet existingBet = betThatExists.get();
-//					
-//					//Check bet is made before the time of the match when updating
-//					if(now.isBefore(existingBet.getMatch().getTimeMatchStart())) {
-//						existingBet.setPredictedWinner(teamRepository.findById(betDTO.predictedWinnerId()).orElseThrow(()-> new RugbyException("Equipo no encontrado", HttpStatus.BAD_REQUEST, ActionType.BETTING)));
-//						existingBet.setBonus(betDTO.bonus());
-//						existingBet.setPointsAwarded(0);
-//					} else {
-//						log.warn("No se puede modificar apuesta para el partido (ID {}) porque ya comenzó.", betDTO.matchId());
-////						throw new RugbyException("La apuesta al partido de " + existingBet.getMatch().getName() + "no es valido porque ya ha empezado el partido", HttpStatus.BAD_REQUEST, ActionType.BETTING);
-//					}
-//					
-//				}
-//			}
-//			//Save new updated ticket
-//			weeklyBetTicketRepository.save(existingTicket);
-//			//return bettingMapper.toDTO(existingTicket);
-//			return weeklyBetTicketMapper.toDTO(existingTicket);
 //		}
-//		
-//		
-//		// 8. Return some response DTO (you can create a mapper for this)
-	}
+		ticket.setCreationDate(now);
+		ticket.setUserSeason(userScore);
+		
+		if(!bets.isEmpty()) {
 
+			ticket.updateBets(bets);
+			
+		}
+		
+		weeklyBetTicketRepository.save(ticket);
+
+		
+		return weeklyBetTicketMapper.toDTO(ticket);
+		
+	
+//		
+		
+		
+		
+	}
+	
+	
 
 	// TODO: Si no se usa hay que borrarlo
 	@Override
@@ -250,7 +227,7 @@ public class BettingServiceImp implements IBettingService{
 
 	@Override
 	@Transactional()
-	public Page<WeeklyBetTicket> fetchUserSeasonTickets(Long userSeasonId, int page) {
+	public Page<WeeklyBetTicketResponseDTO> fetchUserSeasonTickets(Long userSeasonId, int page) {
 		//Validate userSeasonScore exists
 		UserSeasonScore userSeasonScore = checkUserSeason(userSeasonId);
 		if (page < 0) {
@@ -260,7 +237,10 @@ public class BettingServiceImp implements IBettingService{
 		//Create pageable: 10 tickets, newest first
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("creationDate").descending());
 		
-		return weeklyBetTicketRepository.findByUserSeason(userSeasonScore, pageable);
+		Page<WeeklyBetTicket> tickets = weeklyBetTicketRepository.findByUserSeason(userSeasonScore, pageable);
+		 
+		return tickets.map(weeklyBetTicketMapper::toDTO);
+		 
 	
 	}
 
@@ -304,8 +284,35 @@ public class BettingServiceImp implements IBettingService{
 	
 	public Coalition checkCoalition (Long id) {
 		Coalition coalition = coalitionRepository.findById(id)
-				.orElseThrow(()-> new RugbyException("coalicion no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
+				.orElseThrow(()-> new RugbyException("Coalicion no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return coalition;
+		
+	}
+	
+	public MatchDay checkMatchDay (Long id) {
+		MatchDay matchDay = matchDayRepository.findById(id)
+				.orElseThrow(()-> new RugbyException("Jornada no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
+		return matchDay;
+		
+	}
+	public Team checkTeam (Long id) {
+		Team team = teamRepository.findById(id)
+				.orElseThrow(()-> new RugbyException("Equipo no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
+		return team;
+		
+	}
+	
+	public Match checkMatch (Long id) {
+		Match match = matchRepository.findById(id)
+				.orElseThrow(()-> new RugbyException("Partido no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
+		return match;
+		
+	}
+	
+	public Division checkDivision (Long id) {
+		Division division = divisionRepository.findById(id)
+				.orElseThrow(()-> new RugbyException("Partido no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
+		return division;
 		
 	}
 

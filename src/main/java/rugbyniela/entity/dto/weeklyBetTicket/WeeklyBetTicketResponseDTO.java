@@ -11,7 +11,8 @@ public record WeeklyBetTicketResponseDTO(
 		Long userSeasonId,
 		LocalDateTime creationDate,
 		Set<BetResponseDTO> bets,
-//		Set<DivisionBetDTO> divisionBets
-		Long predictedLeaderboardWinner){
+		Set<DivisionBetDTO> divisionBets
+//		Long predictedLeaderboardWinner
+		){
 
 }

@@ -19,12 +19,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import rugbyniela.service.BettingServiceImp;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Slf4j
 public class WeeklyBetTicket {
 
 	@Id
@@ -40,15 +43,15 @@ public class WeeklyBetTicket {
 	@JoinColumn(name = "user_season_score_id", nullable = false)
 	private UserSeasonScore userSeason;//bidirectional relationship
 	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "predicted_leaderboard_winner_team_id", nullable = false)
-	private Team predictedLeaderBoardWinner;
+//	@ManyToOne(fetch = FetchType.LAZY)
+//	@JoinColumn(name = "predicted_leaderboard_winner_team_id", nullable = false)
+//	private Team predictedLeaderBoardWinner;
 	
 	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)//bidirectional relationship
 	private Set<Bet> bets;
 	
 	@OneToMany(mappedBy = "weeklyBetTicket", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<DivisionBet> divisionBets;
+    private Set<DivisionBet> divisionBets;
 	
 	
 	/**
@@ -61,11 +64,46 @@ public class WeeklyBetTicket {
 	private Coalition coalitionAtBetTime;
 	
 	public void addBet(Bet bet) {
-		if(this.bets==null) {
-			this.bets = new HashSet<Bet>();
-		}
-		this.bets.add(bet);
+		
+		bets.add(bet);
 		bet.setWeeklyBetTicket(this);
+	}
+
+	public void removeBet(Bet bet) {
+		bets.remove(bet);
+		bet.setWeeklyBetTicket(null);
+	}
+	
+	public void updateBets(Set<Bet> newBets) {
+		if (this.bets == null) {
+	        this.bets = new HashSet<>();
+	    }
+		bets.removeIf(existing -> newBets.stream().anyMatch(newBet -> newBet.getMatch().equals(existing.getMatch())));
+		newBets.forEach(this::addBet);
+		log.debug("Updated ticket");
+	}
+	
+	public void addDivisionBet(DivisionBet bet) {
+	    divisionBets.add(bet);
+	    bet.setWeeklyBetTicket(this);
+	}
+
+	public void removeDivisionBet(DivisionBet bet) {
+	    divisionBets.remove(bet);
+	    bet.setWeeklyBetTicket(null);
+	}
+
+	public void updateDivisionBets(Set<DivisionBet> newBets) {
+		if (this.divisionBets == null) {
+	        this.divisionBets = new HashSet<>();
+	    }
+		divisionBets.removeIf(existing ->
+	        newBets.stream().anyMatch(nb ->
+	            nb.getDivision().equals(existing.getDivision())
+	        )
+	    );
+
+	    newBets.forEach(this::addDivisionBet);
 	}
 //	
 }
