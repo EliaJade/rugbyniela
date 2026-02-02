@@ -48,6 +48,7 @@ import rugbyniela.mapper.IUserCoalitionHistoryMapper;
 import rugbyniela.mapper.IUserMapper;
 import rugbyniela.mapper.IUserSeasonScoreMaper;
 import rugbyniela.repository.AddressRepository;
+import rugbyniela.repository.CoalitionRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
@@ -70,6 +71,7 @@ public class UserServiceImp implements IUserService {
 	private final IUserSeasonScoreMaper userSeasonScoreMaper;
 	private final AddressRepository addressRepository;
 	private final IAddressMapper addressMapper;
+	private final CoalitionRepository coalitionRepository;
 	private final ISupabaseStorageService supabaseStorageService;
 
 	@Override
@@ -165,6 +167,7 @@ public class UserServiceImp implements IUserService {
 	}
 
 	@Override
+	@Transactional
 	public void registerInSeason(Long seasonId) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
@@ -188,6 +191,12 @@ public class UserServiceImp implements IUserService {
 				user.getCurrentCoalition());
 		
 		userSeasonScoreRepository.save(newUserSeasonScore);
+		
+		Coalition userCoalition = user.getCurrentCoalition();
+		if(userCoalition!=null) {
+			userCoalition.addUserSeasonScore(newUserSeasonScore);
+			coalitionRepository.save(userCoalition);
+		}
 		log.info("Usuario {} registrado exitosamente en la temporada {}", user.getName(), season.getName());
 		
 	}

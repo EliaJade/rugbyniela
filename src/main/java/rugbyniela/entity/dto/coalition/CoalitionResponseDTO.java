@@ -11,7 +11,8 @@ public record CoalitionResponseDTO(
 		String name,
 		UserSimpleResponseDTO capitan,
 		Set<CoalitionSeasonScoreResponseDTO> coalitionSeasonScores,
-		Set<UserSeasonScoreResponseDTO> userSeasonsScores
+		Set<CoalitionActiveMemberResponseDTO> userSeasonScores
+		//Set<UserSeasonScoreResponseDTO> userSeasonsScores
 		) {
 
 }

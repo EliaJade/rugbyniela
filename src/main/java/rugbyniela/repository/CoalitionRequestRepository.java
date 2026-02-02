@@ -13,4 +13,5 @@ import rugbyniela.entity.pojo.CoalitionRequest;
 @Repository
 public interface CoalitionRequestRepository extends JpaRepository<CoalitionRequest, Long>, JpaSpecificationExecutor<CoalitionRequest> {
 	Page<CoalitionRequest> findByCoalitionId(Long coalitionId, Pageable pageable);
+	boolean existsByUserIdAndCoalitionId(Long userId, Long coalitionId);
 }

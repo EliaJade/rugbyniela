@@ -43,7 +43,7 @@ public class UserController {
 
 	
 	@PutMapping("/update")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<UserResponseDTO> update(@Valid @RequestBody UserUpdatedRequestDTO dto){
 		UserResponseDTO response = userService.update(dto);
 		return ResponseEntity.ok(response);
@@ -55,13 +55,13 @@ public class UserController {
 	}
 	
 	@GetMapping
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<UserResponseDTO> fetchCurrentUser(){
 		return ResponseEntity.ok(userService.fetchCurrentUser());
 	}
 	
 	@PatchMapping("/change-password")
-	@PreAuthorize("hasRole('USER')")
+	@PreAuthorize("isAuthenticated()")
 	public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePassworRequestDTO dto) {
         userService.changePassword(dto);
         return ResponseEntity.ok().build();

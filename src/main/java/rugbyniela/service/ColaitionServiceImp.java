@@ -80,7 +80,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 	@Override
 	@Transactional 
 	public CoalitionResponseDTO fetchCoalitionById(Long id) {
-		Coalition coalition = coalitionRepository.findById(id).orElseThrow(()->{
+		Coalition coalition = coalitionRepository.findByIdWithMembersAndScores(id).orElseThrow(()->{
 			throw new RugbyException("La coalicion con id "+id+" no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
 		});
 		return coalitionMapper.toDto(coalition);
@@ -116,6 +116,9 @@ public class ColaitionServiceImp implements ICoalitionService {
 		});
 		if(user.getCurrentCoalition()!=null) {
 			throw new RugbyException("El usuario ya pertenece a una coalicion, debe dejarla antes de pedir unirse a otra", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
+		}
+		if(coalitionRequestRepository.existsByUserIdAndCoalitionId(user.getId(),coalition.getId())) {
+			throw new RugbyException("El usuario ya ha enviado una solicitud, por favor espere la respuesta", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
 		}
 		coalitionRequestRepository.save(new CoalitionRequest(null, user, coalition, LocalDateTime.now()));
 	}
@@ -164,7 +167,9 @@ public class ColaitionServiceImp implements ICoalitionService {
 				userSeasonScoreRepository.save(userSeasonScore);
 			}
 		}
+		coalition.removeUser(user);
 		userRepository.save(user);
+		coalitionRepository.save(coalition);
 	}
 
 	@Override
@@ -219,7 +224,9 @@ public class ColaitionServiceImp implements ICoalitionService {
 					userSeasonScoreRepository.save(userSeasonScore);
 				}
 			}
+			coalition.addUser(user);
 			userRepository.save(user);
+			coalitionRepository.save(coalition);
 			log.info("El usuario {} ha aceptado una solicitud de ingreso a {} en la coalicion {}",
 					SecurityContextHolder.getContext().getAuthentication().getName(),
 					user.getName(),
@@ -267,6 +274,8 @@ public class ColaitionServiceImp implements ICoalitionService {
 		userToKick.setCurrentCoalition(null);
 		userToKick.setCoalitionJoinedAt(null);
 		userRepository.save(userToKick);
+		coalition.removeUser(userToKick);
+		coalitionRepository.save(coalition);
 		log.info("El usuario {} ha eliminado a {} de la coalicion {}",
 				capitan.getName(),
 				userToKick.getName(),
