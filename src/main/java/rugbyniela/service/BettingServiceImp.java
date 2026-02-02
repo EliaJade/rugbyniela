@@ -32,6 +32,7 @@ import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
+import rugbyniela.enums.BetResult;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.mapper.IBetMapper;
 import rugbyniela.mapper.IUserSeasonScoreMaper;
@@ -119,6 +120,8 @@ public class BettingServiceImp implements IBettingService{
 				.map(Match::getTimeMatchStart)
 				.min(LocalDateTime::compareTo)
 				.orElseThrow(() -> new RugbyException("No hay partidos en esta jornada", HttpStatus.BAD_REQUEST, ActionType.BETTING));
+		//TODO: check that this doesnt take in to account inactive matches
+		
 		
 		Set<Match> matchesInMatchDay = matchDay.getMatches();
 		boolean matchDayStarted =earliestMatchStart.isBefore(now);
@@ -137,6 +140,21 @@ public class BettingServiceImp implements IBettingService{
 		
 		Set<Bet> bets = dto.bets().stream().map(betDTO->{
 			Match match = checkMatch(betDTO.matchId());
+			if (betDTO.betResult() == BetResult.DRAW && betDTO.predictedWinnerId() != null) {
+			    throw new RugbyException(
+			        "Empate no puede tener ganador",
+			        HttpStatus.BAD_REQUEST,
+			        ActionType.BETTING
+			    );
+			}
+
+			if (betDTO.betResult() != BetResult.DRAW && betDTO.predictedWinnerId() == null) {
+			    throw new RugbyException(
+			        "Debe indicar un ganador",
+			        HttpStatus.BAD_REQUEST,
+			        ActionType.BETTING
+			    );
+			}
 			
 			if(match.getTimeMatchStart().isBefore(now)) {
 				log.debug("Ignoring bet for match {} because it already started", match.getId());
@@ -145,11 +163,17 @@ public class BettingServiceImp implements IBettingService{
 				
 			}
 			
-			Team predictedWinner =betDTO.predictedWinnerId() != null ? checkTeam(betDTO.predictedWinnerId()) : null;
+			
 			
 			Bet bet = 	betMapper.toEntity(betDTO);
-			bet.setPredictedWinner(predictedWinner);
+			bet.setBetResult(betDTO.betResult());
+
 			bet.setMatch(match);
+			if(betDTO.betResult() != BetResult.DRAW) {
+				
+				bet.setPredictedWinner(checkTeam(betDTO.predictedWinnerId()));
+				
+			}
 			return bet;
 			})
 			.filter(Objects::nonNull)

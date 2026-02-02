@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rugbyniela.enums.BetResult;
 import rugbyniela.enums.Bonus;
 
 @Entity
@@ -49,6 +50,10 @@ public class Bet {
 	@Column(length = 30)
 	//TODO: validate if it matches with the match
 	private Bonus bonus;
+	
+	@Enumerated(EnumType.STRING)
+	@Column
+	private BetResult betResult;
 	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)

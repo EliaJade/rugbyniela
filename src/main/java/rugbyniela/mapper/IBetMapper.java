@@ -14,8 +14,8 @@ import rugbyniela.entity.pojo.Bet;
 public interface IBetMapper {
 
 	
-	@Mapping(target="match.id", source = "matchId")
-	@Mapping(target="predictedWinner.id", source = "predictedWinnerId")
+	@Mapping(target="match.id", ignore = true)
+	@Mapping(target="predictedWinner.id", ignore = true)
 	Bet toEntity(BetRequestDTO dto);
 	
 	@Mapping(source="match.id", target = "matchId")

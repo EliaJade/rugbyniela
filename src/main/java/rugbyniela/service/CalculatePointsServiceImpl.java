@@ -10,6 +10,7 @@ import rugbyniela.entity.dto.bet.BetResponseDTO;
 import rugbyniela.entity.dto.match.MatchResponseDTO;
 import rugbyniela.entity.pojo.Bet;
 import rugbyniela.entity.pojo.Match;
+import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Team;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
@@ -31,12 +32,13 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	public void calculatePointsByBet(Long betId) {
 		Bet bet = checkBet(betId);
 		Match match = bet.getMatch();
+		MatchDay matchDay = match.getMatchDay();
 		WeeklyBetTicket ticket = bet.getWeeklyBetTicket();
 		int weeklyPoints =0;
 		if(match.getLocalResult() == match.getAwayResult()) {
-			//draw
+			bet.setBetCorrect(bet.getPredictedWinner() == null ? true : false);
 		}
-
+		else {
 		Team winner = match.getLocalResult() > match.getAwayResult()
 		        ? match.getLocalTeam()
 		        : match.getAwayTeam();
@@ -57,6 +59,7 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		}
 		else {
 			bet.setBetCorrect(false);
+		}
 		}
 		ticket.setWeeklyPoints(weeklyPoints);
 		log.debug("PointsAwarded: "+bet.getPointsAwarded());
@@ -97,9 +100,9 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		    default -> 0;
 		};
 		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + points);
-
 		
-//		if(ticket.getDivisionBets())
+		
+//		if(ticket.getDivisionBets().stream().map(divisionBet->divisionBet.getPredictedLeader().equals(matchDay.get)))
 		return 0;
 	}
 
