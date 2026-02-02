@@ -21,5 +21,6 @@ public interface IBettingService {
 
 	Page<WeeklyBetTicketResponseDTO> fetchUserSeasonTickets(Long userSeasonId, int page);
 
-	WeeklyBetTicket fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId);
+	WeeklyBetTicketResponseDTO fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId);
+
 }

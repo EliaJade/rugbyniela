@@ -1,7 +1,6 @@
 package rugbyniela.service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -17,9 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import rugbyniela.entity.dto.bet.BetRequestDTO;
-import rugbyniela.entity.dto.season.SeasonRequestDTO;
-import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreRequestDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
@@ -187,15 +183,6 @@ public class BettingServiceImp implements IBettingService{
 			ticket.updateDivisionBets(divisionBets);
 		}
 		
-//		if(predictedLeaderboardWinnerTeam!=null) {
-//			if(earliestMatchStart.isBefore(now)) {
-//				throw new RugbyException("No se puede modificar el ganador del leaderboard cuando ya ha empezado la jornada", HttpStatus.BAD_REQUEST,
-//	                    ActionType.BETTING);
-//			}else {
-//				ticket.setPredictedLeaderBoardWinner(predictedLeaderboardWinnerTeam);
-//				
-//			}
-//		}
 		ticket.setCreationDate(now);
 		ticket.setUserSeason(userScore);
 		
@@ -206,14 +193,8 @@ public class BettingServiceImp implements IBettingService{
 		}
 		
 		weeklyBetTicketRepository.save(ticket);
-
 		
 		return weeklyBetTicketMapper.toDTO(ticket);
-		
-	
-//		
-		
-		
 		
 	}
 	
@@ -247,7 +228,7 @@ public class BettingServiceImp implements IBettingService{
 	
 	@Transactional(readOnly = true)
 	@Override
-	public WeeklyBetTicket fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId) {
+	public WeeklyBetTicketResponseDTO fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId) {
 		UserSeasonScore userSeasonScore = checkUserSeason(userSeasonId);//Validate match day exists
 		MatchDay matchDay = matchDayRepository.findById(matchDayId)
 				.orElseThrow(()-> new RugbyException("Jornada no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
@@ -256,7 +237,7 @@ public class BettingServiceImp implements IBettingService{
 		WeeklyBetTicket ticket = weeklyBetTicketRepository.findByUserSeasonAndMatchDay(userSeasonScore, matchDay)
 				.orElseThrow(()-> new RugbyException("No existe ticket para esta jornada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		
-		return ticket;
+		return weeklyBetTicketMapper.toDTO(ticket);
 		
 		
 	}

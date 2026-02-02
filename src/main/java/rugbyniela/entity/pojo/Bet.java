@@ -1,7 +1,5 @@
 package rugbyniela.entity.pojo;
 
-import java.util.Optional;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,7 +30,10 @@ public class Bet {
 	
 	
 	@Column(nullable = false) 
-	private int pointsAwarded; //default 0
+	private int pointsAwarded; //default 0 //represents bonus
+	
+	@Column
+	private Boolean betCorrect;
 	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
