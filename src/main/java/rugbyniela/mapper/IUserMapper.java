@@ -41,6 +41,7 @@ public interface IUserMapper {
 		User toEntity(UserRequestDTO dto);
 		
 		@Mapping(target = "coalitonName",source="currentCoalition.name")
+		@Mapping(target = "rol", expression = "java(entity.getRole().name())")
 		UserResponseDTO toDTO(User entity);
 		
 		AddressResponseDTO addressToDto(Address address);

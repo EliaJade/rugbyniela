@@ -25,4 +25,11 @@ public interface CoalitionRepository extends JpaRepository<Coalition, Long>, Jpa
 	           "LEFT JOIN FETCH s.season sea " +         // Trae la info de la temporada (para ver si isActive)
 	           "WHERE c.id = :id")
 	    Optional<Coalition> findByIdWithMembersAndScores(@Param("id") Long id);
+	
+	@Query("SELECT c FROM Coalition c WHERE " +
+		       "(:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+		       "(:active IS NULL OR c.active = :active)")
+		Page<Coalition> findByFilters(@Param("name") String name, 
+		                              @Param("active") Boolean active, 
+		                              Pageable pageable);
 }

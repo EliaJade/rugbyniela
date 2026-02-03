@@ -15,6 +15,7 @@ public record UserResponseDTO(
 		String gender,
 		String profilePictureUrl,
 		String coalitonName,
+		String rol,
 		AddressResponseDTO address) {
 
 }

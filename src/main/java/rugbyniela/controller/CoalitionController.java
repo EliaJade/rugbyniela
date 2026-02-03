@@ -56,6 +56,7 @@ public class CoalitionController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<CoalitionSimpleResponseDTO>> getAllCoalitions(
     		@RequestParam(required = false) Boolean active,
+    		@RequestParam(required = false) String name,
     		@PageableDefault(size = 10, sort = "name", direction = Direction.ASC) Pageable pageable,
             Authentication authentication // Inyectamos la auth para verificar el rol manualmente
     ) {
@@ -64,7 +65,7 @@ public class CoalitionController {
         if (!isAdmin) {
             active = true;
         }
-        return ResponseEntity.ok(coalitionService.fetchAllCoalitions(pageable, active));
+        return ResponseEntity.ok(coalitionService.fetchAllCoalitions(pageable, active,name));
     }
 
     @DeleteMapping

@@ -18,7 +18,7 @@ public interface ICoalitionService {
 	//--- generic basic CRUD
 	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
 	CoalitionResponseDTO fetchCoalitionById(Long id);
-	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active);
+	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active, String name);
 	//update coalition ??
 	
 	// --- management of members (from user's point of view) ---

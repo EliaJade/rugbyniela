@@ -87,14 +87,10 @@ public class ColaitionServiceImp implements ICoalitionService {
 	}
 
 	@Override
-	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active) {
+	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active, String name) {
 
-		Page<Coalition> coalitionPage;
-		if(active == null) {
-			coalitionPage= coalitionRepository.findAll(pageable);
-		}else {
-			coalitionPage= coalitionRepository.findByActive(active,pageable);
-		}
+		String searchName = (name != null && !name.isBlank()) ? name.trim() : null;
+		Page<Coalition> coalitionPage = coalitionRepository.findByFilters(searchName, active, pageable);
 		return coalitionPage.map(coalitionMapper::toSimpleDTO);
 	}
 
@@ -118,7 +114,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 			throw new RugbyException("El usuario ya pertenece a una coalicion, debe dejarla antes de pedir unirse a otra", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
 		}
 		if(coalitionRequestRepository.existsByUserIdAndCoalitionId(user.getId(),coalition.getId())) {
-			throw new RugbyException("El usuario ya ha enviado una solicitud, por favor espere la respuesta", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
+			throw new RugbyException("El usuario ya ha enviado una solicitud, por favor espere la respuesta", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);
 		}
 		coalitionRequestRepository.save(new CoalitionRequest(null, user, coalition, LocalDateTime.now()));
 	}
@@ -227,6 +223,7 @@ public class ColaitionServiceImp implements ICoalitionService {
 			coalition.addUser(user);
 			userRepository.save(user);
 			coalitionRepository.save(coalition);
+			coalitionRequestRepository.deleteByUser(user);
 			log.info("El usuario {} ha aceptado una solicitud de ingreso a {} en la coalicion {}",
 					SecurityContextHolder.getContext().getAuthentication().getName(),
 					user.getName(),
