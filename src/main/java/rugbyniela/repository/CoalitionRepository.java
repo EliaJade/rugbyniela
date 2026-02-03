@@ -27,7 +27,7 @@ public interface CoalitionRepository extends JpaRepository<Coalition, Long>, Jpa
 	    Optional<Coalition> findByIdWithMembersAndScores(@Param("id") Long id);
 	
 	@Query("SELECT c FROM Coalition c WHERE " +
-		       "(:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
+		       "(:name IS NULL OR LOWER(c.name) LIKE :name) AND " + // <--- CAMBIO: Quitamos LOWER() alrededor de :name
 		       "(:active IS NULL OR c.active = :active)")
 		Page<Coalition> findByFilters(@Param("name") String name, 
 		                              @Param("active") Boolean active, 

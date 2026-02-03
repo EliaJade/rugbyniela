@@ -1107,27 +1107,13 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	    return "DEL_" + name;
 	}
 
-	
-
-	
-
-	
-
-
-	
-
-	
-	
-	
-
-	
-
-	
-
-	
-
-	
-
-	
+	@Override
+	public Page<TeamResponseDTO> fetchAllTeams(Pageable pageable, Boolean active, String name) {
+		String searchName = (name != null && !name.isBlank()) 
+                ? "%" + name.trim().toLowerCase() + "%" // <--- .toLowerCase() añadido
+                : null;
+		Page<Team> teamPage = teamRepository.findByFilters(searchName, active, pageable);
+		return teamPage.map(teamMapper::toDTO);
+	}
 
 }

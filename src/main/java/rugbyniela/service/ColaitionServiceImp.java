@@ -89,7 +89,9 @@ public class ColaitionServiceImp implements ICoalitionService {
 	@Override
 	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active, String name) {
 
-		String searchName = (name != null && !name.isBlank()) ? name.trim() : null;
+		String searchName = (name != null && !name.isBlank()) 
+                ? "%" + name.trim().toLowerCase() + "%" // <--- .toLowerCase() añadido
+                : null;
 		Page<Coalition> coalitionPage = coalitionRepository.findByFilters(searchName, active, pageable);
 		return coalitionPage.map(coalitionMapper::toSimpleDTO);
 	}

@@ -4,6 +4,7 @@ public record CoalitionSimpleResponseDTO(
 		Long id,
 	    String name,
 	    String captainName,
-	    int membersCount) {
+	    int membersCount,
+	    boolean active) {
 
 }

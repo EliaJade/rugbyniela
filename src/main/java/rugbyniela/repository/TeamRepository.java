@@ -36,4 +36,12 @@ public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificat
 	    @Param("divisionId") Long divisionId,
 	    Pageable pageable
 	);
+	
+	@Query("SELECT t FROM Team t WHERE " +
+		       "(:name IS NULL OR LOWER(t.name) LIKE :name) AND " + // :name ya vendrá en minúsculas y con % desde Java
+		       "(:active IS NULL OR t.isActive = :active)")         // Asumo que el campo en la entidad se llama 'isActive'
+		Page<Team> findByFilters(@Param("name") String name, 
+		                         @Param("active") Boolean active, 
+		                         Pageable pageable);
+	
 	}

@@ -1,6 +1,9 @@
 package rugbyniela.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -35,7 +38,7 @@ import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.service.ICompetitiveService;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/competitive")
 @RequiredArgsConstructor
 public class CompetitiveController {
 
@@ -94,15 +97,17 @@ public class CompetitiveController {
 	}
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/teams")
-	public ResponseEntity<Page<TeamResponseDTO>> getTeams(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(required = false) Boolean isActive,
-			Authentication auth){
-		boolean isAdmin = auth != null && auth.getAuthorities().stream()
-				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
-		if(!isAdmin) {
-			isActive=true;
-		}
-		return ResponseEntity.ok(competitiveService.fetchAllTeams(page, isActive));
+	public ResponseEntity<Page<TeamResponseDTO>> getTeams(
+			@RequestParam(required = false) Boolean active,
+    		@RequestParam(required = false) String name,
+    		@PageableDefault(size = 10, sort = "name", direction = Direction.ASC) Pageable pageable,
+            Authentication authentication){
+	      boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+	                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+	        if (!isAdmin) {
+	            active = true;
+	        }
+		return ResponseEntity.ok(competitiveService.fetchAllTeams(pageable, active,name));
 	}
 	
 	

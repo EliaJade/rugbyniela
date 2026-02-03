@@ -1,6 +1,7 @@
 package rugbyniela.service;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
@@ -38,6 +39,7 @@ public interface ICompetitiveService {
 	Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page, Boolean isActive);
 	Page<TeamResponseDTO> fetchTeamsBySeasonAndDivision (Long seasonId, Long divisionId, int page, Boolean isActive);
 	Page<TeamResponseDTO> fetchTeamsBySeason(Long seasonId, int page, Boolean isActive);
+	Page<TeamResponseDTO> fetchAllTeams(Pageable pageable, Boolean active, String name);
 //	void fetchMatchesOfSeasonByMatchDay();
 //	void fetchMatchDaysByDivision();
 //	void fetchMatchDaysByDivisionAndId();
