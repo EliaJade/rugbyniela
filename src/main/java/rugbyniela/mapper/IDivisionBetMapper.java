@@ -8,10 +8,10 @@ import rugbyniela.entity.pojo.DivisionBet;
 public interface IDivisionBetMapper {
 	
 	@Mapping(target="division.id", source = "divisionId")
-	@Mapping(target="predictedLeader.id", source = "predictedLeaderboardWinnerId")
+	@Mapping(target="predictedLeader.id", source = "predictedLeaderId")
 	DivisionBet toEntity(DivisionBetDTO dto);
 	
 	@Mapping(source="division.id", target = "divisionId")
-	@Mapping(source="predictedLeader.id", target = "predictedLeaderboardWinnerId")
+	@Mapping(source="predictedLeader.id", target = "predictedLeaderId")
 	DivisionBetDTO toDTO(DivisionBet divisionBet);
 }

@@ -3,6 +3,7 @@ package rugbyniela.service;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -22,14 +23,19 @@ import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 import rugbyniela.entity.pojo.TeamDivisionScore;
+import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
+import rugbyniela.enums.BetResult;
 import rugbyniela.enums.Bonus;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.repository.BetRepository;
+import rugbyniela.repository.DivisionBetRepository;
 import rugbyniela.repository.DivisionRepository;
 import rugbyniela.repository.MatchDayRepository;
+import rugbyniela.repository.TeamDivisionScoreRepository;
 import rugbyniela.repository.TeamRepository;
+import rugbyniela.repository.UserSeasonScoreRepository;
 import rugbyniela.repository.WeeklyBetTicketRepository;
 
 @Slf4j
@@ -37,15 +43,19 @@ import rugbyniela.repository.WeeklyBetTicketRepository;
 @RequiredArgsConstructor
 public class CalculatePointsServiceImpl implements ICalculatePointsService{
 
-	private BetRepository betRepository;
-	private WeeklyBetTicketRepository weeklyBetTicketRepository;
-	private DivisionRepository divisionRepository;
-	private MatchDayRepository matchDayRepository;
-	private TeamRepository teamRepository;
+	private final BetRepository betRepository;
+	private final WeeklyBetTicketRepository weeklyBetTicketRepository;
+	private final DivisionRepository divisionRepository;
+	private final MatchDayRepository matchDayRepository;
+	private final TeamRepository teamRepository;
+	private final TeamDivisionScoreRepository teamDivisionScoreRepository;
+	private final UserSeasonScoreRepository userSeasonScoreRepository;
+	private final DivisionBetRepository divisionBetRepository;
 	
 	
 //	private MatchDayMapper matchDayMapper;
 	
+	@Transactional
 	@Override
 	public void calculatePointsByBet(Long betId) {
 		Bet bet = checkBet(betId);
@@ -54,7 +64,7 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		WeeklyBetTicket ticket = bet.getWeeklyBetTicket();
 		int weeklyPoints = 0;
 		if(match.getLocalResult() == match.getAwayResult()) {
-			bet.setBetCorrect(bet.getPredictedWinner() == null ? true : false);
+			bet.setBetCorrect(bet.getBetResult() == BetResult.DRAW ? true : false);
 		}
 		else {
 		Team winner = match.getLocalResult() > match.getAwayResult()
@@ -79,9 +89,11 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			bet.setBetCorrect(false);
 		}
 		}
-		ticket.setWeeklyPoints(weeklyPoints);
+		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + weeklyPoints);
 		log.debug("PointsAwarded: "+bet.getPointsAwarded());
 		log.debug("Was bet correct: " + bet.getBetCorrect());
+		betRepository.save(bet);
+		weeklyBetTicketRepository.save(ticket);
 	}
 	
 
@@ -90,16 +102,17 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	public int calculatePointsByWeeklyBetTicket(Long weeklyBetTicketId) {
 		WeeklyBetTicket ticket = checkTicket(weeklyBetTicketId);
 		
-		for(DivisionBet divisionbet:ticket.getDivisionBets()) {
-			Division division = divisionbet.getDivision();
-			Team predictedLeader = divisionbet.getPredictedLeader();
+		for(DivisionBet divisionBet:ticket.getDivisionBets()) {
+			Division division = divisionBet.getDivision();
+			Team predictedLeader = divisionBet.getPredictedLeader();
 			
 			TeamDivisionScore leader = division.getTeamDivisionScores().stream()
 				    .max(Comparator.comparing(TeamDivisionScore::getTotalPoints))
-				    .orElse(null);
+				    .orElseThrow(()-> new RugbyException("No hay un ganador en la division " + division.getName(), HttpStatus.NOT_FOUND, ActionType.CALCULATION));
 			Team actualLeader = leader != null ? leader.getTeam() : null;
 			boolean correct = actualLeader != null && actualLeader.equals(predictedLeader);
-			divisionbet.setBetCorrect(correct);
+			divisionBet.setBetCorrect(correct);
+			divisionBetRepository.save(divisionBet);
 		}
 		
 //		
@@ -107,45 +120,60 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		long correctBets = ticket.getBets().stream()
 		        .filter(bet -> Boolean.TRUE.equals(bet.getBetCorrect()))
 		        .count();
-//		long correctDivisionBets = ticket.getDivisionBets().stream()
-//		        .filter(db -> Boolean.TRUE.equals(db.getBetCorrect()))
-//		        .count();
+		long correctDivisionBets = ticket.getDivisionBets().stream()
+		        .filter(db -> Boolean.TRUE.equals(db.getBetCorrect()))
+		        .count();
 		log.debug("How many correctBets have there been" + correctBets);
+
+		log.debug("How many correctDivisionBets have there been" + correctDivisionBets);
 //		
 		int points = switch ((int) correctBets) {
-		    case 1 -> 1;
-		    case 2 -> 3;
-		    case 3 -> 5;
-//		    case 4 -> correctDivisionBets ? 10 : 7;
-		    default -> 0;
-		};
+	    case 1 -> 1;
+	    case 2 -> 3;
+	    case 3 -> 5;
+	    case 4 -> (correctDivisionBets <= 2) ? 25
+	              : (correctDivisionBets == 1) ? 10
+	              : 7;
+	    default -> 0;
+	};
 		
 		
 		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + points);
 		
+		weeklyBetTicketRepository.save(ticket);
 		
 		return ticket.getWeeklyPoints();
 	}
 
+	@Transactional
 	@Override
-	public int calculateTotalPoints() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int calculateTotalPoints(Long weeklyBetTicketId) {
+		WeeklyBetTicket ticket = checkTicket(weeklyBetTicketId);
+		UserSeasonScore userScore = ticket.getUserSeason();
+		if(userScore == null) {
+			throw new RugbyException("El ticket no esta asociado a un usuario", HttpStatus.NOT_FOUND, ActionType.CALCULATION);
+		}
+		else {
+		userScore.setTotalPoints(userScore.getTotalPoints()+ticket.getWeeklyPoints());
+		userSeasonScoreRepository.save(userScore);
+		return userScore.getTotalPoints();
+		}
 	}
 	
 
+	@Transactional
 	@Override
 	public void calculateMatchDayPoints(Long matchDayId) {
 		 MatchDay matchDay = checkMatchDay(matchDayId);
 	     Season season = matchDay.getDivision().getSeason();
 		
 		if(Boolean.TRUE.equals(matchDay.getArePointsCalculated())) {
-			throw new RugbyException("Los puntos de esta jornada ya estan calculado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			throw new RugbyException("Los puntos de esta jornada ya estan calculado", HttpStatus.BAD_REQUEST, ActionType.CALCULATION);
 		}
 		
 		Division division = matchDay.getDivision();
 		if(division==null) {
-			throw new RugbyException("La jornada no esta asociada a una division", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+			throw new RugbyException("La jornada no esta asociada a una division", HttpStatus.NOT_FOUND, ActionType.CALCULATION);
 		}
 		
 		Map<Long, Integer> pointsByTeam = new HashMap<>();
@@ -191,7 +219,7 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			
 			pointsByTeam.merge(localTeamId, localPoints, Integer::sum);
 
-			pointsByTeam.merge(awayTeamId, localPoints, Integer::sum);
+			pointsByTeam.merge(awayTeamId, awayPoints, Integer::sum);
 		}
 		
 		
@@ -209,16 +237,19 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			if(teamScore == null) {
 				teamScore = new TeamDivisionScore();
 				teamScore.setDivision(division);
-				teamScore.getSeason();
+				teamScore.setSeason(season);
 				
 				Team team = checkTeam(teamId);
 				teamScore.setTeam(team);
 				teamScore.setTotalPoints(pointsToAdd);
-				division.getTeamDivisionScores();
+				teamDivisionScoreRepository.save(teamScore);
+				division.getTeamDivisionScores().add(teamScore);
+				team.getTeamDivisionScore().add(teamScore);
 				
 			}
 			else {
 				teamScore.setTotalPoints(teamScore.getTotalPoints() + pointsToAdd);
+				teamDivisionScoreRepository.save(teamScore);
 			}
 		}
 		
@@ -228,8 +259,24 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	}
 	
 	
-//	@Transactional
-//	@Override
+	@Transactional
+	@Override
+	public void finishMatchDay(Long matchDayId) {
+		calculateMatchDayPoints(matchDayId);
+		
+		MatchDay matchDay = checkMatchDay(matchDayId);
+		List<Bet> bets = betRepository.findByMatchDayId(matchDayId);
+		for (Bet bet : bets) {
+			calculatePointsByBet(bet.getId());
+		}
+		
+		Set<WeeklyBetTicket> tickets = bets.stream().map(Bet::getWeeklyBetTicket).collect(Collectors.toSet());
+		
+		for (WeeklyBetTicket ticket : tickets) {
+			calculatePointsByWeeklyBetTicket(ticket.getId());
+			calculateTotalPoints(ticket.getId());
+		}
+	}
 //	public void calculateTeamDivisionScore(Long divisionId) {
 //		Division division = checkDivision(divisionId);
 //		Set<MatchDay> matchDays = division.getMatchDays();

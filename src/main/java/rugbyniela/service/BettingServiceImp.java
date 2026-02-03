@@ -116,6 +116,7 @@ public class BettingServiceImp implements IBettingService{
 		
 		boolean isNewTicket = optionalTicket.isEmpty(); //true it's new false it already existed
 		
+		
 		LocalDateTime earliestMatchStart = matchDay.getMatches().stream()
 				.map(Match::getTimeMatchStart)
 				.min(LocalDateTime::compareTo)
@@ -131,6 +132,7 @@ public class BettingServiceImp implements IBettingService{
 				log.debug("How many matches should you have bet on: " + matchesInMatchDay.size());
 				throw new RugbyException("La primera vez que apuesta a un partido debe apostar a todos los partidos", HttpStatus.BAD_REQUEST, ActionType.BETTING);
 			
+				
 		}
 //		Team predictedLeaderboardWinnerTeam =
 //		        dto.predictedLeaderboardWinner() != null
@@ -185,10 +187,14 @@ public class BettingServiceImp implements IBettingService{
 					log.debug("Created a new ticket");
 					WeeklyBetTicket newTicket = new WeeklyBetTicket();
 					newTicket.setUserSeason(userScore);
+					log.debug("se ha asignado un userScore al nuevoTicket");
 					newTicket.setCreationDate(now);
+					log.debug("se ha asignado la fecha de creacion a "+ now);
+
+					log.debug("new ticket" + newTicket.getId());
 					return newTicket;
 					});
-		
+		log.debug("new ticket devuelto" + ticket.getId());
 		if(dto.divisionBets() != null && !dto.divisionBets().isEmpty()) {
 			if(matchDayStarted) {
 				throw new RugbyException("No se puede modificar el ganador del leaderboard cuando ya ha empezado la jornada", HttpStatus.BAD_REQUEST,ActionType.BETTING);
@@ -196,7 +202,7 @@ public class BettingServiceImp implements IBettingService{
 			
 			Set<DivisionBet> divisionBets = dto.divisionBets().stream().map(divisionBetDTO ->{
 				Division division = checkDivision(divisionBetDTO.divisionId());
-				Team predictedLeader = checkTeam(divisionBetDTO.predictedLeaderboardWinnerId());
+				Team predictedLeader = checkTeam(divisionBetDTO.predictedLeaderId()); //TODO:found error here
 				
 				DivisionBet divisionBet = new DivisionBet();
 				divisionBet.setDivision(division);
@@ -208,8 +214,11 @@ public class BettingServiceImp implements IBettingService{
 		}
 		
 		ticket.setCreationDate(now);
-		ticket.setUserSeason(userScore);
-		
+		log.debug("se ha creado la fecha de creacion");
+//		ticket.setUserSeason(userScore);
+//		log.debug("se ha asignado el user al ticket");
+		ticket.setWeeklyPoints(0);
+		log.debug("se ha asignado los weekly points a 0");
 		if(!bets.isEmpty()) {
 
 			ticket.updateBets(bets);
@@ -217,7 +226,7 @@ public class BettingServiceImp implements IBettingService{
 		}
 		
 		weeklyBetTicketRepository.save(ticket);
-		
+		log.debug("se ha guardadp el ticket");
 		return weeklyBetTicketMapper.toDTO(ticket);
 		
 	}
@@ -267,6 +276,7 @@ public class BettingServiceImp implements IBettingService{
 	}
 	
 	public UserSeasonScore checkUserSeason (Long userSeasonId) {
+		log.debug("UserScore Id: "+ userSeasonId);
 		UserSeasonScore userSeasonScore = userSeasonScoreRepository.findById(userSeasonId)
 				.orElseThrow(()-> new RugbyException("Usuario score no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return userSeasonScore;
@@ -274,6 +284,7 @@ public class BettingServiceImp implements IBettingService{
 	}
 	
 	public Season checkSeason (Long id) {
+		log.debug("season Id: "+ id);
 		Season season = seasonRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Temporada no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return season;
@@ -281,6 +292,7 @@ public class BettingServiceImp implements IBettingService{
 	}
 
 	public User checkUser (Long id) {
+		log.debug("User Id: "+ id);
 		User user = userRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Usuario no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return user;
@@ -288,6 +300,7 @@ public class BettingServiceImp implements IBettingService{
 	}
 	
 	public Coalition checkCoalition (Long id) {
+		log.debug("Coalition Id: "+ id);
 		Coalition coalition = coalitionRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Coalicion no encontrado", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return coalition;
@@ -295,12 +308,14 @@ public class BettingServiceImp implements IBettingService{
 	}
 	
 	public MatchDay checkMatchDay (Long id) {
+		log.debug("MatchDay Id: "+ id);
 		MatchDay matchDay = matchDayRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Jornada no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return matchDay;
 		
 	}
 	public Team checkTeam (Long id) {
+		log.debug("Team Id: "+ id);
 		Team team = teamRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Equipo no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return team;
@@ -308,6 +323,7 @@ public class BettingServiceImp implements IBettingService{
 	}
 	
 	public Match checkMatch (Long id) {
+		log.debug("Match Id: "+ id);
 		Match match = matchRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Partido no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return match;
@@ -315,6 +331,7 @@ public class BettingServiceImp implements IBettingService{
 	}
 	
 	public Division checkDivision (Long id) {
+		log.debug("Division Id: "+ id);
 		Division division = divisionRepository.findById(id)
 				.orElseThrow(()-> new RugbyException("Partido no encontrada", HttpStatus.NOT_FOUND, ActionType.BETTING));
 		return division;

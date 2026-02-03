@@ -41,7 +41,6 @@ public class Team {
 	@Column
 	private Boolean isActive;
 	
-	@Column
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<TeamDivisionScore> teamDivisionScore;
 	

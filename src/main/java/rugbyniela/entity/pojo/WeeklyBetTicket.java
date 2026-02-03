@@ -62,8 +62,8 @@ public class WeeklyBetTicket {
 	@JoinColumn(name = "ticket_coalition_id")
 	private Coalition coalitionAtBetTime;
 	
-	@Column
-	private int weeklyPoints;
+	@Column(nullable = false)
+	private Integer weeklyPoints;
 	
 	public void addBet(Bet bet) {
 		

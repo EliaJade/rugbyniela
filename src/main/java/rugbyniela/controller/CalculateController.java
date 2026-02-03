@@ -23,7 +23,7 @@ public class CalculateController {
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/{matchDayId}/finish")
 	public ResponseEntity<String>finishMatchDay(@PathVariable Long matchDayId){
-		calculatePointsService.calculateMatchDayPoints(matchDayId);
+		calculatePointsService.finishMatchDay(matchDayId);
 		log.debug("entered finishMatch");
 		return ResponseEntity.ok("MatchDay finished and points calculated");
 		

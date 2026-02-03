@@ -24,3 +24,4 @@ public interface IBettingService {
 	WeeklyBetTicketResponseDTO fetchUserSeasonTicketByMatchDay(Long userSeasonId, Long matchDayId);
 
 }
+

@@ -9,9 +9,11 @@ public interface ICalculatePointsService {
 	
 	int calculatePointsByWeeklyBetTicket(Long weeklyBetTicketId);
 	
-	int calculateTotalPoints();
+	int calculateTotalPoints(Long weeklyBetTicketId);
 	
 	void calculateMatchDayPoints(Long matchDayId);
+	
+	void finishMatchDay(Long matchDayId);
 	
 //	void calculateTeamDivisionScore(Long division);
 }

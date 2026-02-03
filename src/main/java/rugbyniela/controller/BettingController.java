@@ -44,6 +44,7 @@ public class BettingController {
 		
 	}
 	
+	
 	@PreAuthorize("hasRole('USER')")
 	@PostMapping("/participate-season")
 	public ResponseEntity<UserSeasonScoreResponseDTO>participateInSeason(@Valid @RequestBody UserSeasonScoreRequestDTO dto){

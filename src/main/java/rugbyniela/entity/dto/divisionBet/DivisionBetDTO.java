@@ -4,6 +4,6 @@ package rugbyniela.entity.dto.divisionBet;
 public record DivisionBetDTO(
 		Long id,
 		Long divisionId,
-		Long predictedLeaderboardWinnerId) {
+		Long predictedLeaderId) {
 
 }
