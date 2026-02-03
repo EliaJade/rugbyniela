@@ -1,6 +1,7 @@
 package rugbyniela.service;
 
-import rugbyniela.entity.dto.bet.BetRequestDTO;
+import rugbyniela.entity.pojo.MatchDay;
+import rugbyniela.entity.pojo.Season;
 
 public interface ICalculatePointsService {
 
@@ -9,4 +10,8 @@ public interface ICalculatePointsService {
 	int calculatePointsByWeeklyBetTicket(Long weeklyBetTicketId);
 	
 	int calculateTotalPoints();
+	
+	void calculateMatchDayPoints(Long matchDayId);
+	
+//	void calculateTeamDivisionScore(Long division);
 }

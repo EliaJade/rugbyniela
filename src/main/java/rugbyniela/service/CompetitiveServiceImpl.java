@@ -799,22 +799,22 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		MatchDay matchDay = checkMatchDay(match.getMatchDay().getId());
 		
-		if(matchDay.isArePointsCalculated()) {
+		if(matchDay.getArePointsCalculated()) {
 			throw new RugbyException("No puedes actualizar un partido de una jornada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		
 		if(match.getStatus().equals(MatchStatus.SCHEDULED)||match.getStatus().equals(MatchStatus.CANCELLED)) {
 			if(dto.localResult()!=null) {
-				throw new RugbyException("No puedes modificar los resultados del equipo local de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar los resultados del equipo local de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 			}
 			
 			if(dto.awayResult()!=null) {
-				throw new RugbyException("No puedes modificar los resultados del equipo visitante de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar los resultados del equipo visitante de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 				
 			}
 			
 			if(dto.bonus()!=null) {
-				throw new RugbyException("No puedes modificar los resultados del bonus de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar los resultados del bonus de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 				
 			}
 			if(dto.location()!=null) {
@@ -859,26 +859,26 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			
 		} else if(match.getStatus().equals(MatchStatus.IN_PLAY)||match.getStatus().equals(MatchStatus.FINISHED)){
 			if(dto.location()!=null) {
-				throw new RugbyException("No puedes modificar la localizacion de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar la localizacion de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 								
 			}
 			if(dto.name()!=null) {
-				throw new RugbyException("No puedes modificar el nombre de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar el nombre de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 				
 			}
 			
 			if(dto.timeMatchStart()!=null) {
-				throw new RugbyException("No puedes modificar la hora que empieza el partido de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar la hora que empieza el partido de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 				
 			}
 			
 			if(dto.localTeam()!=null) {
-				throw new RugbyException("No puedes modificar el equipo local de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar el equipo local de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 				
 			}
 			
 			if(dto.awayTeam()!=null) {
-				throw new RugbyException("No puedes modificar el equipo visitante de un partido con status: " + dto.status() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+				throw new RugbyException("No puedes modificar el equipo visitante de un partido con status: " + match.getStatus() , HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 				
 			}
 			if(dto.localResult()!=null) {
@@ -978,7 +978,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			//unnecessary since it would never happen since the match day needs to start before the match
 		}
 		
-		if(matchDay.isArePointsCalculated()) {
+		if(matchDay.getArePointsCalculated()) {
 			throw new RugbyException("No se puede modificar las jornadas ya finalizado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		
