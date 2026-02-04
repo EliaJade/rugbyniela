@@ -6,4 +6,5 @@ public interface IRankingService {
 	void fetchMatchDayRankingSeason();
 	void fetchCoalitionGeneralRankingSeason();
 	void fetchCoalitionMatchDayRankingSeason(); 
+	
 }

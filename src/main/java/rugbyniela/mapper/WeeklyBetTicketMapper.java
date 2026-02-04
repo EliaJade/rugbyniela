@@ -23,6 +23,8 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 		)
 public interface WeeklyBetTicketMapper {
 
+	
+	
 //		@Mapping(target= "predictedLeaderboardWinner", source= "predictedLeaderBoardWinner.id")
 		@Mapping(source = "userSeason.id", target = "userSeasonId")
 	   WeeklyBetTicketResponseDTO toDTO (WeeklyBetTicket ticket);
@@ -41,6 +43,6 @@ public interface WeeklyBetTicketMapper {
 		BetResponseDTO toDTO(Bet bet);
 		
 		@Mapping(source="division.id", target = "divisionId")
-		@Mapping(source="predictedLeader.id", target = "predictedLeaderboardWinnerId")
+		@Mapping(source="predictedLeader.id", target = "predictedLeaderId")
 		DivisionBetDTO toDTO(DivisionBet divisionBet);
 }

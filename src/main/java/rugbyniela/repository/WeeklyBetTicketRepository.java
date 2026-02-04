@@ -32,5 +32,5 @@ public interface WeeklyBetTicketRepository extends JpaRepository<WeeklyBetTicket
 				AND m.matchDay = :matchDay
 			""")
 	Optional<WeeklyBetTicket> findByUserSeasonAndMatchDay(@Param ("userSeason") UserSeasonScore userSeason, @Param ("matchDay") MatchDay matchDay);
-
+//	Optional<WeeklyBetTicket> findByUserSeasonScoreAndBets_MatchDay(UserSeasonScore userSeasonScore,MatchDay matchDay);
 }

@@ -1,11 +1,16 @@
 package rugbyniela.entity.pojo;
 
 
+import java.util.Set;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,7 +38,12 @@ public class Team {
 	@Column(length = 500)
 	private String teamPictureUrl;
 	
-	
+	@Column
 	private Boolean isActive;
+	
+	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<TeamDivisionScore> teamDivisionScore;
+	
+	
 
 }

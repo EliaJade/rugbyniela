@@ -41,4 +41,6 @@ public class DivisionBet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "predicted_leader_id", nullable = false)
     private Team predictedLeader;
+    
+    private Boolean betCorrect;
 }
