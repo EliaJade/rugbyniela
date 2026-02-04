@@ -52,6 +52,7 @@ public class CompetitiveController {
 	public ResponseEntity<Page<SeasonResponseDTO>> getSeasons(
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(required = false) Boolean isActive,
+			@RequestParam(required = false) String name,
 			Authentication auth){
 		
 		boolean isAdmin = auth != null && auth.getAuthorities().stream()
@@ -59,7 +60,7 @@ public class CompetitiveController {
 		if(!isAdmin) {
 			isActive=true;
 		}
-		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page, isActive));
+		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page, isActive,name));
 	}
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/divisions")

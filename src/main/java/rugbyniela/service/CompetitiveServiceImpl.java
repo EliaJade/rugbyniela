@@ -90,26 +90,24 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	//TODO: check the authentication is correct
 	@Override
-	public Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive) {
+	public Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive,String name) {
 		//Validate there are seasons
 		checkNegativePage(page);
-
-		Pageable pageable = PageRequest.of(page, 10, Sort.by("startSeason").descending());
 		
-		Page<Season> seasons;
-		if(isActive == null) {
-			seasons = seasonRepository.findAll(pageable);
-			
-		} else {
-			seasons = seasonRepository.findByIsActive(isActive, pageable);
-		}
+		String searchName = (name != null && !name.isBlank()) 
+                ? "%" + name.trim().toLowerCase() + "%" 
+                : null;
+
+        // 3. Configuración de Paginación
+        // Mantenemos tu ordenamiento por defecto (startSeason descendente)
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("startSeason").descending());
+        
+        // 4. Llamada única al repositorio
+        Page<Season> seasons = seasonRepository.findByFilters(searchName, isActive, pageable);
 		if(seasons.isEmpty()) {
-			throw new RugbyException("No hay temporadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-			
+			throw new RugbyException("No se encontraron temporadas con los filtros aplicados", HttpStatus.NO_CONTENT, ActionType.TOURNAMENT);
 		}
 		return seasons.map(seasonMapper::toDTO);
-		
-		
 	}
 
 	@Override
@@ -432,14 +430,12 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Override
 	public TeamResponseDTO createTeam(TeamRequestDTO dto,MultipartFile logoFile) {
 		if(teamRepository.existsByName(dto.name())) {
-			throw new RugbyException("Este equipo ya existe", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			throw new RugbyException("Ya existe un equipo con ese nombre, usa otro", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		
 		Team team = teamMapper.toEntity(dto);
 		if(team.getIsActive()==null) {
 			team.setIsActive(true);
 		}
-		
 	    if (logoFile != null && !logoFile.isEmpty()) {
 	        try {
 	            String safeName = StringUtils.normalize(dto.name()); 
@@ -937,6 +933,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(dto.url()!=null) {
 			team.setUrl(dto.url());
 		}
+		if(teamRepository.existsByNameAndIdNot(dto.name(),id)) {
+			throw new RugbyException("Ese nombre ya existe, usa otro", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
 		if (logoFile != null && !logoFile.isEmpty()) {
             try {
                 // a. Generamos nombre seguro igual que en el create
@@ -955,6 +954,8 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
                 log.error("Error actualizando el escudo del equipo {}", id, e);
                 throw new RugbyException("Error al actualizar el escudo del equipo", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.SEASON_ADMIN);
             }
+        }else if(dto.deletePicture()) {
+        	team.setTeamPictureUrl(null);
         }
 		teamRepository.save(team);
 		log.info("Se ha actualizado el equipo {} correctamente", 

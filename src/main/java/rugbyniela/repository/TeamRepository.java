@@ -18,6 +18,7 @@ import rugbyniela.entity.pojo.Team;
 public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificationExecutor<Team> {
 	
 	boolean existsByName(String name);
+	boolean existsByNameAndIdNot(String name, Long id);
 	Page<Team> findByIsActive(Boolean isActive, Pageable pageable);
 
 	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId ORDER BY t.name")

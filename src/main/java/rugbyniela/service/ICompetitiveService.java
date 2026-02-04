@@ -24,7 +24,7 @@ import rugbyniela.entity.dto.team.TeamResponseDTO;
 
 public interface ICompetitiveService {
 
-	Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive);
+	Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive,String name);
 	SeasonResponseDTO fetchSeasonById(Long seasonId);
 	Page<DivisionResponseDTO> fetchAllDivisions(int page, Boolean isActive);
 	DivisionResponseDTO fetchDivisionById(Long divisionId);
