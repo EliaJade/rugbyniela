@@ -35,6 +35,7 @@ import rugbyniela.enums.ActionType;
 import rugbyniela.enums.BetResult;
 import rugbyniela.exception.RugbyException;
 import rugbyniela.mapper.IBetMapper;
+import rugbyniela.mapper.IDivisionBetMapper;
 import rugbyniela.mapper.IUserSeasonScoreMaper;
 import rugbyniela.mapper.WeeklyBetTicketMapper;
 import rugbyniela.repository.BetRepository;
@@ -67,6 +68,7 @@ public class BettingServiceImp implements IBettingService{
 	private final IBetMapper betMapper;
 	private  final WeeklyBetTicketMapper weeklyBetTicketMapper;
 	private final IUserSeasonScoreMaper userSeasonScoreMapper;
+	private final IDivisionBetMapper  divisionBetMapper;
 	
 	@Transactional
 	@Override
@@ -207,6 +209,9 @@ public class BettingServiceImp implements IBettingService{
 				DivisionBet divisionBet = new DivisionBet();
 				divisionBet.setDivision(division);
 				divisionBet.setPredictedLeader(predictedLeader);
+//				DivisionBet divisionBet = divisionBetMapper.toEntity(divisionBetDTO);
+				
+				divisionBet.setWeeklyBetTicket(ticket);
 				return divisionBet;
 			}).collect(Collectors.toSet());
 			

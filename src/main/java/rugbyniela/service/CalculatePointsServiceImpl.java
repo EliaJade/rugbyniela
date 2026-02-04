@@ -90,7 +90,7 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		}
 		}
 		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + weeklyPoints);
-		log.debug("PointsAwarded: "+bet.getPointsAwarded());
+		log.debug("PointsAwarded: "+ticket.getWeeklyPoints());
 		log.debug("Was bet correct: " + bet.getBetCorrect());
 		betRepository.save(bet);
 		weeklyBetTicketRepository.save(ticket);
@@ -128,18 +128,37 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		log.debug("How many correctDivisionBets have there been" + correctDivisionBets);
 //		
 		int points = switch ((int) correctBets) {
-	    case 1 -> 1;
-	    case 2 -> 3;
-	    case 3 -> 5;
-	    case 4 -> (correctDivisionBets <= 2) ? 25
+	    case 1 -> {
+	        log.debug("Awarded 1 point");
+	        yield 1;
+	    }
+	    case 2 -> {
+	        log.debug("Awarded 3 points");
+	        yield 3;
+	    }
+	    case 3 -> {
+	        log.debug("Awarded 5 points");
+	        yield 5;
+	    }
+	    case 4 -> {
+	        int p = (correctDivisionBets <= 2) ? 25
 	              : (correctDivisionBets == 1) ? 10
 	              : 7;
-	    default -> 0;
+	        log.debug("Awarded {} points for division bets", p);
+	        yield p;
+	    }
+	    default -> {
+	        log.debug("Awarded 0 points");
+	        yield 0;
+	    }
 	};
-		
-		
+		log.debug("Weekly points:" +ticket.getWeeklyPoints());
+	if (ticket.getWeeklyPoints() == null) {
+	    ticket.setWeeklyPoints(0);
+	}
+		log.debug("Points: " +points);
 		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + points);
-		
+		log.debug("Weekly points:" +ticket.getWeeklyPoints());
 		weeklyBetTicketRepository.save(ticket);
 		
 		return ticket.getWeeklyPoints();
@@ -154,7 +173,9 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			throw new RugbyException("El ticket no esta asociado a un usuario", HttpStatus.NOT_FOUND, ActionType.CALCULATION);
 		}
 		else {
+			log.debug("Weekly Points: " +ticket.getWeeklyPoints());
 		userScore.setTotalPoints(userScore.getTotalPoints()+ticket.getWeeklyPoints());
+		log.debug("Total Points: " +userScore.getTotalPoints());
 		userSeasonScoreRepository.save(userScore);
 		return userScore.getTotalPoints();
 		}

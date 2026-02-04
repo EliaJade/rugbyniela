@@ -17,6 +17,7 @@ import rugbyniela.service.CalculatePointsServiceImpl;
 @RequestMapping("/calculate")
 public class CalculateController {
 	
+	
 	private final CalculatePointsServiceImpl calculatePointsService;
 	
 

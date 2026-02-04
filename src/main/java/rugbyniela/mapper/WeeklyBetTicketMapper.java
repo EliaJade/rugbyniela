@@ -24,6 +24,7 @@ import rugbyniela.entity.pojo.WeeklyBetTicket;
 public interface WeeklyBetTicketMapper {
 
 	
+	
 //		@Mapping(target= "predictedLeaderboardWinner", source= "predictedLeaderBoardWinner.id")
 		@Mapping(source = "userSeason.id", target = "userSeasonId")
 	   WeeklyBetTicketResponseDTO toDTO (WeeklyBetTicket ticket);
