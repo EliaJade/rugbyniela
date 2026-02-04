@@ -25,6 +25,7 @@ import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
 import rugbyniela.entity.pojo.TeamDivisionScore;
+import rugbyniela.entity.pojo.UserMatchDayScore;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.entity.pojo.WeeklyBetTicket;
 import rugbyniela.enums.ActionType;
@@ -118,7 +119,17 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	@Transactional
 	public int calculatePointsByWeeklyBetTicket(Long weeklyBetTicketId) {
 		WeeklyBetTicket ticket = checkTicket(weeklyBetTicketId);
-
+		UserSeasonScore userSeasonScore = ticket.getUserSeason();
+		
+		MatchDay matchDay = ticket.getBets().stream()
+		        .findFirst()
+		        .map(bet -> bet.getMatch().getMatchDay())
+		        .orElseThrow(() -> new RugbyException(
+		            "El ticket no tiene jornadas asociados",
+		            HttpStatus.BAD_REQUEST,
+		            ActionType.CALCULATION
+		        ));
+		
 		for(DivisionBet divisionBet:ticket.getDivisionBets()) {
 			Division division = divisionBet.getDivision();
 			Team actualLeader = division.getTeamDivisionScores().stream()
@@ -128,9 +139,12 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			divisionBet.setBetCorrect(actualLeader!=null && actualLeader.equals(divisionBet.getPredictedLeader()));
 			divisionBetRepository.save(divisionBet);
 		}
+		
 		Map<Division, List<Bet>> betsByDivision = ticket.getBets().stream().collect(Collectors.groupingBy(bet->bet.getMatch().getMatchDay().getDivision()));
 		int totalPoints = 0;
 		boolean allDivisionPerfect = true;
+		
+		
 		for (Entry<Division, List<Bet>> entry : betsByDivision.entrySet()) {
 			Division division = entry.getKey();
 			List<Bet> divisionBets = entry.getValue();
@@ -143,11 +157,28 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 				allDivisionPerfect=false;
 			}
 		}
+		
 		if(allDivisionPerfect && betsByDivision.size()==2) {
 			totalPoints=25;
 		}
 		
+		Set<UserMatchDayScore> userMatchDayScores =userSeasonScore.getMatchDayScores();
+		UserMatchDayScore actualUserMatchDayScore = userMatchDayScores.stream()
+				.filter(userMatchDayScore -> userMatchDayScore.getMatchDay().equals(matchDay))
+				.findFirst()
+				.orElseGet(()->{
+					UserMatchDayScore userMatchDayScore = new UserMatchDayScore();
+					
+					userMatchDayScore.setUserSeason(userSeasonScore);
+					userMatchDayScores.add(userMatchDayScore);
+					userMatchDayScore.setMatchDay(matchDay);
+					return userMatchDayScore;
+				});
+		actualUserMatchDayScore.setPoints(totalPoints);
+		
+		userSeasonScoreRepository.save(userSeasonScore);
 		ticket.setWeeklyPoints(totalPoints);
+		
 		weeklyBetTicketRepository.save(ticket);
 		log.debug("Weekly points calculated: {}", totalPoints);
         return totalPoints;

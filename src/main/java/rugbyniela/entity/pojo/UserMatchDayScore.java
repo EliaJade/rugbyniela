@@ -33,6 +33,10 @@ public class UserMatchDayScore {
 	private int points;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(nullable =false)
+	private MatchDay matchDay;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_season_id", nullable = false)
 	private UserSeasonScore userSeason; //bidirectional relationship
 	

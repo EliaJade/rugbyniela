@@ -42,7 +42,11 @@ public class MatchDay {
 	@Column(nullable = false, length = 100)
 	private String name; //jornada 1, jornada 2....
 	
+	@Column
 	Boolean isActive;
+
+	@Column
+	private Boolean arePointsCalculated;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "division_id", nullable = true)
@@ -51,8 +55,10 @@ public class MatchDay {
 	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<Match> matches; //bidirectional relationship
 	
-	@Column
-	private Boolean arePointsCalculated;
+	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+	private Set<UserMatchDayScore> matchDayScores;//this should be a bidirectional relationship
+	
+	
 	
 	public void addMatch (Match match) {
 		if(this.matches==null) {
