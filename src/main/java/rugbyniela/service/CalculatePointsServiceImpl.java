@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -101,11 +102,10 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	@Transactional
 	public int calculatePointsByWeeklyBetTicket(Long weeklyBetTicketId) {
 		WeeklyBetTicket ticket = checkTicket(weeklyBetTicketId);
-		
+
 		for(DivisionBet divisionBet:ticket.getDivisionBets()) {
 			Division division = divisionBet.getDivision();
 			Team predictedLeader = divisionBet.getPredictedLeader();
-			
 			TeamDivisionScore leader = division.getTeamDivisionScores().stream()
 				    .max(Comparator.comparing(TeamDivisionScore::getTotalPoints))
 				    .orElseThrow(()-> new RugbyException("No hay un ganador en la division " + division.getName(), HttpStatus.NOT_FOUND, ActionType.CALCULATION));
@@ -114,8 +114,16 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			divisionBet.setBetCorrect(correct);
 			divisionBetRepository.save(divisionBet);
 		}
-		
-//		
+		Set<Bet> bets = ticket.getBets();
+		Optional<MatchDay> optionalMatchDay = bets.stream()
+			    .findFirst()           // get any bet (if exists)
+			    .map(Bet::getMatch)    // get the match from that bet
+			    .map(Match::getMatchDay); //get matchday from that match
+		int matchCount = 0;
+		if (optionalMatchDay.isPresent()) {
+		    MatchDay matchDay = optionalMatchDay.get();
+		    matchCount = matchDay.getMatches().size();
+		}
 //		int betAmount = ticket.getBets().size();
 		long correctBets = ticket.getBets().stream()
 		        .filter(bet -> Boolean.TRUE.equals(bet.getBetCorrect()))
@@ -141,17 +149,20 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	        yield 5;
 	    }
 	    case 4 -> {
-	        int p = (correctDivisionBets <= 2) ? 25
-	              : (correctDivisionBets == 1) ? 10
-	              : 7;
-	        log.debug("Awarded {} points for division bets", p);
-	        yield p;
+	        log.debug("Awarded 7 points for division bets");
+	        yield 7;
 	    }
 	    default -> {
 	        log.debug("Awarded 0 points");
 	        yield 0;
 	    }
+	   
 	};
+	 if(matchCount==correctBets) {
+		points = (correctDivisionBets <= 2) ? 25
+	     : (correctDivisionBets == 1) ? 10 
+	     : points;
+	    }
 		log.debug("Weekly points:" +ticket.getWeeklyPoints());
 	if (ticket.getWeeklyPoints() == null) {
 	    ticket.setWeeklyPoints(0);
