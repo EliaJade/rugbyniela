@@ -4,5 +4,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ISupabaseStorageService {
 
-	public String uploadProfilePicture(MultipartFile file, String uniqueName);
+	public String uploadFile(MultipartFile file, String uniqueName);
 }

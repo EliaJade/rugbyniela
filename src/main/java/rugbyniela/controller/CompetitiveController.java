@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -199,8 +201,10 @@ public class CompetitiveController {
 //	------------CREATE and ADD-----------------
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-team")
-	public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto){
-		TeamResponseDTO response = competitiveService.createTeam(dto);
+	public ResponseEntity<TeamResponseDTO> createTeam(
+			@Valid @RequestPart("team") TeamRequestDTO dto, 
+	        @RequestPart(value = "file", required = false) MultipartFile file){
+		TeamResponseDTO response = competitiveService.createTeam(dto,file);
 		return ResponseEntity.ok(response);
 		
 	}
@@ -343,8 +347,11 @@ public class CompetitiveController {
 	}
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-team{id}")
-	public ResponseEntity<TeamResponseDTO> updateTeam(@PathVariable Long id, @Valid@RequestBody TeamRequestDTO dto){
-		TeamResponseDTO team = competitiveService.updateTeam(id, dto);
+	public ResponseEntity<TeamResponseDTO> updateTeam(
+			@PathVariable Long id, 
+            @Valid @RequestPart("team") TeamRequestDTO dto, // JSON con datos
+            @RequestPart(value = "file", required = false) MultipartFile file){
+		TeamResponseDTO team = competitiveService.updateTeam(id, dto,file);
 		return ResponseEntity.ok(team);
 	}
 }

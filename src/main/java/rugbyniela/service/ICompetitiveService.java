@@ -2,6 +2,7 @@ package rugbyniela.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import rugbyniela.entity.dto.division.DivisionAddToSeasonRequestDTO;
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
@@ -61,7 +62,7 @@ public interface ICompetitiveService {
 	DivisionResponseDTO updateDivision(Long id, DivisionUpdateRequestDTO dto);
 	MatchDayResponseDTO updateMatchDay(Long id, MatchDayRequestDTO dto);
 	MatchResponseDTO updateMatch(Long id, MatchUpdateRequestDTO dto);
-	TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto);
+	TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto,MultipartFile logoFile);
 	
 //	SeasonResponseDTO removeDivisionFromSeason(Long divisionId, Long seasonId);
 	MatchDayResponseDTO removeMatchFromMatchDay(Long matchId, Long matchDayId);
@@ -72,7 +73,7 @@ public interface ICompetitiveService {
 	SeasonResponseDTO createSeason(SeasonRequestDTO dto);
 	DivisionResponseDTO createDivision(DivisionRequestDTO dto);
 	MatchResponseDTO createMatch(MatchRequestDTO dto);
-	TeamResponseDTO createTeam(TeamRequestDTO dto);
+	TeamResponseDTO createTeam(TeamRequestDTO dto, MultipartFile file);
 	MatchDayResponseDTO createMatchDay(MatchDayRequestDTO dto);
 	
 	MatchDayResponseDTO addMatchToMatchDay(MatchAddToMatchDayRequestDTO dto);

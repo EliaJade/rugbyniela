@@ -109,7 +109,7 @@ public class UserServiceImp implements IUserService {
             String filename = StringUtils.normalize(user.getNickname()) + "_" + System.currentTimeMillis() + "_" + profilePicture.getOriginalFilename();
             
             // Subir a Supabase
-            String publicUrl = supabaseStorageService.uploadProfilePicture(profilePicture, filename);
+            String publicUrl = supabaseStorageService.uploadFile(profilePicture, filename);
             
             // Guardar URL en entidad
             user.setProfilePictureUrl(publicUrl);

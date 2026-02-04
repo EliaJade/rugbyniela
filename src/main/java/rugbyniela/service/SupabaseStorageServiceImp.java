@@ -32,7 +32,7 @@ public class SupabaseStorageServiceImp implements ISupabaseStorageService {
     private final RestTemplate restTemplate = new RestTemplate(); 
 
     @Override
-    public String uploadProfilePicture(MultipartFile file, String uniqueName) {
+    public String uploadFile(MultipartFile file, String uniqueName) {
         if (file.isEmpty()) return null;
 
         try {

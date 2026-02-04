@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private final MatchRepository matchRepository;
 	private final AddressRepository addressRepository;
 	private final MatchDayRepository matchDayRepository;
+	private final ISupabaseStorageService supabaseStorageService;
 	
 	private final SeasonMapper seasonMapper;
 	private final TeamMapper teamMapper;
@@ -428,7 +430,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	@Transactional
 	@Override
-	public TeamResponseDTO createTeam(TeamRequestDTO dto) {
+	public TeamResponseDTO createTeam(TeamRequestDTO dto,MultipartFile logoFile) {
 		if(teamRepository.existsByName(dto.name())) {
 			throw new RugbyException("Este equipo ya existe", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
@@ -437,6 +439,21 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(team.getIsActive()==null) {
 			team.setIsActive(true);
 		}
+		
+	    if (logoFile != null && !logoFile.isEmpty()) {
+	        try {
+	            String safeName = StringUtils.normalize(dto.name()); 
+	            String filename = "team_" + safeName + "_" + System.currentTimeMillis() + "_" + logoFile.getOriginalFilename();
+	            
+	            String publicUrl = supabaseStorageService.uploadFile(logoFile, filename);
+	            
+	            team.setTeamPictureUrl(publicUrl);
+	            
+	        } catch (Exception e) {
+	            log.error("Error subiendo escudo del equipo", e);
+	            throw new RugbyException("Error al subir el escudo del equipo", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.SEASON_ADMIN);
+	        }
+	    }
 		teamRepository.save(team);
 		log.info("Se ha creado el equipo {} correctamente", 
 				team.getId());
@@ -905,13 +922,14 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return matchMapper.toDTO(match);
 		
 	}
-	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto) {
+	@Override
+	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto,MultipartFile logoFile) {
 		
 		Team team = checkTeam(id);
 		if(Boolean.FALSE.equals(team.getIsActive())) {
 			throw new RugbyException("No puedes actualizar un equipo eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		
+		//TODO: add logic to avoid teams have same names
 		if(dto.name()!=null) {
 			team.setName(dto.name());
 			
@@ -919,6 +937,25 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(dto.url()!=null) {
 			team.setUrl(dto.url());
 		}
+		if (logoFile != null && !logoFile.isEmpty()) {
+            try {
+                // a. Generamos nombre seguro igual que en el create
+                String safeName = StringUtils.normalize(team.getName()); // Usamos el nombre actual o el nuevo
+                String filename = "team_" + safeName + "_" + System.currentTimeMillis() + "_" + logoFile.getOriginalFilename();
+                
+                // b. Subimos el nuevo archivo
+                String publicUrl = supabaseStorageService.uploadFile(logoFile, filename); // O uploadProfilePicture si no lo renombraste
+                
+                // c. Actualizamos la URL en la entidad
+                team.setTeamPictureUrl(publicUrl);
+                
+                // OPCIONAL: Aquí podrías intentar borrar la imagen antigua de Supabase si quisieras ahorrar espacio
+                
+            } catch (Exception e) {
+                log.error("Error actualizando el escudo del equipo {}", id, e);
+                throw new RugbyException("Error al actualizar el escudo del equipo", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.SEASON_ADMIN);
+            }
+        }
 		teamRepository.save(team);
 		log.info("Se ha actualizado el equipo {} correctamente", 
 				team.getId());
