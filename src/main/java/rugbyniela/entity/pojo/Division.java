@@ -55,12 +55,12 @@ public class Division {
 	private Set<TeamDivisionScore> teamDivisionScores;
 	
 	//to know which teams we could pair with each other
-	@ManyToMany(fetch = FetchType.LAZY) 
-    @JoinTable(
-        name = "division_teams", // Nombre de la tabla intermedia en BD
-        joinColumns = @JoinColumn(name = "division_id"),
-        inverseJoinColumns = @JoinColumn(name = "team_id"))
-    private Set<Team> teams; //= new HashSet<>();
+//	@ManyToMany(fetch = FetchType.LAZY) 
+//    @JoinTable(
+//        name = "division_teams", // Nombre de la tabla intermedia en BD
+//        joinColumns = @JoinColumn(name = "division_id"),
+//        inverseJoinColumns = @JoinColumn(name = "team_id"))
+//    private Set<Team> teams; //= new HashSet<>();
 	
 	/**
 	 * Method to add a matchDay in the list
@@ -76,12 +76,12 @@ public class Division {
 		matchDay.setDivision(this);
 	}
 	
-	public void addTeam(Team team) {
-		if(this.teams==null) {
-			this.teams = new HashSet<Team>();
-		}
-		this.teams.add(team);
-	}
+//	public void addTeam(Team team) {
+//		if(this.teams==null) {
+//			this.teams = new HashSet<Team>();
+//		}
+//		this.teams.add(team);
+//	}
 
 	
 	

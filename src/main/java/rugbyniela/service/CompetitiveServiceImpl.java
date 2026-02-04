@@ -354,8 +354,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 				.collect(Collectors.toSet());
 		if(division.getIsActive()==null) {
 			division.setIsActive(true);
-		}						
-		division.setTeams(teams);		
+		}
+		//TODO: create TeamDivisionSeason based on the teams doing the relationships between the classes
+		//division.setTeams(teams);		
 		divisionRepository.save(division);
 		log.info("Se ha creado la division {} correctamente", 
 				division.getId());
@@ -514,9 +515,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		Season season = checkSeason(division.getSeason().getId());
 		LocalDate now = LocalDate.now();
-		boolean teamOutside = matchDay.getMatches().stream()
-				.flatMap(match -> Stream.of(match.getAwayTeam(), match.getLocalTeam())) //flatMap collects both localTeam and awayTeam for each match into one stream.
-				.anyMatch(team -> !division.getTeams().contains(team)); //if at least one team playing in matchDay does not belong to the division it will give true, otherwise false
+		boolean teamOutside = true;
+//		boolean teamOutside = matchDay.getMatches().stream()
+//				.flatMap(match -> Stream.of(match.getAwayTeam(), match.getLocalTeam())) //flatMap collects both localTeam and awayTeam for each match into one stream.
+//				.anyMatch(team -> !division.get().contains(team)); //if at least one team playing in matchDay does not belong to the division it will give true, otherwise false
 		if(teamOutside) {
 			throw new RugbyException("Hay un equipo que juega en la jornada que no juega en esta division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
@@ -572,6 +574,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	@Transactional
 	@Override
+	//TODO: fix
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
 		Division division = checkDivision(dto.division());
@@ -583,9 +586,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		Season season = checkSeason(division.getSeason().getId());
 		LocalDate now = LocalDate.now();
-		boolean exists = division.getTeams().stream()
-				.anyMatch(existingTeam -> 
-							existingTeam.getId().equals(team.getId()));
+		boolean exists = true;
+		//boolean exists = division.getTeams().stream()
+//				.anyMatch(existingTeam -> 
+//							existingTeam.getId().equals(team.getId()));
 				
 		if(exists) {
 			throw new RugbyException("Este equipo ya juegan en la division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
@@ -593,7 +597,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(season.getEndSeason().isBefore(now)) {
 			throw new RugbyException("No se puede añadir equipos a una temporada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		division.addTeam(team);
+		//division.addTeam(team);
 		divisionRepository.save(division);
 		log.info("Se ha añadido el equipo {} a la division {} correctamente", 
 				team.getId(), division.getId());
@@ -1080,6 +1084,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	@Override
+	//TODO: fix
 	public DivisionResponseDTO removeTeamFromDivision(Long teamId, Long divisionId) {
 		Team team = checkTeam(teamId);
 		Division division = checkDivision(divisionId);
@@ -1087,11 +1092,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			throw new RugbyException("No puedes quitar un equipo de una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		
-		if(!division.getTeams().contains(team)) {
-			throw new RugbyException("Esta division no contiene este equipo", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
-		}
-		
-		division.getTeams().remove(team);
+//		if(!division.getTeams().contains(team)) {
+//			throw new RugbyException("Esta division no contiene este equipo", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+//		}
+//		
+//		division.getTeams().remove(team);
 		divisionRepository.save(division);
 		log.info("Se ha quitado el equipo {} de la division {} correctamente", 
 				team.getId(), division.getId());
