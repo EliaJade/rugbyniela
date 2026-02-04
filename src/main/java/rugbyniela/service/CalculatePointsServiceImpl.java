@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -61,9 +62,9 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	public void calculatePointsByBet(Long betId) {
 		Bet bet = checkBet(betId);
 		Match match = bet.getMatch();
-//		MatchDay matchDay = match.getMatchDay();
-		WeeklyBetTicket ticket = bet.getWeeklyBetTicket();
-		int weeklyPoints = 0;
+		
+		boolean correct = false;
+		
 		if(match.getLocalResult() == match.getAwayResult()) {
 			bet.setBetCorrect(bet.getBetResult() == BetResult.DRAW ? true : false);
 		}
@@ -71,30 +72,45 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 		Team winner = match.getLocalResult() > match.getAwayResult()
 		        ? match.getLocalTeam()
 		        : match.getAwayTeam();
-		
-		if(bet.getPredictedWinner().equals(winner)) {
-			bet.setBetCorrect(true);;
-			if(bet.getBonus()!=(Bonus.NONE)) {
-				if(bet.getBonus() == (match.getBonus())) {
-//					bet.setPointsAwarded(bet.getPointsAwarded()+1);
-					weeklyPoints=1;
-				} 
-				 else if (bet.getBonus()!=(match.getBonus())){
-//					bet.setPointsAwarded(bet.getPointsAwarded()-1);
-					weeklyPoints=-1;
-				}
-			}
-			
+		correct = winner.equals(bet.getPredictedWinner());
 		}
-		else {
-			bet.setBetCorrect(false);
-		}
-		}
-		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + weeklyPoints);
-		log.debug("PointsAwarded: "+ticket.getWeeklyPoints());
-		log.debug("Was bet correct: " + bet.getBetCorrect());
+		bet.setBetCorrect(correct);
 		betRepository.save(bet);
-		weeklyBetTicketRepository.save(ticket);
+		
+////		MatchDay matchDay = match.getMatchDay();
+//		WeeklyBetTicket ticket = bet.getWeeklyBetTicket();
+//		int weeklyPoints = 0;
+//		if(match.getLocalResult() == match.getAwayResult()) {
+//			bet.setBetCorrect(bet.getBetResult() == BetResult.DRAW ? true : false);
+//		}
+//		else {
+//		Team winner = match.getLocalResult() > match.getAwayResult()
+//		        ? match.getLocalTeam()
+//		        : match.getAwayTeam();
+//		
+//		if(bet.getPredictedWinner().equals(winner)) {
+//			bet.setBetCorrect(true);;
+//			if(bet.getBonus()!=(Bonus.NONE)) {
+//				if(bet.getBonus() == (match.getBonus())) {
+////					bet.setPointsAwarded(bet.getPointsAwarded()+1);
+//					weeklyPoints=1;
+//				} 
+//				 else if (bet.getBonus()!=(match.getBonus())){
+////					bet.setPointsAwarded(bet.getPointsAwarded()-1);
+//					weeklyPoints=-1;
+//				}
+//			}
+//			
+//		}
+//		else {
+//			bet.setBetCorrect(false);
+//		}
+//		}
+//		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + weeklyPoints);
+//		log.debug("PointsAwarded: "+ticket.getWeeklyPoints());
+//		log.debug("Was bet correct: " + bet.getBetCorrect());
+//		betRepository.save(bet);
+//		weeklyBetTicketRepository.save(ticket);
 	}
 	
 
@@ -105,74 +121,107 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 
 		for(DivisionBet divisionBet:ticket.getDivisionBets()) {
 			Division division = divisionBet.getDivision();
-			Team predictedLeader = divisionBet.getPredictedLeader();
-			TeamDivisionScore leader = division.getTeamDivisionScores().stream()
-				    .max(Comparator.comparing(TeamDivisionScore::getTotalPoints))
-				    .orElseThrow(()-> new RugbyException("No hay un ganador en la division " + division.getName(), HttpStatus.NOT_FOUND, ActionType.CALCULATION));
-			Team actualLeader = leader != null ? leader.getTeam() : null;
-			boolean correct = actualLeader != null && actualLeader.equals(predictedLeader);
-			divisionBet.setBetCorrect(correct);
+			Team actualLeader = division.getTeamDivisionScores().stream()
+					.max(Comparator.comparing(TeamDivisionScore::getTotalPoints))
+					.map(TeamDivisionScore::getTeam)
+					.orElse(null);
+			divisionBet.setBetCorrect(actualLeader!=null && actualLeader.equals(divisionBet.getPredictedLeader()));
 			divisionBetRepository.save(divisionBet);
 		}
-		Set<Bet> bets = ticket.getBets();
-		Optional<MatchDay> optionalMatchDay = bets.stream()
-			    .findFirst()           // get any bet (if exists)
-			    .map(Bet::getMatch)    // get the match from that bet
-			    .map(Match::getMatchDay); //get matchday from that match
-		int matchCount = 0;
-		if (optionalMatchDay.isPresent()) {
-		    MatchDay matchDay = optionalMatchDay.get();
-		    matchCount = matchDay.getMatches().size();
+		Map<Division, List<Bet>> betsByDivision = ticket.getBets().stream().collect(Collectors.groupingBy(bet->bet.getMatch().getMatchDay().getDivision()));
+		int totalPoints = 0;
+		boolean allDivisionPerfect = true;
+		for (Entry<Division, List<Bet>> entry : betsByDivision.entrySet()) {
+			Division division = entry.getKey();
+			List<Bet> divisionBets = entry.getValue();
+			
+			boolean leaderCorrect = ticket.getDivisionBets().stream().anyMatch(divisionBet->divisionBet.getDivision().equals(division)&& Boolean.TRUE.equals(divisionBet.getBetCorrect()));
+			int divisionPoints = scoreDivision(divisionBets, leaderCorrect);
+			totalPoints+=divisionPoints;
+			boolean fullDivision = divisionBets.stream().allMatch(bonus->Boolean.TRUE.equals(bonus.getBetCorrect()));
+			if(!fullDivision && leaderCorrect) {
+				allDivisionPerfect=false;
+			}
 		}
-//		int betAmount = ticket.getBets().size();
-		long correctBets = ticket.getBets().stream()
-		        .filter(bet -> Boolean.TRUE.equals(bet.getBetCorrect()))
-		        .count();
-		long correctDivisionBets = ticket.getDivisionBets().stream()
-		        .filter(db -> Boolean.TRUE.equals(db.getBetCorrect()))
-		        .count();
-		log.debug("How many correctBets have there been" + correctBets);
-
-		log.debug("How many correctDivisionBets have there been" + correctDivisionBets);
-//		
-		int points = switch ((int) correctBets) {
-	    case 1 -> {
-	        log.debug("Awarded 1 point");
-	        yield 1;
-	    }
-	    case 2 -> {
-	        log.debug("Awarded 3 points");
-	        yield 3;
-	    }
-	    case 3 -> {
-	        log.debug("Awarded 5 points");
-	        yield 5;
-	    }
-	    case 4 -> {
-	        log.debug("Awarded 7 points for division bets");
-	        yield 7;
-	    }
-	    default -> {
-	        log.debug("Awarded 0 points");
-	        yield 0;
-	    }
-	   
-	};
-	 if(matchCount==correctBets) {
-		points = (correctDivisionBets <= 2) ? 25
-	     : (correctDivisionBets == 1) ? 10 
-	     : points;
-	    }
-		log.debug("Weekly points:" +ticket.getWeeklyPoints());
-	if (ticket.getWeeklyPoints() == null) {
-	    ticket.setWeeklyPoints(0);
-	}
-		log.debug("Points: " +points);
-		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + points);
-		log.debug("Weekly points:" +ticket.getWeeklyPoints());
-		weeklyBetTicketRepository.save(ticket);
+		if(allDivisionPerfect && betsByDivision.size()==2) {
+			totalPoints=25;
+		}
 		
-		return ticket.getWeeklyPoints();
+		ticket.setWeeklyPoints(totalPoints);
+		weeklyBetTicketRepository.save(ticket);
+		log.debug("Weekly points calculated: {}", totalPoints);
+        return totalPoints;
+		
+//			Team predictedLeader = divisionBet.getPredictedLeader();
+//			
+//			
+//			TeamDivisionScore leader = division.getTeamDivisionScores().stream()
+//				    .max(Comparator.comparing(TeamDivisionScore::getTotalPoints))
+//				    .orElseThrow(()-> new RugbyException("No hay un ganador en la division " + division.getName(), HttpStatus.NOT_FOUND, ActionType.CALCULATION));
+//			Team actualLeader = leader != null ? leader.getTeam() : null;
+//			boolean correct = actualLeader != null && actualLeader.equals(predictedLeader);
+//			divisionBet.setBetCorrect(correct);
+//			divisionBetRepository.save(divisionBet);
+//		}
+//		Set<Bet> bets = ticket.getBets();
+//		Optional<MatchDay> optionalMatchDay = bets.stream()
+//			    .findFirst()           // get any bet (if exists)
+//			    .map(Bet::getMatch)    // get the match from that bet
+//			    .map(Match::getMatchDay); //get matchday from that match
+//		int matchCount = 0;
+//		if (optionalMatchDay.isPresent()) {
+//		    MatchDay matchDay = optionalMatchDay.get();
+//		    matchCount = matchDay.getMatches().size();
+//		}
+////		int betAmount = ticket.getBets().size();
+//		long correctBets = ticket.getBets().stream()
+//		        .filter(bet -> Boolean.TRUE.equals(bet.getBetCorrect()))
+//		        .count();
+//		long correctDivisionBets = ticket.getDivisionBets().stream()
+//		        .filter(db -> Boolean.TRUE.equals(db.getBetCorrect()))
+//		        .count();
+//		log.debug("How many correctBets have there been" + correctBets);
+//
+//		log.debug("How many correctDivisionBets have there been" + correctDivisionBets);
+////		
+//		int points = switch ((int) correctBets) {
+//	    case 1 -> {
+//	        log.debug("Awarded 1 point");
+//	        yield 1;
+//	    }
+//	    case 2 -> {
+//	        log.debug("Awarded 3 points");
+//	        yield 3;
+//	    }
+//	    case 3 -> {
+//	        log.debug("Awarded 5 points");
+//	        yield 5;
+//	    }
+//	    case 4 -> {
+//	        log.debug("Awarded 7 points for division bets");
+//	        yield 7;
+//	    }
+//	    default -> {
+//	        log.debug("Awarded 0 points");
+//	        yield 0;
+//	    }
+//	   
+//	};
+//	 if(matchCount==correctBets) {
+//		points = (correctDivisionBets <= 2) ? 25
+//	     : (correctDivisionBets == 1) ? 10 
+//	     : points;
+//	    }
+//		log.debug("Weekly points:" +ticket.getWeeklyPoints());
+//	if (ticket.getWeeklyPoints() == null) {
+//	    ticket.setWeeklyPoints(0);
+//	}
+//		log.debug("Points: " +points);
+//		ticket.setWeeklyPoints(ticket.getWeeklyPoints() + points);
+//		log.debug("Weekly points:" +ticket.getWeeklyPoints());
+//		weeklyBetTicketRepository.save(ticket);
+//		
+//		return ticket.getWeeklyPoints();
 	}
 
 	@Transactional
@@ -197,16 +246,17 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	@Override
 	public void calculateMatchDayPoints(Long matchDayId) {
 		 MatchDay matchDay = checkMatchDay(matchDayId);
-	     Season season = matchDay.getDivision().getSeason();
+
+		Division division = matchDay.getDivision();
+	     Season season = division.getSeason();
 		
 		if(Boolean.TRUE.equals(matchDay.getArePointsCalculated())) {
 			throw new RugbyException("Los puntos de esta jornada ya estan calculado", HttpStatus.BAD_REQUEST, ActionType.CALCULATION);
 		}
 		
-		Division division = matchDay.getDivision();
-		if(division==null) {
-			throw new RugbyException("La jornada no esta asociada a una division", HttpStatus.NOT_FOUND, ActionType.CALCULATION);
-		}
+//		if(division==null) {
+//			throw new RugbyException("La jornada no esta asociada a una division", HttpStatus.NOT_FOUND, ActionType.CALCULATION);
+//		}
 		
 		Map<Long, Integer> pointsByTeam = new HashMap<>();
 		
@@ -223,26 +273,21 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			
 			if(match.getLocalResult() > match.getAwayResult()) {
 	            localPoints = 4;
-	            awayPoints = 0;
+	           
 			
 	            if(match.getBonus() != null) {
-					if(match.getBonus() == Bonus.ATTACK) {
-						localPoints = localPoints+1;
-					}
-					else if(match.getBonus() == Bonus.DEFENSE) {
-						awayPoints = awayPoints+1;
-					}
+					if(match.getBonus() == Bonus.ATTACK) localPoints++;
+					
+					else if(match.getBonus() == Bonus.DEFENSE) awayPoints++;
 				}
 		 	} 
 			else if (match.getLocalResult() < match.getAwayResult()) {
-	            localPoints = 0;
+	            
 	            awayPoints = 4;
-	            if(match.getBonus() == Bonus.DEFENSE) {
-					localPoints = localPoints+1;
-				}
-				else if(match.getBonus() == Bonus.ATTACK) {
-					awayPoints = awayPoints+1;
-				}
+	            if(match.getBonus() == Bonus.DEFENSE) localPoints++;
+				
+				else if(match.getBonus() == Bonus.ATTACK)  awayPoints++;
+				
 			} else {
 		        // Draw scenario
 		        localPoints = 2;
@@ -294,9 +339,10 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 	@Transactional
 	@Override
 	public void finishMatchDay(Long matchDayId) {
-		calculateMatchDayPoints(matchDayId);
-		
+
 		MatchDay matchDay = checkMatchDay(matchDayId);
+		calculateMatchDayPoints(matchDay.getId());
+		
 		List<Bet> bets = betRepository.findByMatchDayId(matchDayId);
 		for (Bet bet : bets) {
 			calculatePointsByBet(bet.getId());
@@ -309,6 +355,30 @@ public class CalculatePointsServiceImpl implements ICalculatePointsService{
 			calculateTotalPoints(ticket.getId());
 		}
 	}
+	
+	private int scoreDivision(List<Bet>bets, boolean leaderCorret ) {
+		long correctResults = bets.stream().filter(bet->Boolean.TRUE.equals(bet.getBetCorrect())).count();
+	int base = switch ((int)correctResults){
+		case 1 -> 1;
+	    case 2 -> 3;
+	    case 3 -> 5;
+	    case 4 -> 7;
+	    default -> 0;
+	};
+	int bonus = bets.stream().filter(bet->Boolean.TRUE.equals(bet.getBetCorrect())).mapToInt(bet->{
+		if(bet.getBonus() == Bonus.NONE) return 0;
+		return bet.getBonus() == bet.getMatch().getBonus() ? 1: -1;
+	})
+			.sum();
+	
+	int total = base + bonus;
+	if(correctResults == bets.size() && leaderCorret) {
+		total = Math.max(total, 10);
+	}
+	return total;
+	}
+	
+	
 //	public void calculateTeamDivisionScore(Long divisionId) {
 //		Division division = checkDivision(divisionId);
 //		Set<MatchDay> matchDays = division.getMatchDays();
