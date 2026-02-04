@@ -17,8 +17,6 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,6 +50,9 @@ public class Division {
 	
 	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<MatchDay> matchDays; //bidirectional relationship
+	
+	@OneToMany(mappedBy = "division", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<TeamDivisionScore> teamDivisionScores;
 	
 	//to know which teams we could pair with each other
 	@ManyToMany(fetch = FetchType.LAZY) 

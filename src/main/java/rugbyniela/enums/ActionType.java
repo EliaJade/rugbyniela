@@ -8,5 +8,6 @@ public enum ActionType {
     BETTING,        // Bet
     SEASON_ADMIN,   // Create seasons
     TEAM_MANAGEMENT,	// Manage teams
-    TOURNAMENT	// Tournament actions
+    TOURNAMENT,	// Tournament actions
+    CALCULATION
 }

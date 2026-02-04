@@ -17,6 +17,7 @@ import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreRequestDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketRequestDTO;
 import rugbyniela.entity.dto.weeklyBetTicket.WeeklyBetTicketResponseDTO;
+import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.service.BettingServiceImp;
 
 @RestController
@@ -35,7 +36,7 @@ public class BettingController {
 		
 		
 	}
-	
+	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/tickets-by-user{id}")
 	public ResponseEntity<Page<WeeklyBetTicketResponseDTO>> getAllUserSeasonTickets(@Valid @PathVariable Long id,  @RequestParam(defaultValue = "0") int page){
 		Page<WeeklyBetTicketResponseDTO> response = bettingService.fetchUserSeasonTickets(id, page);
@@ -43,12 +44,22 @@ public class BettingController {
 		
 	}
 	
+	
 	@PreAuthorize("hasRole('USER')")
 	@PostMapping("/participate-season")
 	public ResponseEntity<UserSeasonScoreResponseDTO>participateInSeason(@Valid @RequestBody UserSeasonScoreRequestDTO dto){
 		UserSeasonScoreResponseDTO response = bettingService.participateInSeason(dto);
 		return ResponseEntity.ok(response);
 		
+		
+	}
+	
+	@PreAuthorize("isAuthenticated()")
+	@GetMapping("/ticket-by-user{userSeasonId}-match-day{matchDayId}")
+	public ResponseEntity<WeeklyBetTicketResponseDTO> fetchUserSeasonTicketByMatchDay(@PathVariable Long userSeasonId,@PathVariable Long matchDayId){
+		WeeklyBetTicketResponseDTO response = bettingService.fetchUserSeasonTicketByMatchDay(userSeasonId, matchDayId);
+		
+		return ResponseEntity.ok(response);
 		
 	}
 	

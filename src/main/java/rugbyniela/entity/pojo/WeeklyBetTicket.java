@@ -20,7 +20,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import rugbyniela.service.BettingServiceImp;
 
 @Entity
 @AllArgsConstructor
@@ -62,6 +61,9 @@ public class WeeklyBetTicket {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ticket_coalition_id")
 	private Coalition coalitionAtBetTime;
+	
+	@Column(nullable = false)
+	private Integer weeklyPoints;
 	
 	public void addBet(Bet bet) {
 		

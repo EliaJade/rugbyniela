@@ -14,8 +14,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,7 +51,8 @@ public class MatchDay {
 	@OneToMany(mappedBy = "matchDay", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
 	private Set<Match> matches; //bidirectional relationship
 	
-	private boolean arePointsCalculated;
+	@Column
+	private Boolean arePointsCalculated;
 	
 	public void addMatch (Match match) {
 		if(this.matches==null) {

@@ -1,7 +1,5 @@
 package rugbyniela.entity.pojo;
 
-import java.util.Optional;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import rugbyniela.enums.BetResult;
 import rugbyniela.enums.Bonus;
 
 @Entity
@@ -32,7 +31,10 @@ public class Bet {
 	
 	
 	@Column(nullable = false) 
-	private int pointsAwarded; //default 0
+	private int pointsAwarded; //default 0 //represents bonus
+	
+	@Column
+	private Boolean betCorrect;
 	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -48,6 +50,10 @@ public class Bet {
 	@Column(length = 30)
 	//TODO: validate if it matches with the match
 	private Bonus bonus;
+	
+	@Enumerated(EnumType.STRING)
+	@Column
+	private BetResult betResult;
 	
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY)
