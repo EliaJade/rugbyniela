@@ -21,22 +21,22 @@ public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificat
 	boolean existsByNameAndIdNot(String name, Long id);
 	Page<Team> findByIsActive(Boolean isActive, Pageable pageable);
 
-	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId ORDER BY t.name")
-	Page<Team> findTeamsBySeasonAndDivision(@Param("season")Season season, @Param("divisionId")Long divisionId, Pageable pageable);
+//	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId ORDER BY t.name")
+//	Page<Team> findTeamsBySeasonAndDivision(@Param("season")Season season, @Param("divisionId")Long divisionId, Pageable pageable);
 	
-	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season ORDER BY t.name")
-	Page<Team> findTeamsBySeason(@Param("season") Season season, Pageable pageable);
+//	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season ORDER BY t.name")
+//	Page<Team> findTeamsBySeason(@Param("season") Season season, Pageable pageable);
+//	
+//	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND t.isActive = :isActive ORDER BY t.name")
+//	Page<Team> findTeamsBySeasonAndIsActive(@Param("season") Season season, @Param("isActive") Boolean isActive, Pageable pageable);
 	
-	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND t.isActive = :isActive ORDER BY t.name")
-	Page<Team> findTeamsBySeasonAndIsActive(@Param("season") Season season, @Param("isActive") Boolean isActive, Pageable pageable);
-	
-	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId AND t.isActive = :isActive ORDER BY t.name")
-	Page<Team> findTeamsByIsActiveAndSeasonAndDivision(
-	    @Param("isActive") Boolean isActive,
-	    @Param("season") Season season,
-	    @Param("divisionId") Long divisionId,
-	    Pageable pageable
-	);
+//	@Query("SELECT t FROM Division d JOIN d.teams t WHERE d.season = :season AND d.id = :divisionId AND t.isActive = :isActive ORDER BY t.name")
+//	Page<Team> findTeamsByIsActiveAndSeasonAndDivision(
+//	    @Param("isActive") Boolean isActive,
+//	    @Param("season") Season season,
+//	    @Param("divisionId") Long divisionId,
+//	    Pageable pageable
+//	);
 	
 	@Query("SELECT t FROM Team t WHERE " +
 		       "(:name IS NULL OR LOWER(t.name) LIKE :name) AND " + // :name ya vendrá en minúsculas y con % desde Java

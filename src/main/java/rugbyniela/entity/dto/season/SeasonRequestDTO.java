@@ -5,6 +5,8 @@ import java.util.Set;
 
 import org.hibernate.validator.constraints.UniqueElements;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,7 +17,9 @@ public record SeasonRequestDTO(
 		@Size(max=100, message = "El nombre debe tener un maximo de 100 caracteres")
 		String name,
 		@NotNull(message = "La fecha de inicio es necestario")
+		@JsonFormat(pattern = "yyyy-MM-dd")
 		LocalDate startSeason,
+		@JsonFormat(pattern = "yyyy-MM-dd")
 		LocalDate endSeason,
 		@NotNull(message = "es necesario tener divisiones")
 		@Size(min = 1, message = "Debe haber al menos una division")

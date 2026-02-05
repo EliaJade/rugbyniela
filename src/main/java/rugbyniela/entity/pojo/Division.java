@@ -17,6 +17,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,12 @@ import lombok.Setter;
 import rugbyniela.enums.Category;
 
 @Entity
+@Table(uniqueConstraints = {
+	    @UniqueConstraint(
+	        name = "uk_division_name_per_season", // Es buena práctica ponerle el mismo nombre que en la BD
+	        columnNames = {"name", "season_id"}
+	    )
+	})
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -35,7 +43,7 @@ public class Division {
 	private Long id;
 	
 
-	@Column(nullable = false, length = 50, unique = true)
+	@Column(nullable = false, length = 50)
 	private String name; //default "Division de Honor"
 	
 	@Enumerated(EnumType.STRING)

@@ -12,10 +12,7 @@ public record DivisionRequestDTO(
 		@Size(max=50, message = "El nombre de la division no puede superar los 50 caracteres")
 		String name,
 		@NotNull(message = "La division debe tener categoria")
-		String category,
-		@NotNull(message = "La division debe tener jornadas")
-		Set<MatchDayRequestDTO> matchDays,
-		@NotNull(message = "La division debe tener equipos")
-		Set<Long> teams) {
+		String category
+		) {
 
 }

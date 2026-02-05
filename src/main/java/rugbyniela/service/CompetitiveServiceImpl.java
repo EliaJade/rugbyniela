@@ -257,13 +257,15 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
 		
 		Page<Team> teams; 
-		if(isActive == null) {
-			teams = teamRepository.findTeamsBySeason(season, pageable);
-		} else {
-			teams = teamRepository.findTeamsBySeasonAndIsActive(season, isActive, pageable);
-		}
+//		if(isActive == null) {
+//			teams = teamRepository.findTeamsBySeason(season, pageable);
+//		} else {
+//			teams = teamRepository.findTeamsBySeasonAndIsActive(season, isActive, pageable);
+//		}
 		
-		return teams.map(teamMapper::toDTO);
+//		return teams.map(teamMapper::toDTO);
+		//TODO: fix this this in order to use TeamDivisionSeason
+		return null;
 	}
 	
 	public Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page, Boolean isActive) {
@@ -285,13 +287,15 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Division division = checkDivision(divisionId);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
 		Page<Team> teams;
-		if(isActive == null) {
-			teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
-			} else {
-			teams = teamRepository.findTeamsByIsActiveAndSeasonAndDivision(isActive, season, division.getId(), pageable);
-			}
-		//TODO:logs
-		return teams.map(teamMapper::toDTO);
+//		if(isActive == null) {
+//			teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
+//			} else {
+//			teams = teamRepository.findTeamsByIsActiveAndSeasonAndDivision(isActive, season, division.getId(), pageable);
+//			}
+//		//TODO:logs
+//		return teams.map(teamMapper::toDTO);
+		//TODO: fix this in order to use the TeamDivisonSeason
+		return null;
 		
 	}
 
@@ -302,14 +306,17 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Transactional
 	@Override
 	public SeasonResponseDTO createSeason(SeasonRequestDTO dto) {
-		if (dto.endSeason().isBefore(dto.startSeason())) {
+
+		if (dto.endSeason()!=null && dto.endSeason().isBefore(dto.startSeason())) {
+			System.out.println("Entro en error de fechas");
 			throw new RugbyException("La fecha de inicio de temporada no puede ser despues del final de temporada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		if(seasonRepository.existsByName(dto.name())) {
+			System.out.println("Entro en error de nombre");
 			throw new RugbyException("Ya existe una temporada con este nombre", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		Set<Division> divisions = divisionMapper.toEntitySet(dto.divisions());
-		
+		//TODO: validate for same names
 		Season season = seasonMapper.toEntity(dto);
 		if(season.getIsActive()==null) {
 			season.setIsActive(true);
@@ -320,7 +327,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		season.setDivisions(divisions);
+		System.out.println("Antes de guardar temporada");
 		seasonRepository.save(season);
+		System.out.println("Despues de guardar la temporada");
 		log.info("Se ha creado la temporada {} correctamente", 
 				season.getId());
 		return seasonMapper.toDTO(season);
@@ -343,26 +352,29 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(!dto.name().matches(".*\\d.*")) {
 			throw new RugbyException("El nombre de la Division debe tener el año", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
-				dto.name(),
-				categoryEnum.name(),
-				dto.matchDays(),
-				dto.teams());
-		Division division = divisionMapper.toEntity(dtoWithEnumCategory);
-		Set<Team> teams = dto.teams().stream()
-				.map(id ->checkTeam(id))
-				.collect(Collectors.toSet());
-		if(division.getIsActive()==null) {
-			division.setIsActive(true);
-		}
+//		for (DivisionRequestDTO divisionRequest : dto.) {
+//			
+//		}
+//		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
+//				dto.name(),
+//				categoryEnum.name(),
+//				dto.matchDays(),
+//				dto.teams());
+//		Division division = divisionMapper.toEntity(dtoWithEnumCategory);
+//		Set<Team> teams = dto.teams().stream()
+//				.map(id ->checkTeam(id))
+//				.collect(Collectors.toSet());
+//		if(division.getIsActive()==null) {
+//			division.setIsActive(true);
+//		}
 		//TODO: create TeamDivisionSeason based on the teams doing the relationships between the classes
 		//division.setTeams(teams);		
-		divisionRepository.save(division);
-		log.info("Se ha creado la division {} correctamente", 
-				division.getId());
-		return divisionMapper.toDTO(division);
+//		divisionRepository.save(division);
+//		log.info("Se ha creado la division {} correctamente", 
+//				division.getId());
+//		return divisionMapper.toDTO(division);
 		
-		
+		return null;
 	}
 	@Transactional
 	@Override
