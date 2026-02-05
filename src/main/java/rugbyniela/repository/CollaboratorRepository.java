@@ -1,7 +1,11 @@
 package rugbyniela.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.validation.constraints.NotBlank;
@@ -15,5 +19,11 @@ import rugbyniela.entity.pojo.Collaborator;
 public interface CollaboratorRepository extends JpaRepository<Collaborator, Long>, JpaSpecificationExecutor<Collaborator> {
 
 	boolean existsByName(String name);
+	boolean existsByNameAndIdNot(String name, Long id);
+
+	@Query("SELECT c FROM Collaborator c WHERE " +
+	           "(:name IS NULL OR LOWER(c.name) LIKE :name) AND " +
+	           "(:active IS NULL OR c.isActive = :active)")
+	Page<Collaborator> findByFilters(@Param("name")String searchName, @Param("active")Boolean isActive, Pageable pageable);
 
 }

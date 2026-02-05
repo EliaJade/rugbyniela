@@ -9,6 +9,7 @@ public record CollaboratorRequestDTO(
 		@NotBlank(message = "El colaborador debe tener un nombre")
 		String name,
 		@Size(max = 500, message = "El url del colaborador debe tener menos de 500 caracteres")
-		String url) {
+		String url,
+		boolean deletePicture) {
 
 }

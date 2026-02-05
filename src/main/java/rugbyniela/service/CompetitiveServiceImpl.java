@@ -1152,7 +1152,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return match;
 	}
 	
-	public void checkNegativePage(int page) {
+	private void checkNegativePage(int page) {
 		if(page<0) {
 			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
