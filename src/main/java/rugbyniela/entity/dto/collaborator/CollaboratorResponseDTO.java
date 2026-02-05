@@ -4,6 +4,7 @@ public record CollaboratorResponseDTO(
 		Long id,
 		String name,
 		String url,
-		String pictureUrl) {
+		String pictureUrl,
+		Boolean isActive) {
 
 }

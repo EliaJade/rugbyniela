@@ -3,6 +3,9 @@ package rugbyniela.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import rugbyniela.entity.pojo.Collaborator;
 
 /**
@@ -10,5 +13,7 @@ import rugbyniela.entity.pojo.Collaborator;
 */
 @Repository
 public interface CollaboratorRepository extends JpaRepository<Collaborator, Long>, JpaSpecificationExecutor<Collaborator> {
+
+	boolean existsByName(String name);
 
 }
