@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	private final MatchRepository matchRepository;
 	private final AddressRepository addressRepository;
 	private final MatchDayRepository matchDayRepository;
+	private final ISupabaseStorageService supabaseStorageService;
 	
 	private final SeasonMapper seasonMapper;
 	private final TeamMapper teamMapper;
@@ -88,26 +90,24 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	//TODO: check the authentication is correct
 	@Override
-	public Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive) {
+	public Page<SeasonResponseDTO> fetchAllSeasons(int page, Boolean isActive,String name) {
 		//Validate there are seasons
 		checkNegativePage(page);
-
-		Pageable pageable = PageRequest.of(page, 10, Sort.by("startSeason").descending());
 		
-		Page<Season> seasons;
-		if(isActive == null) {
-			seasons = seasonRepository.findAll(pageable);
-			
-		} else {
-			seasons = seasonRepository.findByIsActive(isActive, pageable);
-		}
+		String searchName = (name != null && !name.isBlank()) 
+                ? "%" + name.trim().toLowerCase() + "%" 
+                : null;
+
+        // 3. Configuración de Paginación
+        // Mantenemos tu ordenamiento por defecto (startSeason descendente)
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("startSeason").descending());
+        
+        // 4. Llamada única al repositorio
+        Page<Season> seasons = seasonRepository.findByFilters(searchName, isActive, pageable);
 		if(seasons.isEmpty()) {
-			throw new RugbyException("No hay temporadas", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-			
+			throw new RugbyException("No se encontraron temporadas con los filtros aplicados", HttpStatus.NO_CONTENT, ActionType.TOURNAMENT);
 		}
 		return seasons.map(seasonMapper::toDTO);
-		
-		
 	}
 
 	@Override
@@ -257,13 +257,15 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
 		
 		Page<Team> teams; 
-		if(isActive == null) {
-			teams = teamRepository.findTeamsBySeason(season, pageable);
-		} else {
-			teams = teamRepository.findTeamsBySeasonAndIsActive(season, isActive, pageable);
-		}
+//		if(isActive == null) {
+//			teams = teamRepository.findTeamsBySeason(season, pageable);
+//		} else {
+//			teams = teamRepository.findTeamsBySeasonAndIsActive(season, isActive, pageable);
+//		}
 		
-		return teams.map(teamMapper::toDTO);
+//		return teams.map(teamMapper::toDTO);
+		//TODO: fix this this in order to use TeamDivisionSeason
+		return null;
 	}
 	
 	public Page<MatchResponseDTO> fetchMatchesBySeason(Long seasonId, int page, Boolean isActive) {
@@ -285,13 +287,15 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		Division division = checkDivision(divisionId);
 		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
 		Page<Team> teams;
-		if(isActive == null) {
-			teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
-			} else {
-			teams = teamRepository.findTeamsByIsActiveAndSeasonAndDivision(isActive, season, division.getId(), pageable);
-			}
-		//TODO:logs
-		return teams.map(teamMapper::toDTO);
+//		if(isActive == null) {
+//			teams = teamRepository.findTeamsBySeasonAndDivision(season, division.getId(), pageable);
+//			} else {
+//			teams = teamRepository.findTeamsByIsActiveAndSeasonAndDivision(isActive, season, division.getId(), pageable);
+//			}
+//		//TODO:logs
+//		return teams.map(teamMapper::toDTO);
+		//TODO: fix this in order to use the TeamDivisonSeason
+		return null;
 		
 	}
 
@@ -302,14 +306,17 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	@Transactional
 	@Override
 	public SeasonResponseDTO createSeason(SeasonRequestDTO dto) {
-		if (dto.endSeason().isBefore(dto.startSeason())) {
+
+		if (dto.endSeason()!=null && dto.endSeason().isBefore(dto.startSeason())) {
+			System.out.println("Entro en error de fechas");
 			throw new RugbyException("La fecha de inicio de temporada no puede ser despues del final de temporada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		if(seasonRepository.existsByName(dto.name())) {
+			System.out.println("Entro en error de nombre");
 			throw new RugbyException("Ya existe una temporada con este nombre", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		Set<Division> divisions = divisionMapper.toEntitySet(dto.divisions());
-		
+		//TODO: validate for same names
 		Season season = seasonMapper.toEntity(dto);
 		if(season.getIsActive()==null) {
 			season.setIsActive(true);
@@ -320,7 +327,9 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		
 		season.setDivisions(divisions);
+		System.out.println("Antes de guardar temporada");
 		seasonRepository.save(season);
+		System.out.println("Despues de guardar la temporada");
 		log.info("Se ha creado la temporada {} correctamente", 
 				season.getId());
 		return seasonMapper.toDTO(season);
@@ -343,25 +352,29 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(!dto.name().matches(".*\\d.*")) {
 			throw new RugbyException("El nombre de la Division debe tener el año", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
-				dto.name(),
-				categoryEnum.name(),
-				dto.matchDays(),
-				dto.teams());
-		Division division = divisionMapper.toEntity(dtoWithEnumCategory);
-		Set<Team> teams = dto.teams().stream()
-				.map(id ->checkTeam(id))
-				.collect(Collectors.toSet());
-		if(division.getIsActive()==null) {
-			division.setIsActive(true);
-		}						
-		division.setTeams(teams);		
-		divisionRepository.save(division);
-		log.info("Se ha creado la division {} correctamente", 
-				division.getId());
-		return divisionMapper.toDTO(division);
+//		for (DivisionRequestDTO divisionRequest : dto.) {
+//			
+//		}
+//		DivisionRequestDTO dtoWithEnumCategory = new DivisionRequestDTO(
+//				dto.name(),
+//				categoryEnum.name(),
+//				dto.matchDays(),
+//				dto.teams());
+//		Division division = divisionMapper.toEntity(dtoWithEnumCategory);
+//		Set<Team> teams = dto.teams().stream()
+//				.map(id ->checkTeam(id))
+//				.collect(Collectors.toSet());
+//		if(division.getIsActive()==null) {
+//			division.setIsActive(true);
+//		}
+		//TODO: create TeamDivisionSeason based on the teams doing the relationships between the classes
+		//division.setTeams(teams);		
+//		divisionRepository.save(division);
+//		log.info("Se ha creado la division {} correctamente", 
+//				division.getId());
+//		return divisionMapper.toDTO(division);
 		
-		
+		return null;
 	}
 	@Transactional
 	@Override
@@ -428,15 +441,28 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	@Transactional
 	@Override
-	public TeamResponseDTO createTeam(TeamRequestDTO dto) {
+	public TeamResponseDTO createTeam(TeamRequestDTO dto,MultipartFile logoFile) {
 		if(teamRepository.existsByName(dto.name())) {
-			throw new RugbyException("Este equipo ya existe", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+			throw new RugbyException("Ya existe un equipo con ese nombre, usa otro", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		
 		Team team = teamMapper.toEntity(dto);
 		if(team.getIsActive()==null) {
 			team.setIsActive(true);
 		}
+	    if (logoFile != null && !logoFile.isEmpty()) {
+	        try {
+	            String safeName = StringUtils.normalize(dto.name()); 
+	            String filename = "team_" + safeName + "_" + System.currentTimeMillis() + "_" + logoFile.getOriginalFilename();
+	            
+	            String publicUrl = supabaseStorageService.uploadFile(logoFile, filename);
+	            
+	            team.setTeamPictureUrl(publicUrl);
+	            
+	        } catch (Exception e) {
+	            log.error("Error subiendo escudo del equipo", e);
+	            throw new RugbyException("Error al subir el escudo del equipo", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.SEASON_ADMIN);
+	        }
+	    }
 		teamRepository.save(team);
 		log.info("Se ha creado el equipo {} correctamente", 
 				team.getId());
@@ -501,9 +527,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		Season season = checkSeason(division.getSeason().getId());
 		LocalDate now = LocalDate.now();
-		boolean teamOutside = matchDay.getMatches().stream()
-				.flatMap(match -> Stream.of(match.getAwayTeam(), match.getLocalTeam())) //flatMap collects both localTeam and awayTeam for each match into one stream.
-				.anyMatch(team -> !division.getTeams().contains(team)); //if at least one team playing in matchDay does not belong to the division it will give true, otherwise false
+		boolean teamOutside = true;
+//		boolean teamOutside = matchDay.getMatches().stream()
+//				.flatMap(match -> Stream.of(match.getAwayTeam(), match.getLocalTeam())) //flatMap collects both localTeam and awayTeam for each match into one stream.
+//				.anyMatch(team -> !division.get().contains(team)); //if at least one team playing in matchDay does not belong to the division it will give true, otherwise false
 		if(teamOutside) {
 			throw new RugbyException("Hay un equipo que juega en la jornada que no juega en esta division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
@@ -559,6 +586,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	@Transactional
 	@Override
+	//TODO: fix
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
 		Division division = checkDivision(dto.division());
@@ -570,9 +598,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		}
 		Season season = checkSeason(division.getSeason().getId());
 		LocalDate now = LocalDate.now();
-		boolean exists = division.getTeams().stream()
-				.anyMatch(existingTeam -> 
-							existingTeam.getId().equals(team.getId()));
+		boolean exists = true;
+		//boolean exists = division.getTeams().stream()
+//				.anyMatch(existingTeam -> 
+//							existingTeam.getId().equals(team.getId()));
 				
 		if(exists) {
 			throw new RugbyException("Este equipo ya juegan en la division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
@@ -580,7 +609,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(season.getEndSeason().isBefore(now)) {
 			throw new RugbyException("No se puede añadir equipos a una temporada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		division.addTeam(team);
+		//division.addTeam(team);
 		divisionRepository.save(division);
 		log.info("Se ha añadido el equipo {} a la division {} correctamente", 
 				team.getId(), division.getId());
@@ -905,13 +934,14 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		return matchMapper.toDTO(match);
 		
 	}
-	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto) {
+	@Override
+	public TeamResponseDTO updateTeam(Long id, TeamRequestDTO dto,MultipartFile logoFile) {
 		
 		Team team = checkTeam(id);
 		if(Boolean.FALSE.equals(team.getIsActive())) {
 			throw new RugbyException("No puedes actualizar un equipo eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		
+		//TODO: add logic to avoid teams have same names
 		if(dto.name()!=null) {
 			team.setName(dto.name());
 			
@@ -919,6 +949,30 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(dto.url()!=null) {
 			team.setUrl(dto.url());
 		}
+		if(teamRepository.existsByNameAndIdNot(dto.name(),id)) {
+			throw new RugbyException("Ese nombre ya existe, usa otro", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		if (logoFile != null && !logoFile.isEmpty()) {
+            try {
+                // a. Generamos nombre seguro igual que en el create
+                String safeName = StringUtils.normalize(team.getName()); // Usamos el nombre actual o el nuevo
+                String filename = "team_" + safeName + "_" + System.currentTimeMillis() + "_" + logoFile.getOriginalFilename();
+                
+                // b. Subimos el nuevo archivo
+                String publicUrl = supabaseStorageService.uploadFile(logoFile, filename); // O uploadProfilePicture si no lo renombraste
+                
+                // c. Actualizamos la URL en la entidad
+                team.setTeamPictureUrl(publicUrl);
+                
+                // OPCIONAL: Aquí podrías intentar borrar la imagen antigua de Supabase si quisieras ahorrar espacio
+                
+            } catch (Exception e) {
+                log.error("Error actualizando el escudo del equipo {}", id, e);
+                throw new RugbyException("Error al actualizar el escudo del equipo", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.SEASON_ADMIN);
+            }
+        }else if(dto.deletePicture()) {
+        	team.setTeamPictureUrl(null);
+        }
 		teamRepository.save(team);
 		log.info("Se ha actualizado el equipo {} correctamente", 
 				team.getId());
@@ -1042,6 +1096,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	
 	@Override
+	//TODO: fix
 	public DivisionResponseDTO removeTeamFromDivision(Long teamId, Long divisionId) {
 		Team team = checkTeam(teamId);
 		Division division = checkDivision(divisionId);
@@ -1049,11 +1104,11 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			throw new RugbyException("No puedes quitar un equipo de una division eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		
-		if(!division.getTeams().contains(team)) {
-			throw new RugbyException("Esta division no contiene este equipo", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
-		}
-		
-		division.getTeams().remove(team);
+//		if(!division.getTeams().contains(team)) {
+//			throw new RugbyException("Esta division no contiene este equipo", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN);
+//		}
+//		
+//		division.getTeams().remove(team);
 		divisionRepository.save(division);
 		log.info("Se ha quitado el equipo {} de la division {} correctamente", 
 				team.getId(), division.getId());
@@ -1107,27 +1162,13 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	    return "DEL_" + name;
 	}
 
-	
-
-	
-
-	
-
-
-	
-
-	
-	
-	
-
-	
-
-	
-
-	
-
-	
-
-	
+	@Override
+	public Page<TeamResponseDTO> fetchAllTeams(Pageable pageable, Boolean active, String name) {
+		String searchName = (name != null && !name.isBlank()) 
+                ? "%" + name.trim().toLowerCase() + "%" // <--- .toLowerCase() añadido
+                : null;
+		Page<Team> teamPage = teamRepository.findByFilters(searchName, active, pageable);
+		return teamPage.map(teamMapper::toDTO);
+	}
 
 }

@@ -80,21 +80,19 @@ public class ColaitionServiceImp implements ICoalitionService {
 	@Override
 	@Transactional 
 	public CoalitionResponseDTO fetchCoalitionById(Long id) {
-		Coalition coalition = coalitionRepository.findById(id).orElseThrow(()->{
+		Coalition coalition = coalitionRepository.findByIdWithMembersAndScores(id).orElseThrow(()->{
 			throw new RugbyException("La coalicion con id "+id+" no existe", HttpStatus.NOT_FOUND, ActionType.TEAM_MANAGEMENT);
 		});
 		return coalitionMapper.toDto(coalition);
 	}
 
 	@Override
-	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active) {
+	public Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active, String name) {
 
-		Page<Coalition> coalitionPage;
-		if(active == null) {
-			coalitionPage= coalitionRepository.findAll(pageable);
-		}else {
-			coalitionPage= coalitionRepository.findByActive(active,pageable);
-		}
+		String searchName = (name != null && !name.isBlank()) 
+                ? "%" + name.trim().toLowerCase() + "%" // <--- .toLowerCase() añadido
+                : null;
+		Page<Coalition> coalitionPage = coalitionRepository.findByFilters(searchName, active, pageable);
 		return coalitionPage.map(coalitionMapper::toSimpleDTO);
 	}
 
@@ -116,6 +114,9 @@ public class ColaitionServiceImp implements ICoalitionService {
 		});
 		if(user.getCurrentCoalition()!=null) {
 			throw new RugbyException("El usuario ya pertenece a una coalicion, debe dejarla antes de pedir unirse a otra", HttpStatus.NO_CONTENT, ActionType.TEAM_MANAGEMENT);
+		}
+		if(coalitionRequestRepository.existsByUserIdAndCoalitionId(user.getId(),coalition.getId())) {
+			throw new RugbyException("El usuario ya ha enviado una solicitud, por favor espere la respuesta", HttpStatus.CONFLICT, ActionType.TEAM_MANAGEMENT);
 		}
 		coalitionRequestRepository.save(new CoalitionRequest(null, user, coalition, LocalDateTime.now()));
 	}
@@ -164,10 +165,13 @@ public class ColaitionServiceImp implements ICoalitionService {
 				userSeasonScoreRepository.save(userSeasonScore);
 			}
 		}
+		coalition.removeUser(user);
 		userRepository.save(user);
+		coalitionRepository.save(coalition);
 	}
 
 	@Override
+	@Transactional
 	public Page<CoalitionJoinResponseDTO> getPendingRequests( Pageable pageable) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
@@ -218,7 +222,10 @@ public class ColaitionServiceImp implements ICoalitionService {
 					userSeasonScoreRepository.save(userSeasonScore);
 				}
 			}
+			coalition.addUser(user);
 			userRepository.save(user);
+			coalitionRepository.save(coalition);
+			coalitionRequestRepository.deleteByUser(user);
 			log.info("El usuario {} ha aceptado una solicitud de ingreso a {} en la coalicion {}",
 					SecurityContextHolder.getContext().getAuthentication().getName(),
 					user.getName(),
@@ -266,6 +273,8 @@ public class ColaitionServiceImp implements ICoalitionService {
 		userToKick.setCurrentCoalition(null);
 		userToKick.setCoalitionJoinedAt(null);
 		userRepository.save(userToKick);
+		coalition.removeUser(userToKick);
+		coalitionRepository.save(coalition);
 		log.info("El usuario {} ha eliminado a {} de la coalicion {}",
 				capitan.getName(),
 				userToKick.getName(),
@@ -376,6 +385,21 @@ public class ColaitionServiceImp implements ICoalitionService {
 	    coalitionSeasonScoreRepository.save(inscription);
 
 	    log.info("Coalición '{}' inscrita en la temporada '{}'", coalition.getName(), season.getName());
+	}
+
+	@Override
+	@Transactional
+	public CoalitionResponseDTO getMyCoalition() {
+		   Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		    User captain = userRepository.findByEmail(auth.getName()).orElseThrow(() -> 
+		        new RugbyException("Usuario no encontrado", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION)
+		    );
+
+		    Coalition coalition = captain.getCurrentCoalition();
+		    if (coalition == null) {
+		        throw new RugbyException("No tienes una coalición para registrar.", HttpStatus.BAD_REQUEST, ActionType.TEAM_MANAGEMENT);
+		    }
+		return coalitionMapper.toDto(coalition);
 	}
 
 }

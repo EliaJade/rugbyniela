@@ -1,6 +1,9 @@
 package rugbyniela.controller;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -11,7 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +40,7 @@ import rugbyniela.entity.dto.team.TeamResponseDTO;
 import rugbyniela.service.ICompetitiveService;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/competitive")
 @RequiredArgsConstructor
 public class CompetitiveController {
 
@@ -47,6 +52,7 @@ public class CompetitiveController {
 	public ResponseEntity<Page<SeasonResponseDTO>> getSeasons(
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(required = false) Boolean isActive,
+			@RequestParam(required = false) String name,
 			Authentication auth){
 		
 		boolean isAdmin = auth != null && auth.getAuthorities().stream()
@@ -54,7 +60,7 @@ public class CompetitiveController {
 		if(!isAdmin) {
 			isActive=true;
 		}
-		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page, isActive));
+		return ResponseEntity.ok(competitiveService.fetchAllSeasons(page, isActive,name));
 	}
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/divisions")
@@ -94,15 +100,17 @@ public class CompetitiveController {
 	}
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/teams")
-	public ResponseEntity<Page<TeamResponseDTO>> getTeams(@RequestParam(defaultValue = "0") int page,
-			@RequestParam(required = false) Boolean isActive,
-			Authentication auth){
-		boolean isAdmin = auth != null && auth.getAuthorities().stream()
-				.anyMatch(a-> a.getAuthority().equals("ROLE_ADMIN"));
-		if(!isAdmin) {
-			isActive=true;
-		}
-		return ResponseEntity.ok(competitiveService.fetchAllTeams(page, isActive));
+	public ResponseEntity<Page<TeamResponseDTO>> getTeams(
+			@RequestParam(required = false) Boolean active,
+    		@RequestParam(required = false) String name,
+    		@PageableDefault(size = 10, sort = "name", direction = Direction.ASC) Pageable pageable,
+            Authentication authentication){
+	      boolean isAdmin = authentication != null && authentication.getAuthorities().stream()
+	                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+	        if (!isAdmin) {
+	            active = true;
+	        }
+		return ResponseEntity.ok(competitiveService.fetchAllTeams(pageable, active,name));
 	}
 	
 	
@@ -194,8 +202,10 @@ public class CompetitiveController {
 //	------------CREATE and ADD-----------------
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/create-team")
-	public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto){
-		TeamResponseDTO response = competitiveService.createTeam(dto);
+	public ResponseEntity<TeamResponseDTO> createTeam(
+			@Valid @RequestPart("team") TeamRequestDTO dto, 
+	        @RequestPart(value = "file", required = false) MultipartFile file){
+		TeamResponseDTO response = competitiveService.createTeam(dto,file);
 		return ResponseEntity.ok(response);
 		
 	}
@@ -338,8 +348,11 @@ public class CompetitiveController {
 	}
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-team{id}")
-	public ResponseEntity<TeamResponseDTO> updateTeam(@PathVariable Long id, @Valid@RequestBody TeamRequestDTO dto){
-		TeamResponseDTO team = competitiveService.updateTeam(id, dto);
+	public ResponseEntity<TeamResponseDTO> updateTeam(
+			@PathVariable Long id, 
+            @Valid @RequestPart("team") TeamRequestDTO dto, // JSON con datos
+            @RequestPart(value = "file", required = false) MultipartFile file){
+		TeamResponseDTO team = competitiveService.updateTeam(id, dto,file);
 		return ResponseEntity.ok(team);
 	}
 }

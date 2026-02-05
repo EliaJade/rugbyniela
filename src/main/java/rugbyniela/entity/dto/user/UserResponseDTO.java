@@ -13,8 +13,9 @@ public record UserResponseDTO(
 		boolean isActive,
 		String instagram,
 		String gender,
-		//TODO: add profile picture, maybe add role?
-		//TODO: add to which coalition is part of
+		String profilePictureUrl,
+		String coalitonName,
+		String rol,
 		AddressResponseDTO address) {
 
 }

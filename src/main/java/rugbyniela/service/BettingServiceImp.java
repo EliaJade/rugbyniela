@@ -102,8 +102,6 @@ public class BettingServiceImp implements IBettingService{
 		
 		return userSeasonScoreMapper.toDto(userScore);
 	}
-
-
 	@Override
 	@Transactional
 	public WeeklyBetTicketResponseDTO submitTicket(WeeklyBetTicketRequestDTO dto) {

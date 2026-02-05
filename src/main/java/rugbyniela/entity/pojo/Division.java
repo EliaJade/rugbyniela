@@ -17,6 +17,8 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +26,12 @@ import lombok.Setter;
 import rugbyniela.enums.Category;
 
 @Entity
+@Table(uniqueConstraints = {
+	    @UniqueConstraint(
+	        name = "uk_division_name_per_season", // Es buena práctica ponerle el mismo nombre que en la BD
+	        columnNames = {"name", "season_id"}
+	    )
+	})
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -35,7 +43,7 @@ public class Division {
 	private Long id;
 	
 
-	@Column(nullable = false, length = 50, unique = true)
+	@Column(nullable = false, length = 50)
 	private String name; //default "Division de Honor"
 	
 	@Enumerated(EnumType.STRING)
@@ -55,12 +63,12 @@ public class Division {
 	private Set<TeamDivisionScore> teamDivisionScores;
 	
 	//to know which teams we could pair with each other
-	@ManyToMany(fetch = FetchType.LAZY) 
-    @JoinTable(
-        name = "division_teams", // Nombre de la tabla intermedia en BD
-        joinColumns = @JoinColumn(name = "division_id"),
-        inverseJoinColumns = @JoinColumn(name = "team_id"))
-    private Set<Team> teams; //= new HashSet<>();
+//	@ManyToMany(fetch = FetchType.LAZY) 
+//    @JoinTable(
+//        name = "division_teams", // Nombre de la tabla intermedia en BD
+//        joinColumns = @JoinColumn(name = "division_id"),
+//        inverseJoinColumns = @JoinColumn(name = "team_id"))
+//    private Set<Team> teams; //= new HashSet<>();
 	
 	/**
 	 * Method to add a matchDay in the list
@@ -76,12 +84,12 @@ public class Division {
 		matchDay.setDivision(this);
 	}
 	
-	public void addTeam(Team team) {
-		if(this.teams==null) {
-			this.teams = new HashSet<Team>();
-		}
-		this.teams.add(team);
-	}
+//	public void addTeam(Team team) {
+//		if(this.teams==null) {
+//			this.teams = new HashSet<Team>();
+//		}
+//		this.teams.add(team);
+//	}
 
 	
 	

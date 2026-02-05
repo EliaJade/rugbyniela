@@ -9,6 +9,7 @@ public record TeamRequestDTO(
 		@Size(max=50, message= "El nombre no puede superar los 50 caracteres")
 		String name,
 		@Size(max=300, message= "El url no puede superar los 300 caracteres")
-		String url) {
+		String url,
+		boolean deletePicture){
 
 }

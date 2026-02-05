@@ -82,7 +82,7 @@
 		<artifactId>mapstruct-processor</artifactId> 
 		<version>1.5.5.Final</version> 
 		<scope>provided</scope> 
-		</dependency> 
+		</dependency>
 <!--nos recomienda tenerlo: Without mapstruct-processor, MapStruct never generates UserMapperImpl-->
 <!--❌ Therefore Spring cannot find a UserMapper bean-->
 <!--❌ Result: No qualifying bean of type UserMapper -->

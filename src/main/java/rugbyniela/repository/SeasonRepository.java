@@ -6,6 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rugbyniela.entity.pojo.Season;
 
@@ -20,4 +22,10 @@ public interface SeasonRepository extends JpaRepository<Season, Long>, JpaSpecif
 	boolean existsByName(String name);
 	public Page<Season> findByIsActiveTrue(Pageable pageable);
 	public Page<Season> findByIsActive(Boolean isActive, Pageable pageable);
+	@Query("SELECT s FROM Season s WHERE " +
+	           "(:name IS NULL OR LOWER(s.name) LIKE :name) AND " + // :name ya viene con % y minúsculas
+	           "(:active IS NULL OR s.isActive = :active)")
+	    Page<Season> findByFilters(@Param("name") String name, 
+	                               @Param("active") Boolean active, 
+	                               Pageable pageable);
 }

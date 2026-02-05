@@ -50,6 +50,9 @@ public class Coalition {
 	@OneToMany(mappedBy = "coalition", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<CoalitionSeasonScore> coalitionSeasonScores; //bidirectional relationship
 	
+	@OneToMany(mappedBy = "currentCoalition", fetch = FetchType.LAZY)
+	private Set<User> members;//bidirectional relationship
+	
 	
 	@OneToMany(mappedBy = "coalition",fetch = FetchType.LAZY)
 	private Set<UserSeasonScore> userSeasonScores; //bidirectional relationship
@@ -75,6 +78,18 @@ public class Coalition {
 		this.coalitionSeasonScores.add(coalSeasonScore);
 		coalSeasonScore.setCoalition(this);
 		
+	}
+	public void addUser(User user) {
+		if(this.members==null) {
+			this.members= new HashSet<User>();
+		}
+		this.members.add(user);
+	}
+	public void removeUser(User user) {
+		if(this.members==null) {
+			this.members= new HashSet<User>();
+		}
+		this.members.remove(user);
 	}
 	public void addUserSeasonScore(UserSeasonScore uSeasonScore) {
 		if(this.userSeasonScores==null) {

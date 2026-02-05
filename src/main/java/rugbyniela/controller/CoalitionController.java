@@ -34,6 +34,12 @@ public class CoalitionController {
 
     private final ICoalitionService coalitionService;
 
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<CoalitionResponseDTO> getUserCoalition(){
+    	return  ResponseEntity.ok(coalitionService.getMyCoalition());
+    }
+    
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<CoalitionResponseDTO> createCoalition(@Valid @RequestBody CoalitionRequestDTO dto) {
@@ -50,6 +56,7 @@ public class CoalitionController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<CoalitionSimpleResponseDTO>> getAllCoalitions(
     		@RequestParam(required = false) Boolean active,
+    		@RequestParam(required = false) String name,
     		@PageableDefault(size = 10, sort = "name", direction = Direction.ASC) Pageable pageable,
             Authentication authentication // Inyectamos la auth para verificar el rol manualmente
     ) {
@@ -58,7 +65,7 @@ public class CoalitionController {
         if (!isAdmin) {
             active = true;
         }
-        return ResponseEntity.ok(coalitionService.fetchAllCoalitions(pageable, active));
+        return ResponseEntity.ok(coalitionService.fetchAllCoalitions(pageable, active,name));
     }
 
     @DeleteMapping
@@ -86,7 +93,7 @@ public class CoalitionController {
     @GetMapping("/requests")
     @PreAuthorize("hasAnyRole('USER')")
     public ResponseEntity<Page<CoalitionJoinResponseDTO>> getPendingRequests(
-    		@PageableDefault(page = 0, size = 10, sort = "createdAt", direction = Direction.ASC) Pageable pageable
+    		@PageableDefault(page = 0, size = 10, sort = "requestedAt", direction = Direction.ASC) Pageable pageable
     ) {
         return ResponseEntity.ok(coalitionService.getPendingRequests(pageable));
     }

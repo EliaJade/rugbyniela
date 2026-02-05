@@ -4,6 +4,7 @@ public record TeamResponseDTO(
 		Long id,
 		String name,
 		String url,
-		String teamPictureUrl) {
+		String teamPictureUrl,
+		boolean isActive) {
 
 }
