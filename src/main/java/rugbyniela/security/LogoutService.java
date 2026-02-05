@@ -1,5 +1,7 @@
 package rugbyniela.security;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -9,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import rugbyniela.entity.pojo.Token;
+import rugbyniela.entity.pojo.User;
 import rugbyniela.repository.TokenRepository;
 
 @Service
@@ -16,6 +19,7 @@ import rugbyniela.repository.TokenRepository;
 public class LogoutService implements LogoutHandler{
 
 	private final TokenRepository tokenRepository;
+	
 
 	@Override
 	public void logout(
@@ -31,13 +35,19 @@ public class LogoutService implements LogoutHandler{
 		}
 		jwt = authHeader.substring(7);
 		
-		//TODO: I need get the refresh token in order to set it revoked and expired
-		//the refresh is expired but the normal no
 		Token storedToken = tokenRepository.findByToken(jwt).orElse(null);
+		
 		if(storedToken != null) {
-			storedToken.setExpired(true);
-            storedToken.setRevoked(true);
-            tokenRepository.save(storedToken);
+			User user = storedToken.getUser();
+			List<Token> allUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
+			if(allUserTokens.isEmpty()) {
+				return;
+			}
+			allUserTokens.forEach(token->{
+				token.setExpired(true);
+				token.setRevoked(true);
+			});
+			tokenRepository.saveAll(allUserTokens);
             SecurityContextHolder.clearContext();
 		}
 	}

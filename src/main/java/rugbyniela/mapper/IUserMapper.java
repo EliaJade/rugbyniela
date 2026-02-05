@@ -11,9 +11,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.http.HttpStatus;
 
+import rugbyniela.entity.dto.address.AddressResponseDTO;
 import rugbyniela.entity.dto.user.UserRequestDTO;
 import rugbyniela.entity.dto.user.UserResponseDTO;
 import rugbyniela.entity.dto.user.UserUpdatedRequestDTO;
+import rugbyniela.entity.pojo.Address;
 import rugbyniela.entity.pojo.User;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Gender;
@@ -28,18 +30,21 @@ import rugbyniela.exception.RugbyException;
 public interface IUserMapper {
 	
 		@Mapping(target = "gender",source="gender",qualifiedByName = "stringToGender")
-//		@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
 		@Mapping(target = "password",ignore = true)//TODO: change this in order to allow mapstruct do this for us
 //		@Mapping(target="email",source="email",qualifiedByName = "normalizeEmail")
-		
-		
+
+		//@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
 		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	    void updateUserFromDto(UserUpdatedRequestDTO dto, @MappingTarget User user); // im not sure what this does need to check
-	    
+
+	    @Mapping(target = "role", source = "role", qualifiedByName = "stringToRole")
 		User toEntity(UserRequestDTO dto);
-		@Mapping(target = "isActive",source = "active")
+		
+		@Mapping(target = "coalitonName",source="currentCoalition.name")
+		@Mapping(target = "rol", expression = "java(entity.getRole().name())")
 		UserResponseDTO toDTO(User entity);
 		
+		AddressResponseDTO addressToDto(Address address);
 		
 		@Named("normalizeEmail")
 		default String normalizeEmail(String email) {

@@ -13,10 +13,12 @@ import rugbyniela.entity.dto.coalition.CoalitionSimpleResponseDTO;
 
 public interface ICoalitionService {
 
+	//method to get the coalition of the current user
+	CoalitionResponseDTO getMyCoalition();
 	//--- generic basic CRUD
 	CoalitionResponseDTO createCoalition(CoalitionRequestDTO dto);
 	CoalitionResponseDTO fetchCoalitionById(Long id);
-	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active);
+	Page<CoalitionSimpleResponseDTO> fetchAllCoalitions(Pageable pageable, Boolean active, String name);
 	//update coalition ??
 	
 	// --- management of members (from user's point of view) ---

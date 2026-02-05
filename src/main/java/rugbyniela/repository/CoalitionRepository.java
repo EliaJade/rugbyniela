@@ -1,9 +1,13 @@
 package rugbyniela.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rugbyniela.entity.pojo.Coalition;
 import rugbyniela.entity.pojo.CoalitionRequest;
@@ -15,4 +19,17 @@ import rugbyniela.entity.pojo.CoalitionRequest;
 public interface CoalitionRepository extends JpaRepository<Coalition, Long>, JpaSpecificationExecutor<Coalition> {
 
 	Page<Coalition> findByActive(boolean active, Pageable pageable);
+	@Query("SELECT c FROM Coalition c " +
+	           "LEFT JOIN FETCH c.members " +           // Trae la lista de miembros de una vez
+	           "LEFT JOIN FETCH c.userSeasonScores s " + // Trae la lista de scores de una vez
+	           "LEFT JOIN FETCH s.season sea " +         // Trae la info de la temporada (para ver si isActive)
+	           "WHERE c.id = :id")
+	    Optional<Coalition> findByIdWithMembersAndScores(@Param("id") Long id);
+	
+	@Query("SELECT c FROM Coalition c WHERE " +
+		       "(:name IS NULL OR LOWER(c.name) LIKE :name) AND " + // <--- CAMBIO: Quitamos LOWER() alrededor de :name
+		       "(:active IS NULL OR c.active = :active)")
+		Page<Coalition> findByFilters(@Param("name") String name, 
+		                              @Param("active") Boolean active, 
+		                              Pageable pageable);
 }

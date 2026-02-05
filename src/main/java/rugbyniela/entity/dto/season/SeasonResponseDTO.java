@@ -6,6 +6,7 @@ public record SeasonResponseDTO(
 		Long id,
 		String name,
 		LocalDate startSeason,
-		LocalDate endSeason) {
+		LocalDate endSeason,
+		boolean isActive) {
 
 }

@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -47,6 +48,7 @@ import rugbyniela.mapper.IUserCoalitionHistoryMapper;
 import rugbyniela.mapper.IUserMapper;
 import rugbyniela.mapper.IUserSeasonScoreMaper;
 import rugbyniela.repository.AddressRepository;
+import rugbyniela.repository.CoalitionRepository;
 import rugbyniela.repository.SeasonRepository;
 import rugbyniela.repository.TokenRepository;
 import rugbyniela.repository.UserRepository;
@@ -69,9 +71,11 @@ public class UserServiceImp implements IUserService {
 	private final IUserSeasonScoreMaper userSeasonScoreMaper;
 	private final AddressRepository addressRepository;
 	private final IAddressMapper addressMapper;
+	private final CoalitionRepository coalitionRepository;
+	private final ISupabaseStorageService supabaseStorageService;
 
 	@Override
-	public UserResponseDTO register(UserRequestDTO dto) {
+	public UserResponseDTO register(UserRequestDTO dto, MultipartFile profilePicture) {
 		
 		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
 			log.warn("Intento fallido de registro. Email ya existe {}",dto.email());
@@ -100,6 +104,16 @@ public class UserServiceImp implements IUserService {
 		user.setPassword(encoder.encode(dto.password()));
 		user.setActive(true);
 		user.setAddress(address);
+		if (profilePicture != null && !profilePicture.isEmpty()) {
+            // Generar nombre único: nickname_timestamp.jpg (para evitar sobrescribir)
+            String filename = StringUtils.normalize(user.getNickname()) + "_" + System.currentTimeMillis() + "_" + profilePicture.getOriginalFilename();
+            
+            // Subir a Supabase
+            String publicUrl = supabaseStorageService.uploadFile(profilePicture, filename);
+            
+            // Guardar URL en entidad
+            user.setProfilePictureUrl(publicUrl);
+        }
 		//save
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		log.info("Usuario creado!");
@@ -137,25 +151,30 @@ public class UserServiceImp implements IUserService {
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
 		
-		if(!dto.currentPassword().equals(dto.confirmationPassword())) {
+		if(!encoder.matches(dto.currentPassword(), user.getPassword())) {
+			throw new RugbyException("La contraseña actual es incorrecta", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
+		}
+		if(!dto.newPassword().equals(dto.confirmationPassword())) {
 			throw new RugbyException("La nueva contraseña y la confirmación no coinciden", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
 		}
-		if(!encoder.matches(dto.newPassword(), user.getPassword())) {
+		if(encoder.matches(dto.newPassword(), user.getPassword())) {
 			throw new RugbyException("La nueva contraseña no puede ser igual a la anterior", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION);
 		}
+		
 		user.setPassword(encoder.encode(dto.newPassword()));
 		userRepository.save(user);
 		log.info("El usuario {} ha cambiado su contraseña exitosamente", user.getEmail());
 	}
 
 	@Override
+	@Transactional
 	public void registerInSeason(Long seasonId) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
 		Season season = seasonRepository.findByIdAndIsActiveTrue(seasonId).orElseThrow(() ->{ 
-	    	throw new RugbyException("La temporada a la cual el usuario se quiere registrar no existe o ha terminado", HttpStatus.NO_CONTENT, ActionType.USER_ACTION);
+	    	throw new RugbyException("La temporada a la cual el usuario se quiere registrar no existe o ha terminado", HttpStatus.NOT_FOUND, ActionType.USER_ACTION);
 	    });
 		boolean isAlreadyRegistered = userSeasonScoreRepository.findByUserAndSeason(user, season).isPresent();
 		if (isAlreadyRegistered) {
@@ -172,6 +191,12 @@ public class UserServiceImp implements IUserService {
 				user.getCurrentCoalition());
 		
 		userSeasonScoreRepository.save(newUserSeasonScore);
+		
+		Coalition userCoalition = user.getCurrentCoalition();
+		if(userCoalition!=null) {
+			userCoalition.addUserSeasonScore(newUserSeasonScore);
+			coalitionRepository.save(userCoalition);
+		}
 		log.info("Usuario {} registrado exitosamente en la temporada {}", user.getName(), season.getName());
 		
 	}
@@ -199,7 +224,7 @@ public class UserServiceImp implements IUserService {
 		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
 	    	throw new RugbyException("El usuario no existe", HttpStatus.NOT_FOUND, ActionType.AUTHENTICATION);
 	    });
-		Page<UserSeasonScore> seasonScores = userSeasonScoreRepository.findByUser_EmailAndCoalitionIsNotNull(user.getEmail(), pageable);
+		Page<UserSeasonScore> seasonScores = userSeasonScoreRepository.findByUser_Email(user.getEmail(), pageable);
 
 		return seasonScores.map(historyMapper::toHistoryDTO);
 	}

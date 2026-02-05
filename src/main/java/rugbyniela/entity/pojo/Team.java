@@ -28,7 +28,7 @@ public class Team {
 	private Long id;
 	
 	@NotBlank
-	@Column(nullable = false, length = 50)
+	@Column(nullable = false, length = 50,unique = true)
 	private String name;
 	
 	

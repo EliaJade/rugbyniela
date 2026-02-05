@@ -19,5 +19,5 @@ import rugbyniela.entity.pojo.UserSeasonScore;
 public interface UserSeasonScoreRepository extends JpaRepository<UserSeasonScore, Long>, JpaSpecificationExecutor<UserSeasonScore> {
 
 	public Optional<UserSeasonScore> findByUserAndSeason(User u, Season s);
-	Page<UserSeasonScore> findByUser_EmailAndCoalitionIsNotNull(String email, Pageable pageable);
+	Page<UserSeasonScore> findByUser_Email(String email, Pageable pageable);
 }
