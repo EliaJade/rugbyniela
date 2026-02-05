@@ -348,10 +348,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 			throw new RugbyException("La categoria no es valida", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
 		//TODO: validation in name must contain year of division to order it or add a varaible in division that has localdate it was made
-		
-		if(!dto.name().matches(".*\\d.*")) {
-			throw new RugbyException("El nombre de la Division debe tener el año", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
-		}
+//TODO: delete this		
+//		if(!dto.name().matches(".*\\d.*")) {
+//			throw new RugbyException("El nombre de la Division debe tener el año", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+//		}
 //		for (DivisionRequestDTO divisionRequest : dto.) {
 //			
 //		}

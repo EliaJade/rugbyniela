@@ -116,27 +116,27 @@ public class CompetitiveController {
 	
 //	------------BY ID-----------------
 	
-	@GetMapping("/season{id}")
+	@GetMapping("/season/{id}")
 	public ResponseEntity<SeasonResponseDTO> getSeasonById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchSeasonById(id));
 	}
 	
-	@GetMapping("/division{id}")
+	@GetMapping("/division/{id}")
 	public ResponseEntity<DivisionResponseDTO> getDivisionById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchDivisionById(id));
 	}
 	
-	@GetMapping("/match-day{id}")
+	@GetMapping("/match-day/{id}")
 	public ResponseEntity<MatchDayResponseDTO> getMatchDayById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchMatchDayById(id));
 	}
 	
-	@GetMapping("/match{id}")
+	@GetMapping("/match/{id}")
 	public ResponseEntity<MatchResponseDTO> getMatchById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchMatchById(id));
 	}
 	
-	@GetMapping("/team{id}")
+	@GetMapping("/team/{id}")
 	public ResponseEntity<TeamResponseDTO> getTeamById(@PathVariable Long id){
 		return ResponseEntity.ok(competitiveService.fetchTeamById(id));
 	}
