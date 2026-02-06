@@ -419,6 +419,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 
 	    Address address = addressRepository.findAddressByStreetAndCityAndPostalCodeAndDescription(street, city, postalCode, description)
 				.orElseGet(()->{
+					log.debug("creating a new address");
 					Address location = addressMapper.toEntity(dto.location());
 					return addressRepository.save(location);	
 				});

@@ -67,8 +67,10 @@ public class UserController {
 	
 	@PutMapping("/update")
 	@PreAuthorize("isAuthenticated()")
-	public ResponseEntity<UserResponseDTO> update(@Valid @RequestBody UserUpdatedRequestDTO dto){
-		UserResponseDTO response = userService.update(dto);
+	public ResponseEntity<UserResponseDTO> update(
+			@Valid @RequestPart UserUpdatedRequestDTO dto,
+			@RequestPart(value = "file", required = false) MultipartFile file){
+		UserResponseDTO response = userService.update(dto, file);
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("/{id}")

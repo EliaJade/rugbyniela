@@ -2,6 +2,7 @@ package rugbyniela.entity.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import rugbyniela.entity.dto.address.AddressRequestDTO;
 
 public record UserUpdatedRequestDTO(
 		@NotBlank
@@ -16,6 +17,8 @@ public record UserUpdatedRequestDTO(
 		String phoneNumber,
 		@Size(max=80)
 		String instagram,
-		String gender) {
+		String gender,
+		AddressRequestDTO address,
+		boolean deletePicture) {
 
 }

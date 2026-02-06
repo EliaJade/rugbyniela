@@ -76,7 +76,7 @@ public class CollaboratorController {
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update/{id}")
-	public ResponseEntity<CollaboratorResponseDTO> updateSeason(
+	public ResponseEntity<CollaboratorResponseDTO> updateCollaborator(
 			@PathVariable Long id, 
 			@Valid@RequestPart("collaborator") CollaboratorRequestDTO dto,
 			@RequestPart(value = "file", required = false) MultipartFile file){

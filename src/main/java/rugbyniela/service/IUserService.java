@@ -22,7 +22,7 @@ import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 public interface IUserService {
 
 	UserResponseDTO register(UserRequestDTO dto, MultipartFile profilePicture);
-	UserResponseDTO update(UserUpdatedRequestDTO dto);
+	UserResponseDTO update(UserUpdatedRequestDTO dto, MultipartFile logoFile);
 	UserResponseDTO fetchUserById(Long id);
 	Page<UserResponseDTO> fetchAllUsers(int page, Boolean isActive, String name);
 	UserResponseDTO fetchCurrentUser();

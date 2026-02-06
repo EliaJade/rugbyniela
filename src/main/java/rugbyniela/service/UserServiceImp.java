@@ -14,10 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -78,6 +74,7 @@ public class UserServiceImp implements IUserService {
 	private final ISupabaseStorageService supabaseStorageService;
 
 	@Override
+	@Transactional
 	public UserResponseDTO register(UserRequestDTO dto, MultipartFile profilePicture) {
 		
 		if (userRepository.existsByEmail(dto.email())) { //without using JpaSpecificationExecutor<User>
@@ -121,11 +118,11 @@ public class UserServiceImp implements IUserService {
 		userRepository.saveAndFlush(user); //works because userRepo implements JpaRepo 
 		log.info("Usuario creado!");
 		return userMapper.toDTO(user);
-//		return null;
 	}
 
+	@Transactional
 	@Override
-	public UserResponseDTO update(UserUpdatedRequestDTO dto) {
+	public UserResponseDTO update(UserUpdatedRequestDTO dto, MultipartFile logoFile) {
 		//Find existing user
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		User user = userRepository.findByEmail(auth.getName()).orElseThrow(() ->{ 
@@ -133,18 +130,78 @@ public class UserServiceImp implements IUserService {
 	    });
 		//partial update
 		userMapper.updateUserFromDto(dto, user);
+		if(dto.address() != null) {
+			Long currentAddressId = user.getAddress() != null ? user.getAddress().getId() : null;
+
+			String street = StringUtils.normalize(dto.address().street());
+			String city = StringUtils.normalize(dto.address().city());
+			String postalCode = StringUtils.normalize(dto.address().postalCode());
+			String description = StringUtils.normalize(dto.address().description());
+			Address address = addressRepository.findByFieldsExcludingId(street, city, postalCode, description, currentAddressId)
+					.orElseGet(()->{
+						log.debug("creating a new address");
+						Address newAddress = addressMapper.toEntity(dto.address());
+						return addressRepository.save(newAddress);
+					});
+			log.debug("Id of address" + address.getId());
+			user.setAddress(address);
+		}
+		if (logoFile != null && !logoFile.isEmpty()) {
+		      try {
+	              // a. Generamos nombre seguro igual que en el create
+	              String safeName = StringUtils.normalize(user.getName()); // Usamos el nombre actual o el nuevo
+	              String filename = "team_" + safeName + "_" + System.currentTimeMillis() + "_" + logoFile.getOriginalFilename();
+	              
+	              // b. Subimos el nuevo archivo
+	              String publicUrl = supabaseStorageService.uploadFile(logoFile, filename); // O uploadProfilePicture si no lo renombraste
+	              
+	              // c. Actualizamos la URL en la entidad
+	              user.setProfilePictureUrl(publicUrl);
+	              
+	              // OPCIONAL: Aquí podrías intentar borrar la imagen antigua de Supabase si quisieras ahorrar espacio
+	              
+	          } catch (Exception e) {
+	              log.error("Error actualizando el logo del colaborador {}", e);
+	              throw new RugbyException("Error al actualizar el logo del colaborador", HttpStatus.INTERNAL_SERVER_ERROR, ActionType.SEASON_ADMIN);
+	          }
+	      }else if(dto.deletePicture()) {
+	    	  user.setProfilePictureUrl(null);
+	      }
+		
+		
+		
 		User updatedUser = userRepository.save(user);
 		return userMapper.toDTO(updatedUser);
-//		return null;
+
 	}
 	
-	@Override
+	@Transactional
+	@Override  //BY Id
 	public UserResponseDTO updateUser(Long id, UserUpdatedRequestDTO updateRequestDTO) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		
 		User user = checkUser(id);
-	    // Update fields - do null checks or validation as needed
+		
+
 		userMapper.updateUserFromDto(updateRequestDTO, user);
+		
+		if(updateRequestDTO.address() != null) {
+			Long currentAddressId = user.getAddress() != null ? user.getAddress().getId() : null;
+
+			String street = StringUtils.normalize(updateRequestDTO.address().street());
+			String city = StringUtils.normalize(updateRequestDTO.address().city());
+			String postalCode = StringUtils.normalize(updateRequestDTO.address().postalCode());
+			String description = StringUtils.normalize(updateRequestDTO.address().description());
+			Address address = addressRepository.findByFieldsExcludingId(street, city, postalCode, description, currentAddressId)
+					.orElseGet(()->{
+						log.debug("creating a new address");
+						Address newAddress = addressMapper.toEntity(updateRequestDTO.address());
+						return addressRepository.save(newAddress);
+					});
+			log.debug("Id of address" + address.getId());
+			user.setAddress(address);
+		}
+		
 	    userRepository.save(user);
 
 	    return userMapper.toDTO(user);  // map entity to DTO
@@ -155,7 +212,6 @@ public class UserServiceImp implements IUserService {
 		User user = userRepository.findById(id)
 				.orElseThrow(()->new RugbyException("El usuario con id "+id+" no existe", HttpStatus.BAD_REQUEST, ActionType.AUTHENTICATION));
 		return userMapper.toDTO(user);
-//		return null;
 	}
 
 	@Override
@@ -267,6 +323,7 @@ public class UserServiceImp implements IUserService {
 
 	
 	@Override
+	@Transactional
 	public void deleteUser(Long id) {
 		User user = checkUser(id);
 		if(Boolean.FALSE.equals(user.isActive())) {

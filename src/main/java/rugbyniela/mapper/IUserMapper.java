@@ -33,7 +33,9 @@ public interface IUserMapper {
 		@Mapping(target = "password",ignore = true)//TODO: change this in order to allow mapstruct do this for us
 //		@Mapping(target="email",source="email",qualifiedByName = "normalizeEmail")
 
+		
 		//@Mapping(target = "role",source="role",qualifiedByName = "stringToRole")
+		@Mapping(target = "address", ignore = true)
 		@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	    void updateUserFromDto(UserUpdatedRequestDTO dto, @MappingTarget User user); // im not sure what this does need to check
 

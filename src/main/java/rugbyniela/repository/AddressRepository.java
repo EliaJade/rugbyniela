@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import rugbyniela.entity.dto.address.AddressRequestDTO;
@@ -20,4 +22,22 @@ public interface AddressRepository extends JpaRepository<Address, Long>, JpaSpec
 			String city,
 			String postalCode,
 			String description);
+	
+	
+	@Query("""
+		    SELECT a FROM Address a
+		    WHERE a.street = :street
+		      AND a.city = :city
+		      AND a.postalCode = :postalCode
+		      AND a.description = :description
+		      AND (:excludeId IS NULL OR a.id <> :excludeId)
+		""")
+		Optional<Address> findByFieldsExcludingId(
+		    @Param("street") String street,
+		    @Param("city") String city,
+		    @Param("postalCode") String postalCode,
+		    @Param("description") String description,
+		    @Param("excludeId") Long excludeId);
 	}
+
+

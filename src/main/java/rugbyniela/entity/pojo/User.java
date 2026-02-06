@@ -91,8 +91,8 @@ public class User {
     @Column(nullable = false)
     private Role role;
 	
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
-	@JoinColumn(name="address_id")
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="address_id", unique = false)
 	Address address;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
