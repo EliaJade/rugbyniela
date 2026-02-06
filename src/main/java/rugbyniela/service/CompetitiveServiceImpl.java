@@ -43,6 +43,7 @@ import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.MatchDay;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.Team;
+import rugbyniela.entity.pojo.TeamDivisionScore;
 import rugbyniela.entity.pojo.UserSeasonScore;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Bonus;
@@ -586,7 +587,6 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 	}
 	@Transactional
 	@Override
-	//TODO: fix
 	public DivisionResponseDTO addTeamToDivision(TeamAddToDivisionRequestDTO dto) {
 		Team team = checkTeam(dto.team());
 		Division division = checkDivision(dto.division());
@@ -596,20 +596,21 @@ public class CompetitiveServiceImpl implements ICompetitiveService{
 		if(Boolean.FALSE.equals(team.getIsActive())) {
 			throw new RugbyException("No puedes añadir un equipo eliminado a una division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		Season season = checkSeason(division.getSeason().getId());
-		LocalDate now = LocalDate.now();
-		boolean exists = true;
-		//boolean exists = division.getTeams().stream()
-//				.anyMatch(existingTeam -> 
-//							existingTeam.getId().equals(team.getId()));
+		//validate if the team already exist in the division
+		boolean exists = division.getTeamDivisionScores()
+				.stream().
+				anyMatch(t-> t.getTeam().getId().equals(dto.team()));
 				
 		if(exists) {
 			throw new RugbyException("Este equipo ya juegan en la division", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
+		Season season = checkSeason(division.getSeason().getId());
+		LocalDate now = LocalDate.now();
 		if(season.getEndSeason().isBefore(now)) {
 			throw new RugbyException("No se puede añadir equipos a una temporada terminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
 		}
-		//division.addTeam(team);
+		TeamDivisionScore teamDivisionScore = new TeamDivisionScore(null, season, division, 0, team);
+		division.addTeam(teamDivisionScore);
 		divisionRepository.save(division);
 		log.info("Se ha añadido el equipo {} a la division {} correctamente", 
 				team.getId(), division.getId());

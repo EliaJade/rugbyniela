@@ -5,7 +5,9 @@ public record TeamDivisionScoreResponseDTO(
 		Long seasonId,
 		Long divisionId,
 		Long teamId,
-		int puntosTotales
+		String name,
+		String teamPictureUrl,
+		int totalPoints
 		) {
 
 }

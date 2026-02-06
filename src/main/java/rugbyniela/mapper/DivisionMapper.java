@@ -12,8 +12,10 @@ import org.springframework.http.HttpStatus;
 
 import rugbyniela.entity.dto.division.DivisionRequestDTO;
 import rugbyniela.entity.dto.division.DivisionResponseDTO;
+import rugbyniela.entity.dto.teamDivisionScore.TeamDivisionScoreResponseDTO;
 import rugbyniela.entity.pojo.Division;
 import rugbyniela.entity.pojo.Team;
+import rugbyniela.entity.pojo.TeamDivisionScore;
 import rugbyniela.enums.ActionType;
 import rugbyniela.enums.Category;
 import rugbyniela.enums.Gender;
@@ -29,7 +31,15 @@ public interface DivisionMapper {
 	Division toEntity(DivisionRequestDTO dto);
 	
 	@Mapping(target="seasonId",source = "season.id")
+	@Mapping(target = "teams",source = "teamDivisionScores")
 	DivisionResponseDTO toDTO(Division division);
+	
+	@Mapping(target = "seasonId",source = "season.id")
+	@Mapping(target = "divisionId",source = "division.id")
+	@Mapping(target = "teamId",source="team.id")
+	@Mapping(target = "name",source = "team.name")
+	@Mapping(target = "teamPictureUrl",source="team.url")
+	TeamDivisionScoreResponseDTO toTeamDivisionResponseDTo(TeamDivisionScore teamDivisionScore);
 	
 	default Set<Division> toEntitySet(Set<DivisionRequestDTO> dtos){
 		
