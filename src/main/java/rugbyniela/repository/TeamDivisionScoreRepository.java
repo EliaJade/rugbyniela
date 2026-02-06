@@ -1,7 +1,11 @@
 package rugbyniela.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rugbyniela.entity.pojo.TeamDivisionScore;
 
@@ -11,4 +15,6 @@ import rugbyniela.entity.pojo.TeamDivisionScore;
 @Repository
 public interface TeamDivisionScoreRepository extends JpaRepository<TeamDivisionScore, Long>, JpaSpecificationExecutor<TeamDivisionScore> {
 
+	Optional<TeamDivisionScore> findByIdAndDivision_Id(Long id, Long divisionId);
+	TeamDivisionScore findByTeam_IdAndDivision_Id(Long teamId, Long divisionId);
 }

@@ -1,9 +1,13 @@
 package rugbyniela.repository;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import rugbyniela.entity.pojo.Match;
@@ -18,4 +22,25 @@ public interface MatchDayRepository extends JpaRepository<MatchDay, Long>, JpaSp
 	boolean existsByMatchesContaining(Match match);
 
 	Page<MatchDay> findByIsActive(Boolean isActive, Pageable pageable);
+	boolean existsByDivisionIdAndName(Long divisionId, String name);
+	boolean existsByDivisionIdAndDateBegin(Long divisionId, LocalDate dateBegin);
+	boolean existsByDivisionIdAndNameAndIdNot(Long divisionId, String name, Long id);
+	@Query("SELECT COUNT(m) > 0 FROM MatchDay m " +
+	           "WHERE m.division.id = :divisionId " +
+	           // Lógica de solapamiento de rangos:
+	           "AND (:newStart <= m.dateEnd) " +
+	           "AND (:newEnd >= m.dateBegin)")
+	    boolean existsOverlappingMatchDay(@Param("divisionId") Long divisionId, 
+	                                      @Param("newStart") LocalDate newStart, 
+	                                      @Param("newEnd") LocalDate newEnd);
+	
+	@Query("SELECT COUNT(m) > 0 FROM MatchDay m " +
+	           "WHERE m.division.id = :divisionId " +
+	           "AND m.id != :id " + 
+	           "AND (:newStart <= m.dateEnd) " +
+	           "AND (:newEnd >= m.dateBegin)")
+	    boolean existsOverlappingMatchDayAndIdNot(@Param("divisionId") Long divisionId, 
+	                                              @Param("id") Long id,
+	                                              @Param("newStart") LocalDate newStart, 
+	                                              @Param("newEnd") LocalDate newEnd);
 }

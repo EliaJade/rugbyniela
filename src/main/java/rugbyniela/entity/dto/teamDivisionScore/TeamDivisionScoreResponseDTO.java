@@ -7,7 +7,8 @@ public record TeamDivisionScoreResponseDTO(
 		Long teamId,
 		String name,
 		String teamPictureUrl,
-		int totalPoints
+		int totalPoints,
+		boolean isWithdrawn
 		) {
 
 }

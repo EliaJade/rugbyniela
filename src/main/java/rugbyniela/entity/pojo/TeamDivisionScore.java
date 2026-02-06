@@ -40,4 +40,6 @@ public class TeamDivisionScore {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="team_id", nullable = false)
 	private Team team;
+	
+	private boolean isWithdrawn;
 }
