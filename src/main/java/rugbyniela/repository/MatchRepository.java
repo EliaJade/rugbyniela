@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import rugbyniela.entity.pojo.Match;
 import rugbyniela.entity.pojo.Season;
@@ -24,4 +26,18 @@ public interface MatchRepository extends JpaRepository<Match, Long>, JpaSpecific
 
 	Page<Match> findByIsActiveAndMatchDay_Division_Season(Boolean isActive, Season season, Pageable pageable);
 
+	@Query("SELECT COUNT(m) > 0 FROM Match m " +
+	           "WHERE m.matchDay.division.id = :divisionId " +
+	           "AND (m.localTeam.id = :teamId OR m.awayTeam.id = :teamId) " +
+	           "AND m.status = 'SCHEDULED'") // O 'PENDING', según tu enum MatchStatus
+	    boolean hasPendingMatches(@Param("divisionId") Long divisionId, 
+	                              @Param("teamId") Long teamId);
+
+	    // Para saber si ha jugado ALGUN partido (para decidir entre Hard vs Soft delete)
+	    @Query("SELECT COUNT(m) > 0 FROM Match m " +
+	           "WHERE m.matchDay.division.id = :divisionId " +
+	           "AND (m.localTeam.id = :teamId OR m.awayTeam.id = :teamId) " +
+	           "AND m.status = 'FINISHED'") 
+	    boolean hasPlayedMatches(@Param("divisionId") Long divisionId, 
+	                             @Param("teamId") Long teamId);
 }

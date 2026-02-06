@@ -14,6 +14,7 @@ public interface MatchDayMapper {
 	
 
 	@Mapping(target = "matches", expression = "java(new java.util.HashSet<>())")
+	@Mapping(target = "arePointsCalculated", constant = "false")
 	MatchDay toEntity(MatchDayRequestDTO dto);
 	
 	@Mapping(target = "divisionId",source = "division.id")

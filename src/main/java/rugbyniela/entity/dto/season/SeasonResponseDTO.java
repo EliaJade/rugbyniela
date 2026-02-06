@@ -8,5 +8,4 @@ public record SeasonResponseDTO(
 		LocalDate startSeason,
 		LocalDate endSeason,
 		boolean isActive) {
-
 }

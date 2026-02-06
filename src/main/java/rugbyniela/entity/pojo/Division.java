@@ -84,12 +84,12 @@ public class Division {
 		matchDay.setDivision(this);
 	}
 	
-//	public void addTeam(Team team) {
-//		if(this.teams==null) {
-//			this.teams = new HashSet<Team>();
-//		}
-//		this.teams.add(team);
-//	}
+	public void addTeam(TeamDivisionScore team) {
+		if(this.teamDivisionScores==null) {
+			this.teamDivisionScores = new HashSet<>();
+		}
+		this.teamDivisionScores.add(team);
+	}
 
 	
 	
