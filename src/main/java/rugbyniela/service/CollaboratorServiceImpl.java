@@ -127,6 +127,7 @@ public class CollaboratorServiceImpl implements ICollaboratorService{
 
 	@Override
 	public void deleteCollaborator(Long id) {
+		log.debug("ha entrado en delete Collaborator");
 		Collaborator collaborator = checkCollaborator(id);
 		if(Boolean.FALSE.equals(collaborator.getIsActive())) {
 			throw new RugbyException("No puedes borrar un colaborador ya eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
@@ -138,9 +139,12 @@ public class CollaboratorServiceImpl implements ICollaboratorService{
 		log.info("Se ha eliminado el colaborador {}", 
 				collaborator.getId());
 		
+		
 	}
 
 	private Collaborator checkCollaborator(Long id) {
+
+		log.debug("Collaborator Id: "+ id);
 		Collaborator collaborator = collaboratorRepository.findById(id)
 				.orElseThrow(()
 				-> new RugbyException("Colaborador no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)); 
@@ -148,6 +152,7 @@ public class CollaboratorServiceImpl implements ICollaboratorService{
 	}
 	
 	private String deletedName(String name) {
+		log.debug("added DEL_ to name of collaborator");
 	    return "DEL_" + name;
 	}
 	

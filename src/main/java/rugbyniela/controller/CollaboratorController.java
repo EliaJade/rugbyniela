@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import rugbyniela.entity.dto.coalition.CoalitionResponseDTO;
 import rugbyniela.entity.dto.collaborator.CollaboratorRequestDTO;
 import rugbyniela.entity.dto.collaborator.CollaboratorResponseDTO;
@@ -25,6 +26,7 @@ import rugbyniela.entity.dto.season.SeasonUpdateRequestDTO;
 import rugbyniela.service.CollaboratorServiceImpl;
 import rugbyniela.service.ICollaboratorService;
 
+@Slf4j
 @RestController
 @RequestMapping("/collaborator")
 @RequiredArgsConstructor
@@ -64,11 +66,13 @@ public class CollaboratorController {
 	}
 	
 	@PreAuthorize("hasRole('ADMIN')")
-	@DeleteMapping("/delete{id}")
+	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<CollaboratorResponseDTO>deleteCollaborator(@PathVariable Long id){
+		log.debug("entro en delete controller");
 		service.deleteCollaborator(id);
 		return ResponseEntity.noContent().build();
 	}
+	
 	
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update/{id}")

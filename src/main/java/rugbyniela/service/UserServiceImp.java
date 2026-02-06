@@ -9,7 +9,9 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +38,7 @@ import rugbyniela.entity.dto.userSeasonScore.UserCoalitionHistoryResponseDTO;
 import rugbyniela.entity.dto.userSeasonScore.UserSeasonScoreResponseDTO;
 import rugbyniela.entity.pojo.Address;
 import rugbyniela.entity.pojo.Coalition;
+import rugbyniela.entity.pojo.Collaborator;
 import rugbyniela.entity.pojo.Season;
 import rugbyniela.entity.pojo.SecurityUser;
 import rugbyniela.entity.pojo.Token;
@@ -133,6 +136,18 @@ public class UserServiceImp implements IUserService {
 		User updatedUser = userRepository.save(user);
 		return userMapper.toDTO(updatedUser);
 //		return null;
+	}
+	
+	@Override
+	public UserResponseDTO updateUser(Long id, UserUpdatedRequestDTO updateRequestDTO) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		
+		User user = checkUser(id);
+	    // Update fields - do null checks or validation as needed
+		userMapper.updateUserFromDto(updateRequestDTO, user);
+	    userRepository.save(user);
+
+	    return userMapper.toDTO(user);  // map entity to DTO
 	}
 
 	@Override
@@ -240,7 +255,50 @@ public class UserServiceImp implements IUserService {
 //		return null;
 	}
 
+	@Override
+	public Page<UserResponseDTO> fetchAllUsers(int page, Boolean isActive, String name) {
+		checkNegativePage(page);
+		String searchName = (name!=null&&!name.isBlank()) 
+				? "%" + name.trim().toLowerCase() + "%" : null;
+		Pageable pageable = PageRequest.of(page, 10, Sort.by("name").ascending());
+		Page<User> users = userRepository.findByFilters(searchName, isActive, pageable);
+		return users.map(userMapper::toDTO);
+	}
+
 	
+	@Override
+	public void deleteUser(Long id) {
+		User user = checkUser(id);
+		if(Boolean.FALSE.equals(user.isActive())) {
+			throw new RugbyException("No puedes borrar un colaborador ya eliminado", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		user.setActive(false);
+		String name = deletedName(user.getName());
+		user.setName(name);
+		userRepository.save(user);
+		log.info("Se ha eliminado el usuario {}", 
+				user.getId());
+	}
+	
+	private String deletedName(String name) {
+		log.debug("added DEL_ to name of usuario");
+	    return "DEL_" + name;
+	}
+
+	private User checkUser(Long id) {
+
+		log.debug("Collaborator Id: "+ id);
+		User user = userRepository.findById(id)
+				.orElseThrow(()
+				-> new RugbyException("Usuario no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN)); 
+		return user;
+	}
+	
+	private void checkNegativePage(int page) {
+		if(page<0) {
+			throw new RugbyException("La pagina no puede ser negativa", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+	}
 
 
 }

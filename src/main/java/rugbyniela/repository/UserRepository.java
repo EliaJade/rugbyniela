@@ -2,9 +2,12 @@ package rugbyniela.repository;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import rugbyniela.entity.pojo.Coalition;
@@ -26,4 +29,9 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	public boolean existsByIdAndCurrentCoalitionIsNotNull(Long id);
 	
 	public long countByCurrentCoalition(Coalition coalition);
+	
+	@Query("SELECT u FROM User u WHERE " +
+	           "(:name IS NULL OR LOWER(u.name) LIKE :name) AND " +
+	           "(:active IS NULL OR u.isActive = :active)")
+	Page<User> findByFilters(@Param("name")String searchName, @Param("active")Boolean isActive, Pageable pageable);
 }

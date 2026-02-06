@@ -327,6 +327,7 @@ public class CompetitiveController {
 	public ResponseEntity<SeasonResponseDTO> updateSeason(@PathVariable Long id, @Valid@RequestBody SeasonUpdateRequestDTO dto){
 		SeasonResponseDTO season = competitiveService.updateSeason(id, dto);
 		return ResponseEntity.ok(season);
+		
 	}
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/update-division{id}")
