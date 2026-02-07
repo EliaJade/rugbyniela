@@ -26,18 +26,51 @@ public interface MatchRepository extends JpaRepository<Match, Long>, JpaSpecific
 
 	Page<Match> findByIsActiveAndMatchDay_Division_Season(Boolean isActive, Season season, Pageable pageable);
 
+	/**
+	 * Method to validate if a team has pending matches by its id and 
+	 * division's id
+	 * @param divisionId
+	 * @param teamId
+	 * @return boolean
+	 */
 	@Query("SELECT COUNT(m) > 0 FROM Match m " +
 	           "WHERE m.matchDay.division.id = :divisionId " +
 	           "AND (m.localTeam.id = :teamId OR m.awayTeam.id = :teamId) " +
 	           "AND m.status = 'SCHEDULED'") // O 'PENDING', según tu enum MatchStatus
 	    boolean hasPendingMatches(@Param("divisionId") Long divisionId, 
 	                              @Param("teamId") Long teamId);
+	/**
+	 * Method to validate if a match day has matches related that are programmed
+	 * to the future
+	 * @param matchDayId
+	 * @return boolean
+	 */
+	@Query("SELECT COUNT(m) > 0 FROM Match m " +
+	           "WHERE m.matchDay.id = :matchDayId " +
+	           "AND m.status = 'SCHEDULED'")
+	    boolean hasPendingMatches(@Param("matchDayId") Long matchDayId);
 
-	    // Para saber si ha jugado ALGUN partido (para decidir entre Hard vs Soft delete)
+	/**
+	 * Method to validate if a team has played a match by its id and the division's id.
+	 * This is to know if we need to do a soft delete or a hard delete
+	 * @param divisionId
+	 * @param teamId
+	 * @return boolean
+	 */
 	    @Query("SELECT COUNT(m) > 0 FROM Match m " +
 	           "WHERE m.matchDay.division.id = :divisionId " +
 	           "AND (m.localTeam.id = :teamId OR m.awayTeam.id = :teamId) " +
 	           "AND m.status = 'FINISHED'") 
 	    boolean hasPlayedMatches(@Param("divisionId") Long divisionId, 
 	                             @Param("teamId") Long teamId);
+	    /**
+	     * Method to validate if a match day has matched related (finished or in playing)
+	     * This will be use when an ADMIN wants to delete a match day
+	     * @param matchDayId
+	     * @return boolean
+	     */
+	    @Query("SELECT COUNT(m) > 0 FROM Match m " +
+	           "WHERE m.matchDay.id = :matchDayId " +
+	           "AND m.status IN ('FINISHED', 'IN_PLAY','CANCELLED')")
+	    boolean hasPlayedMatches(@Param("matchDayId") Long matchDayId);
 }

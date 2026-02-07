@@ -16,8 +16,12 @@ public interface MatchMapper {
 	
 
 	@Mapping(target = "localTeam", ignore = true)
-	@Mapping(target = "awayTeam", ignore = true)
-	@Mapping(target = "location", ignore = true)
+    @Mapping(target = "awayTeam", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    @Mapping(target = "matchDay", ignore = true)
+    @Mapping(target = "isActive", constant = "true")
+    @Mapping(target = "status", constant = "SCHEDULED")
+    @Mapping(target = "bonus", constant = "NONE")
 	Match toEntity(MatchRequestDTO dto);
 	
 

@@ -13,7 +13,7 @@ public record MatchDayResponseDTO(
 		LocalDate dateBegin,
 		LocalDate dateEnd,
 		Set<MatchResponseDTO> matches,
-		//we have to configure mapstruct to do this
+		boolean isActive,
 		boolean arePointsCalculated) {
 
 }

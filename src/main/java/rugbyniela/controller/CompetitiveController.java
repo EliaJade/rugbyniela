@@ -222,6 +222,7 @@ public class CompetitiveController {
 		return ResponseEntity.ok(response);
 		
 	}
+	//TODO: probably this end-point won't be use because of fronted design 
 	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/add-match")
 	public ResponseEntity<MatchDayResponseDTO> addMatchToMatchDay(@Valid @RequestBody MatchAddToMatchDayRequestDTO dto){

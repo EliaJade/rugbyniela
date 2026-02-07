@@ -417,7 +417,7 @@ public class CompetitiveServiceImpl implements ICompetitiveService {
 	@Override
 	public MatchResponseDTO createMatch(MatchRequestDTO dto) {
 		LocalDateTime now = LocalDateTime.now();
-		if (dto.localTeam() == dto.awayTeam()) {
+		if (dto.localTeam().equals(dto.awayTeam())) {
 			throw new RugbyException("No puede jugar un equipo contra si mismo", HttpStatus.BAD_REQUEST,
 					ActionType.SEASON_ADMIN);
 		}
@@ -425,7 +425,24 @@ public class CompetitiveServiceImpl implements ICompetitiveService {
 			throw new RugbyException("El partido no puede empezar en el pasado", HttpStatus.BAD_REQUEST,
 					ActionType.SEASON_ADMIN);
 		}
+		
+		MatchDay matchDay = matchDayRepository.findById(dto.matchDayId()).orElseThrow(
+			() -> new RugbyException("Jornada no encontrada", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
 
+		if(Boolean.FALSE.equals(matchDay.getIsActive())) {
+			throw new RugbyException("No puedes agregar partidos a una jornada eliminada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+		}
+		
+		LocalDate matchDate = dto.timeMatchStart().toLocalDate();
+		if (matchDate.isBefore(matchDay.getDateBegin()) || matchDate.isAfter(matchDay.getDateEnd())) {
+	        throw new RugbyException(
+	            String.format("La fecha del partido (%s) está fuera del rango de la Jornada (%s - %s)", 
+	            matchDate, matchDay.getDateBegin(), matchDay.getDateEnd()), 
+	            HttpStatus.BAD_REQUEST, 
+	            ActionType.SEASON_ADMIN
+	        );
+	    }
+		
 		Team localTeam = teamRepository.findById(dto.localTeam()).orElseThrow(
 				() -> new RugbyException("Equipo local no encontrado", HttpStatus.NOT_FOUND, ActionType.SEASON_ADMIN));
 		Team awayTeam = teamRepository.findById(dto.awayTeam())
@@ -445,15 +462,10 @@ public class CompetitiveServiceImpl implements ICompetitiveService {
 				});
 
 		Match match = matchMapper.toEntity(dto);
-		if (match.getIsActive() == null) {
-			match.setIsActive(true);
-		}
-		if (match.getStatus() == null) {
-			match.setStatus(MatchStatus.SCHEDULED);
-		}
 		match.setLocation(address);
 		match.setLocalTeam(localTeam);
 		match.setAwayTeam(awayTeam);
+		match.setMatchDay(matchDay);
 		matchRepository.save(match);
 		log.info("Se ha creado el partido {} correctamente", match.getId());
 		return matchMapper.toDTO(match);
@@ -1166,28 +1178,61 @@ public class CompetitiveServiceImpl implements ICompetitiveService {
 	public DivisionResponseDTO removeMatchDayFromDivision(Long matchId, Long divisionId) {
 		MatchDay matchDay = checkMatchDay(matchId);
 		Division division = checkDivision(divisionId);
+		
 		if (Boolean.FALSE.equals(division.getIsActive())) {
 			throw new RugbyException("No puedes quitar una jornada de una division eliminada", HttpStatus.BAD_REQUEST,
 					ActionType.SEASON_ADMIN);
 		}
 
-		LocalDate now = LocalDate.now();
+		if (!matchDay.getDivision().getId().equals(divisionId)) {
+	        throw new RugbyException("Esta jornada no pertenece a la división indicada", HttpStatus.BAD_REQUEST, ActionType.SEASON_ADMIN);
+	    }
+		boolean hasHistory = matchRepository.hasPlayedMatches(matchDay.getId());
+	    boolean hasPending = matchRepository.hasPendingMatches(matchDay.getId());
 
-		if (!division.getMatchDays().contains(matchDay)) {
-			throw new RugbyException("Esta division no contiene este jornada", HttpStatus.NOT_FOUND,
-					ActionType.SEASON_ADMIN);
-		}
+	    if (hasPending) {
+	        throw new RugbyException(
+	            "La jornada tiene partidos programados. Por seguridad, debes eliminar o cancelar esos partidos manualmente antes de borrar la jornada.", 
+	            HttpStatus.CONFLICT, // 409 Conflict
+	            ActionType.SEASON_ADMIN
+	        );
+	    }
 
-		if (matchDay.getDateBegin().isBefore(now)) {
-			throw new RugbyException("No se puede quitar una jornada empezada", HttpStatus.BAD_REQUEST,
-					ActionType.SEASON_ADMIN);
-		}
+	    if (hasHistory) {
+	        log.info("La jornada {} tiene historial. Se procede a SOFT DELETE.", matchDay.getId());
+	        matchDay.setIsActive(false); 
+	        matchDayRepository.save(matchDay);
+	    } 
+	    else {
+	        log.info("La jornada {} está vacía. Se procede a HARD DELETE.", matchDay.getId());
+	        division.getMatchDays().remove(matchDay);
+	        matchDayRepository.delete(matchDay);
+	    }
+	    return divisionMapper.toDTO(division);
+//		Por qué esta lógica es mejor que validar LocalDate.now():
+//			Flexibilidad: Imagina que creaste la "Jornada 5" para la semana pasada por error, pero no cargaste ningún partido.
+//Según tu código antiguo (isBefore(now)), no podrías borrarla aunque esté vacía. Con mi código, como no tiene partidos (matches),
+//se hace Hard Delete sin problemas.
+//
+//			Seguridad: Si la jornada es la próxima semana (futuro) pero ya tiene partidos con apuestas (WeeklyBetTickets) creadas,
+//			tu código antiguo permitía borrarla. El mío lanza excepción (Caso A) protegiendo las apuestas.
+//		LocalDate now = LocalDate.now();
+//
+//		if (!division.getMatchDays().contains(matchDay)) {
+//			throw new RugbyException("Esta division no contiene este jornada", HttpStatus.NOT_FOUND,
+//					ActionType.SEASON_ADMIN);
+//		}
+//
+//		if (matchDay.getDateBegin().isBefore(now)) {
+//			throw new RugbyException("No se puede quitar una jornada empezada", HttpStatus.BAD_REQUEST,
+//					ActionType.SEASON_ADMIN);
+//		}
 
-		division.getMatchDays().remove(matchDay);
-		matchDay.setDivision(null);
-		divisionRepository.save(division);
-		log.info("Se ha quitado la jornada {} de la division {} correctamente", matchDay.getId(), division.getId());
-		return divisionMapper.toDTO(division);
+//		division.getMatchDays().remove(matchDay);
+//		matchDay.setDivision(null);
+//		divisionRepository.save(division);
+//		log.info("Se ha quitado la jornada {} de la division {} correctamente", matchDay.getId(), division.getId());
+//		return divisionMapper.toDTO(division);
 	}
 
 	@Override

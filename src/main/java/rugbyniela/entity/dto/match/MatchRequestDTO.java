@@ -20,6 +20,8 @@ public record MatchRequestDTO(
 		@NotNull
 		Long localTeam,
 		@NotNull
-		Long awayTeam) {
+		Long awayTeam,
+		@NotNull(message = "El partido debe pertenecer a una jornada")
+	    Long matchDayId) {
 
 }
